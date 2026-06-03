@@ -1,5 +1,4 @@
 import { servicenowFrontEndPlugins, watch } from '@servicenow/isomorphic-rollup'
-import { tailwindPlugin } from './tailwind-plugin.mjs'
 
 export default async ({ rootDir, config, fs, path, logger, credential }) => {
     const clientDir = path.join(rootDir, config.clientDir)
@@ -8,16 +7,13 @@ export default async ({ rootDir, config, fs, path, logger, credential }) => {
     const watcher = watch({
         fs,
         input: path.join(clientDir, '**', '*.html'),
-        plugins: [
-            tailwindPlugin({ rootDir, config, fs, path, logger }),
-            ...(await servicenowFrontEndPlugins({
+        plugins: servicenowFrontEndPlugins({
             dev: true,
             scope: config.scope,
             rootDir: clientDir,
             watchPaths: [staticContentDir],
             credential,
-            })),
-        ],
+        }),
         output: {
             dir: staticContentDir,
             sourcemap: true,

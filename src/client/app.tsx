@@ -7,8 +7,7 @@ import TicketSidebar from './components/TicketSidebar'
 import TicketList from './components/TicketList'
 import TicketDetail from './components/TicketDetail'
 import TicketForm from './components/TicketForm'
-import DarkModeToggle from './components/DarkModeToggle'
-import './app.tailwind.css'
+import './app.css'
 
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
 
@@ -122,28 +121,22 @@ export default function App() {
     }
 
     return (
-        <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-rh-black">
+        <div className="workspace-app">
             <TicketSidebar
                 activeView={activeView}
                 onViewChange={handleViewChange}
                 onCreateClick={handleCreateClick}
             />
 
-            <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="workspace-main">
                 {error && (
-                    <div className="flex items-center justify-between border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400">
+                    <div className="error-message">
                         {error}
-                        <button
-                            type="button"
-                            onClick={() => setError(null)}
-                            className="cursor-pointer font-semibold underline"
-                        >
-                            Dismiss
-                        </button>
+                        <button onClick={() => setError(null)}>Dismiss</button>
                     </div>
                 )}
 
-                <div className="flex flex-1 overflow-hidden">
+                <div className="workspace-panels">
                     <TicketList
                         tickets={tickets}
                         selectedId={selectedTicket ? getSysId(selectedTicket) : null}
@@ -165,8 +158,6 @@ export default function App() {
             </div>
 
             {showForm && <TicketForm onSubmit={handleFormSubmit} onCancel={handleFormClose} />}
-
-            <DarkModeToggle />
         </div>
     )
 }
