@@ -22,17 +22,16 @@
 
 .form-header {
     padding: 15px 20px;
-    background-color: #f5f5f5;
+    background-color: #264653;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #ddd;
 }
 
 .form-header h2 {
     margin: 0;
     font-size: 18px;
-    color: #333;
+    color: #fff;
 }
 
 .close-button {
@@ -40,11 +39,11 @@
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #666;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .close-button:hover {
-    color: #000;
+    color: #fff;
 }
 
 form {
@@ -52,7 +51,7 @@ form {
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .form-row {
@@ -66,9 +65,10 @@ form {
 
 label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 500;
     color: #333;
+    font-size: 13px;
 }
 
 input,
@@ -79,20 +79,21 @@ textarea {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: #2196f3;
-    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    border-color: #2ecc71;
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
 }
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    margin-top: 30px;
+    margin-top: 24px;
     gap: 10px;
 }
 
@@ -110,15 +111,11 @@ textarea:focus {
     color: #333;
 }
 
-.cancel-button:hover {
-    background-color: #d5d5d5;
-}
-
 .submit-button {
-    background-color: #4caf50;
+    background-color: #2ecc71;
     color: white;
 }
 
 .submit-button:hover {
-    background-color: #45a049;
+    background-color: #27ae60;
 }

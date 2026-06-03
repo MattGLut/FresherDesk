@@ -1,45 +1,35 @@
 import React, { useState, useEffect } from 'react'
-import './IncidentForm.css'
+import { getDisplayValue, getValue } from '../utils/snValue'
+import './TicketForm.css'
 
-export default function IncidentForm({ incident, onSubmit, onCancel }) {
-    const isEditing = !!incident
+export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
+    const isEditing = !!ticket
 
-    // Initialize form state
     const [formData, setFormData] = useState({
         short_description: '',
         description: '',
         state: '1',
-        impact: '2',
+        priority: '3',
+        requester_email: '',
+        category: 'general',
     })
 
-    // Load incident data if editing
     useEffect(() => {
-        if (incident) {
-            // Extract primitive values from potential objects
-            const shortDesc =
-                typeof incident.short_description === 'object'
-                    ? incident.short_description.value
-                    : incident.short_description
-            const description =
-                typeof incident.description === 'object' ? incident.description.value : incident.description
-            const state = typeof incident.state === 'object' ? incident.state.value : incident.state
-            const impact = typeof incident.impact === 'object' ? incident.impact.value : incident.impact
-
+        if (ticket) {
             setFormData({
-                short_description: shortDesc || '',
-                description: description || '',
-                state: state || '1',
-                impact: impact || '2',
+                short_description: getValue(ticket.short_description),
+                description: getValue(ticket.description),
+                state: getValue(ticket.state) || '1',
+                priority: getValue(ticket.priority) || '3',
+                requester_email: getValue(ticket.requester_email),
+                category: getValue(ticket.category) || 'general',
             })
         }
-    }, [incident])
+    }, [ticket])
 
     const handleChange = (e) => {
         const { name, value } = e.target
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }))
+        setFormData((prev) => ({ ...prev, [name]: value }))
     }
 
     const handleSubmit = (e) => {
@@ -51,14 +41,14 @@ export default function IncidentForm({ incident, onSubmit, onCancel }) {
         <div className="form-overlay">
             <div className="form-container">
                 <div className="form-header">
-                    <h2>{isEditing ? `Edit ${incident.number.display_value}` : 'Create New Incident'}</h2>
+                    <h2>{isEditing ? `Edit ${getDisplayValue(ticket.number)}` : 'Create New Ticket'}</h2>
                     <button type="button" className="close-button" onClick={onCancel}>
                         ×
                     </button>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="short_description">Short Description *</label>
+                        <label htmlFor="short_description">Subject *</label>
                         <input
                             type="text"
                             id="short_description"
@@ -71,6 +61,17 @@ export default function IncidentForm({ incident, onSubmit, onCancel }) {
                     </div>
 
                     <div className="form-group">
+                        <label htmlFor="requester_email">Requester Email</label>
+                        <input
+                            type="email"
+                            id="requester_email"
+                            name="requester_email"
+                            value={formData.requester_email}
+                            onChange={handleChange}
+                        />
+                    </div>
+
+                    <div className="form-group">
                         <label htmlFor="description">Description</label>
                         <textarea
                             id="description"
@@ -78,30 +79,39 @@ export default function IncidentForm({ incident, onSubmit, onCancel }) {
                             value={formData.description}
                             onChange={handleChange}
                             rows={5}
-                            maxLength={4000}
                         />
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="state">State</label>
+                            <label htmlFor="state">Status</label>
                             <select id="state" name="state" value={formData.state} onChange={handleChange}>
-                                <option value="1">New</option>
-                                <option value="2">In Progress</option>
-                                <option value="3">On Hold</option>
+                                <option value="1">Open</option>
+                                <option value="2">Pending</option>
                                 <option value="6">Resolved</option>
                                 <option value="7">Closed</option>
                             </select>
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="impact">Impact</label>
-                            <select id="impact" name="impact" value={formData.impact} onChange={handleChange}>
-                                <option value="1">1 - High</option>
-                                <option value="2">2 - Medium</option>
-                                <option value="3">3 - Low</option>
+                            <label htmlFor="priority">Priority</label>
+                            <select id="priority" name="priority" value={formData.priority} onChange={handleChange}>
+                                <option value="1">Critical</option>
+                                <option value="2">High</option>
+                                <option value="3">Medium</option>
+                                <option value="4">Low</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="category">Category</label>
+                        <select id="category" name="category" value={formData.category} onChange={handleChange}>
+                            <option value="general">General</option>
+                            <option value="billing">Billing</option>
+                            <option value="technical">Technical</option>
+                            <option value="account">Account</option>
+                        </select>
                     </div>
 
                     <div className="form-actions">

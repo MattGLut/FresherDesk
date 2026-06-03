@@ -1,0 +1,52 @@
+import '@servicenow/sdk/global'
+import {
+    Table,
+    EmailColumn,
+    ChoiceColumn,
+    OverrideColumn,
+} from '@servicenow/sdk/core'
+
+export const x_2058901_fresher_ticket = Table({
+    name: 'x_2058901_fresher_ticket',
+    label: 'FresherDesk Ticket',
+    extends: 'task',
+    display: 'short_description',
+    allowWebServiceAccess: true,
+    autoNumber: {
+        prefix: 'TKT',
+        number: 1000,
+        numberOfDigits: 7,
+    },
+    schema: {
+        requester_email: EmailColumn({
+            label: 'Requester Email',
+        }),
+        source: ChoiceColumn({
+            label: 'Source',
+            choices: {
+                email: 'Email',
+                form: 'Form',
+                api: 'API',
+            },
+            default: 'form',
+        }),
+        category: ChoiceColumn({
+            label: 'Category',
+            choices: {
+                general: 'General',
+                billing: 'Billing',
+                technical: 'Technical',
+                account: 'Account',
+            },
+            default: 'general',
+        }),
+        state: OverrideColumn({
+            baseTable: 'task',
+            default: '1',
+        }),
+        priority: OverrideColumn({
+            baseTable: 'task',
+            default: '3',
+        }),
+    },
+})
