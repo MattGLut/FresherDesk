@@ -321,6 +321,7 @@ declare global {
                     {
                         table: 'sys_choice'
                         id: '2b05dac2945f4c7f84992c4a7c5ac23d'
+                        deleted: true
                         key: {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'comment_type'
@@ -884,7 +885,7 @@ declare global {
                     {
                         table: 'sys_choice'
                         id: 'ee989f4d34b542afaf22a04177559834'
-                        deleted: true
+                        deleted: false
                         key: {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'comment_type'
