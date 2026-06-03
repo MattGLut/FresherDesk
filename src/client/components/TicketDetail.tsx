@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { getDisplayValue, getValue, getSysId } from '../utils/snValue'
+import { AgentService } from '../services/AgentService'
 import ConversationThread from './ConversationThread'
 import './TicketDetail.css'
 
@@ -17,7 +18,16 @@ export default function TicketDetail({
     const [replyBody, setReplyBody] = useState('')
     const [replyType, setReplyType] = useState('public_reply')
     const [submitting, setSubmitting] = useState(false)
+    const [agents, setAgents] = useState([])
     const [localState, setLocalState] = useState({ state: '1', priority: '3', assigned_to: '' })
+
+    useEffect(() => {
+        const agentService = new AgentService()
+        agentService
+            .list()
+            .then(setAgents)
+            .catch(() => setAgents([]))
+    }, [])
 
     useEffect(() => {
         if (ticket) {
@@ -96,6 +106,20 @@ export default function TicketDetail({
                         <option value="2">High</option>
                         <option value="3">Medium</option>
                         <option value="4">Low</option>
+                    </select>
+                </div>
+                <div className="field-group">
+                    <label>Assignee</label>
+                    <select
+                        value={localState.assigned_to}
+                        onChange={(e) => handleFieldUpdate('assigned_to', e.target.value)}
+                    >
+                        <option value="">Unassigned</option>
+                        {agents.map((agent) => (
+                            <option key={getSysId(agent)} value={getValue(agent.sys_id)}>
+                                {getDisplayValue(agent.name)}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="field-group">
