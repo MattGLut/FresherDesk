@@ -1,6 +1,7 @@
 import { GlideRecord } from '@servicenow/glide'
 import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries.ts'
 import { parseTags } from './ticketTags.ts'
+import { COMMENT_TYPE_AUDIT_DELTA } from './commentTypes.ts'
 
 const COMMENT_TABLE = 'x_2058901_fresher_ticket_comment'
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
@@ -150,6 +151,11 @@ function loadComments(ticketSysId: string): CommentDto[] {
     gr.query()
 
     while (gr.next()) {
+        const commentType = gr.getValue('comment_type') || 'public_reply'
+        if (commentType === COMMENT_TYPE_AUDIT_DELTA) {
+            continue
+        }
+
         const authorId = gr.getValue('author') || ''
         comments.push({
             id: gr.getUniqueValue(),

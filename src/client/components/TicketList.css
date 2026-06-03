@@ -9,6 +9,11 @@
     overflow: hidden;
 }
 
+.ticket-list-panel.is-refreshing .ticket-rows {
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
 .list-header {
     display: flex;
     align-items: center;

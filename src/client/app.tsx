@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { TicketService } from './services/TicketService'
 import { CommentService } from './services/CommentService'
 import { AttachmentService } from './services/AttachmentService'
 import { getSysId } from './utils/snValue'
+import { mergeTicketUpdate, replaceTicketInList } from './utils/ticketPatch'
 import TicketSidebar from './components/TicketSidebar'
 import TicketList from './components/TicketList'
 import TicketDetail from './components/TicketDetail'
@@ -18,37 +19,68 @@ export default function App() {
     const [attachments, setAttachments] = useState([])
     const [activeView, setActiveView] = useState('all')
     const [tagFilter, setTagFilter] = useState('')
+    const [debouncedTagFilter, setDebouncedTagFilter] = useState('')
     const [listLoading, setListLoading] = useState(true)
+    const [listRefreshing, setListRefreshing] = useState(false)
     const [detailLoading, setDetailLoading] = useState(false)
     const [showForm, setShowForm] = useState(false)
     const [error, setError] = useState(null)
+    const hasLoadedList = useRef(false)
 
     const ticketService = useMemo(() => new TicketService(), [])
     const commentService = useMemo(() => new CommentService(), [])
     const attachmentService = useMemo(() => new AttachmentService(), [])
 
+    useEffect(() => {
+        const timer = window.setTimeout(() => setDebouncedTagFilter(tagFilter), 300)
+        return () => window.clearTimeout(timer)
+    }, [tagFilter])
+
+    const applyTicketUpdate = useCallback((sysId, data, serverTicket = null) => {
+        const merge = (ticket) => (serverTicket ? serverTicket : mergeTicketUpdate(ticket, data))
+
+        setTickets((prev) =>
+            replaceTicketInList(
+                prev,
+                sysId,
+                merge(prev.find((ticket) => getSysId(ticket) === sysId) || { sys_id: sysId })
+            )
+        )
+        setSelectedTicket((prev) => {
+            if (!prev || getSysId(prev) !== sysId) return prev
+            return merge(prev)
+        })
+    }, [])
+
     const refreshTickets = useCallback(async () => {
+        const showFullLoading = !hasLoadedList.current
         try {
-            setListLoading(true)
+            if (showFullLoading) {
+                setListLoading(true)
+            } else {
+                setListRefreshing(true)
+            }
             setError(null)
             const filter = {
                 ...(activeView === 'all' ? {} : { view: activeView }),
-                ...(tagFilter.trim() ? { tag: tagFilter.trim() } : {}),
+                ...(debouncedTagFilter.trim() ? { tag: debouncedTagFilter.trim() } : {}),
             }
             const data = await ticketService.list(filter)
             setTickets(data)
+            hasLoadedList.current = true
         } catch (err) {
             setError('Failed to load tickets: ' + (err.message || 'Unknown error'))
         } finally {
             setListLoading(false)
+            setListRefreshing(false)
         }
-    }, [ticketService, activeView, tagFilter])
+    }, [ticketService, activeView, debouncedTagFilter])
 
     const loadTicketDetail = useCallback(
-        async (sysId) => {
+        async (sysId, { showLoading = true } = {}) => {
             if (!sysId) return
             try {
-                setDetailLoading(true)
+                if (showLoading) setDetailLoading(true)
                 const [ticketData, commentData, attachmentData] = await Promise.all([
                     ticketService.get(sysId),
                     commentService.listForTicket(sysId),
@@ -60,7 +92,7 @@ export default function App() {
             } catch (err) {
                 setError('Failed to load ticket: ' + (err.message || 'Unknown error'))
             } finally {
-                setDetailLoading(false)
+                if (showLoading) setDetailLoading(false)
             }
         },
         [ticketService, commentService, attachmentService]
@@ -85,23 +117,29 @@ export default function App() {
 
     const handleFormSubmit = async (formData) => {
         try {
-            setListLoading(true)
             const created = await ticketService.create(formData)
             setShowForm(false)
-            await refreshTickets()
             if (created) {
+                setTickets((prev) => [created, ...prev])
                 await loadTicketDetail(getSysId(created))
             }
         } catch (err) {
             setError('Failed to create ticket: ' + (err.message || 'Unknown error'))
-        } finally {
-            setListLoading(false)
         }
     }
 
     const handleUpdate = async (sysId, data) => {
-        await ticketService.update(sysId, data)
-        await refreshTickets()
+        applyTicketUpdate(sysId, data)
+        try {
+            const updated = await ticketService.update(sysId, data)
+            applyTicketUpdate(sysId, data, updated)
+        } catch (err) {
+            setError('Failed to update ticket: ' + (err.message || 'Unknown error'))
+            await refreshTickets()
+            if (selectedTicket && getSysId(selectedTicket) === sysId) {
+                await loadTicketDetail(sysId, { showLoading: false })
+            }
+        }
     }
 
     const handleReply = async (sysId, body, commentType) => {
@@ -121,7 +159,7 @@ export default function App() {
         setSelectedTicket(null)
         setComments([])
         setAttachments([])
-        await refreshTickets()
+        setTickets((prev) => prev.filter((item) => getSysId(item) !== sysId))
     }
 
     return (
@@ -146,6 +184,7 @@ export default function App() {
                         selectedId={selectedTicket ? getSysId(selectedTicket) : null}
                         onSelect={handleSelectTicket}
                         loading={listLoading}
+                        refreshing={listRefreshing}
                         tagFilter={tagFilter}
                         onTagFilterChange={setTagFilter}
                     />

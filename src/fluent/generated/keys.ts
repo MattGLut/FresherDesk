@@ -65,6 +65,26 @@ declare global {
                         table: 'sys_module'
                         id: '857cdf93b2bf4c6aa4b1765e8c42d2b3'
                     }
+                    src_server_rest_updateTicket_ts: {
+                        table: 'sys_module'
+                        id: '988d3531662546caafc6fdf75f840dae'
+                    }
+                    src_server_tickets_commentTypes_ts: {
+                        table: 'sys_module'
+                        id: 'fc13814ac71a48a780de04b27082eca0'
+                    }
+                    src_server_tickets_recordTicketDeltaNotes_ts: {
+                        table: 'sys_module'
+                        id: '6a3a39d098ee475095a7613bcc1b5e1c'
+                    }
+                    src_server_tickets_ticketComments_ts: {
+                        table: 'sys_module'
+                        id: 'd3ef0209879142b2a1bd2eeb336bc078'
+                    }
+                    src_server_tickets_ticketLookup_ts: {
+                        table: 'sys_module'
+                        id: '10603e79bb1644e6aa5c4882231c26cc'
+                    }
                     src_server_tickets_ticketQueries_ts: {
                         table: 'sys_module'
                         id: 'b362cb30eea34914b5d77fd334920d01'
@@ -93,6 +113,10 @@ declare global {
                         table: 'sys_security_acl'
                         id: '528c24c7d9b548fd8a01874370d72843'
                     }
+                    'ticket-delta-audit-br': {
+                        table: 'sys_script'
+                        id: '0d9dd3c5835d4209bd71892b4525cfa4'
+                    }
                     'ticket-email-comment-br': {
                         table: 'sys_script'
                         id: '9ce096be130b40ec9d8f6511c7ef5a57'
@@ -112,6 +136,10 @@ declare global {
                     'tickets-rest-api': {
                         table: 'sys_ws_definition'
                         id: '0b768bd506ac4f5a97411eb58074ee13'
+                    }
+                    'tickets-update-route': {
+                        table: 'sys_ws_operation'
+                        id: '783652ce81a143ed8bd98748fe7379f7'
                     }
                 }
                 composite: [
@@ -845,6 +873,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'ee989f4d34b542afaf22a04177559834'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_comment'
+                            element: 'comment_type'
+                            value: 'audit_delta'
+                        }
+                    },
+                    {
                         table: 'sys_user_role'
                         id: 'f0cc966f036246d593acf246828b4955'
                         key: {
@@ -866,6 +903,15 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'ticket'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'fab84f2cbcb448e19267157c51a8e3d1'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_comment'
+                            element: 'source'
+                            value: 'api'
                         }
                     },
                     {

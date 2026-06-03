@@ -26,6 +26,7 @@ export const x_2058901_fresher_ticket_comment = Table({
             choices: {
                 public_reply: 'Public Reply',
                 internal_note: 'Internal Note',
+                audit_delta: 'Audit Delta',
             },
             default: 'public_reply',
         }),
@@ -35,6 +36,7 @@ export const x_2058901_fresher_ticket_comment = Table({
                 agent: 'Agent',
                 email: 'Email',
                 system: 'System',
+                api: 'API',
             },
             default: 'agent',
         }),

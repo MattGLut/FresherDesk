@@ -1,6 +1,6 @@
 # FresherDesk REST API
 
-Read-only JSON API for listing and retrieving helpdesk tickets. All endpoints require a valid API key.
+JSON API for listing, retrieving, and updating helpdesk tickets. All endpoints require a valid API key.
 
 **Base URL:** `https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets`
 
@@ -10,6 +10,7 @@ The API ID (`tickets`) is part of the path. Resource URLs:
 |--------|------|-------------|
 | `GET` | `/tickets/tickets` | List tickets with optional filters and pagination |
 | `GET` | `/tickets/tickets/{id}` | Get a single ticket by number or sys_id |
+| `PATCH` | `/tickets/tickets/{id}` | Update ticket status, subject, or description |
 
 **Content type:** `application/json`
 
@@ -209,6 +210,63 @@ curl -s \
 
 ---
 
+## Update ticket
+
+```http
+PATCH /api/x_2058901_fresher/v1/tickets/tickets/{id}
+```
+
+Updates one or more ticket fields. Returns the updated ticket (same shape as [Get ticket](#get-ticket)).
+
+### Path parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Ticket number (e.g. `TKT0001001`, case-insensitive) or ticket sys_id |
+
+### Request body
+
+Send JSON with any combination of the fields below. At least one field must be present.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | `open`, `pending`, `resolved`, or `closed` |
+| `subject` | string | Ticket title (maps to `short_description`, max 160 characters) |
+| `title` | string | Alias for `subject` |
+| `description` | string | Full ticket body |
+
+### Side effects
+
+- Creates an **internal note** summarizing the API update (visible to agents in the workspace).
+- Triggers the ticket delta audit business rule, which writes **audit delta** comments for each changed field (hidden from the agent UI and REST comment output; query the comment table directly for forensics).
+
+### Example request
+
+```bash
+curl -s -X PATCH \
+  -H "X-API-Key: YOUR_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"pending","subject":"Password reset still failing"}' \
+  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+```
+
+### Example response (200)
+
+Same structure as the [Get ticket](#get-ticket) response, including the updated ticket fields and any new internal notes in `comments`.
+
+### Bad request (400)
+
+```json
+{
+  "error": {
+    "code": "bad_request",
+    "message": "Provide at least one updatable field: status, subject, description"
+  }
+}
+```
+
+---
+
 ## Data model
 
 ### Ticket object
@@ -236,10 +294,10 @@ curl -s \
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | string | Comment sys_id |
-| `type` | string | `public_reply` or `internal_note` |
+| `type` | string | `public_reply`, `internal_note`, or `audit_delta` (audit deltas are excluded from API responses) |
 | `body` | string | Comment text |
 | `author` | object \| null | `{ id, name, email, username }` |
-| `source` | string | `agent`, `email`, or `system` |
+| `source` | string | `agent`, `email`, `system`, or `api` |
 | `created_at` | string | Instance display datetime |
 
 Comments are ordered oldest-first.
@@ -265,6 +323,7 @@ All errors return JSON with an `error` object containing `code` and `message`.
 | HTTP status | Code | When |
 |-------------|------|------|
 | 401 | `unauthorized` | Missing, invalid, or inactive API key |
+| 400 | `bad_request` | Invalid update payload or field values |
 | 404 | `not_found` | Ticket does not exist |
 | 500 | `internal_error` | Unexpected server failure |
 
@@ -283,9 +342,10 @@ All errors return JSON with an `error` object containing `code` and `message`.
 
 ## Limitations (v1)
 
-- **Read-only** — no `POST`, `PUT`, `PATCH`, or `DELETE` endpoints
+- **Partial write support** — `PATCH` updates status, subject/title, and description only
 - **No attachment download** — metadata only
-- **No comment creation** via REST — use the agent workspace or email ingestion
+- **No public comment creation** via REST — agent replies use the workspace; API updates create internal notes automatically
+- **Audit deltas** — field-level change history is stored as `audit_delta` comments but excluded from REST and UI conversation views
 - ServiceNow platform authentication is disabled on these routes; access is controlled solely by API key validation
 
 Implementation source: [`src/fluent/rest/tickets-api.now.ts`](src/fluent/rest/tickets-api.now.ts), [`src/server/rest/`](src/server/rest/).

@@ -63,7 +63,6 @@ export default function TicketDetail({
     const handleTagsUpdate = async (nextTags: string[]) => {
         setLocalTags(nextTags)
         await onUpdate(sysId, { tags: serializeTags(nextTags) })
-        await onRefresh(sysId)
     }
 
     const handleAddTag = async (e) => {
