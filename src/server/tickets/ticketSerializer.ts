@@ -8,6 +8,18 @@ export interface UserDto {
     id: string
     name: string
     email: string
+    username: string
+}
+
+export interface RequesterDto {
+    id: string | null
+    name: string
+    email: string
+    username: string
+}
+
+export interface AssigneeDto extends UserDto {
+    roles: string[]
 }
 
 export interface CommentDto {
@@ -36,27 +48,96 @@ export interface TicketDto {
     priority: string
     category: string
     source: string
-    requester: { email: string; name: string; id: string | null }
-    assignee: UserDto | null
+    requester: RequesterDto
+    assignee: AssigneeDto | null
     opened_at: string
     updated_at: string
     comments: CommentDto[]
     attachments: AttachmentDto[]
 }
 
-function serializeUser(gr: GlideRecord<'sys_user'> | null, sysId: string): UserDto | null {
+function loadUserById(sysId: string): GlideRecord<'sys_user'> | null {
     if (!sysId) {
         return null
     }
-    const user = gr || new GlideRecord('sys_user')
-    if (!gr && !user.get(sysId)) {
-        return { id: sysId, name: '', email: '' }
+    const user = new GlideRecord('sys_user')
+    return user.get(sysId) ? user : null
+}
+
+function loadUserRoles(userId: string): string[] {
+    const roles: string[] = []
+    const gr = new GlideRecord('sys_user_has_role')
+    gr.addQuery('user', userId)
+    gr.query()
+
+    while (gr.next()) {
+        const roleName = gr.getDisplayValue('role')
+        if (roleName) {
+            roles.push(roleName)
+        }
     }
+
+    return roles
+}
+
+function serializeUserFromRecord(user: GlideRecord<'sys_user'>): UserDto {
     return {
-        id: sysId,
+        id: user.getUniqueValue(),
         name: user.getDisplayValue('name') || '',
         email: user.getValue('email') || '',
+        username: user.getValue('user_name') || '',
     }
+}
+
+function serializeUser(sysId: string): UserDto | null {
+    if (!sysId) {
+        return null
+    }
+
+    const user = loadUserById(sysId)
+    if (!user) {
+        return { id: sysId, name: '', email: '', username: '' }
+    }
+
+    return serializeUserFromRecord(user)
+}
+
+function serializeAssignee(sysId: string): AssigneeDto | null {
+    const user = serializeUser(sysId)
+    if (!user) {
+        return null
+    }
+
+    return {
+        ...user,
+        roles: loadUserRoles(user.id),
+    }
+}
+
+function serializeRequester(openedBy: string, requesterEmail: string): RequesterDto {
+    if (openedBy) {
+        const user = loadUserById(openedBy)
+        if (user) {
+            const profile = serializeUserFromRecord(user)
+            return {
+                id: openedBy,
+                name: profile.name,
+                username: profile.username,
+                email: requesterEmail || profile.email,
+            }
+        }
+    }
+
+    return {
+        id: openedBy || null,
+        name: '',
+        email: requesterEmail,
+        username: '',
+    }
+}
+
+function serializeCommentAuthor(sysId: string): UserDto | null {
+    return serializeUser(sysId)
 }
 
 function loadComments(ticketSysId: string): CommentDto[] {
@@ -72,7 +153,7 @@ function loadComments(ticketSysId: string): CommentDto[] {
             id: gr.getUniqueValue(),
             type: gr.getValue('comment_type') || 'public_reply',
             body: gr.getValue('body') || '',
-            author: serializeUser(null, authorId),
+            author: serializeCommentAuthor(authorId),
             source: gr.getValue('source') || 'agent',
             created_at: gr.getDisplayValue('sys_created_on') || '',
         })
@@ -108,14 +189,6 @@ export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, inc
     const assignedTo = gr.getValue('assigned_to') || ''
     const requesterEmail = gr.getValue('requester_email') || ''
 
-    let requesterName = ''
-    if (openedBy) {
-        const userGr = new GlideRecord('sys_user')
-        if (userGr.get(openedBy)) {
-            requesterName = userGr.getDisplayValue('name') || ''
-        }
-    }
-
     const ticket: TicketDto = {
         id: ticketId,
         number: gr.getValue('number') || '',
@@ -125,12 +198,8 @@ export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, inc
         priority: mapPriorityToLabel(gr.getValue('priority') || '3'),
         category: gr.getValue('category') || 'general',
         source: gr.getValue('source') || 'form',
-        requester: {
-            email: requesterEmail,
-            name: requesterName,
-            id: openedBy || null,
-        },
-        assignee: serializeUser(null, assignedTo),
+        requester: serializeRequester(openedBy, requesterEmail),
+        assignee: serializeAssignee(assignedTo),
         opened_at: gr.getDisplayValue('opened_at') || gr.getDisplayValue('sys_created_on') || '',
         updated_at: gr.getDisplayValue('sys_updated_on') || '',
         comments: [],

@@ -86,14 +86,17 @@ curl -s \
       "category": "technical",
       "source": "email",
       "requester": {
-        "email": "customer@example.com",
+        "id": "c1d2e3f4a5b6789012345678901234cd",
         "name": "Jane Customer",
-        "id": "c1d2e3f4a5b6789012345678901234cd"
+        "email": "customer@example.com",
+        "username": "jane.customer"
       },
       "assignee": {
         "id": "e1f2a3b4c5d6789012345678901234ef",
         "name": "Support Agent",
-        "email": "agent@example.com"
+        "email": "agent@example.com",
+        "username": "support.agent",
+        "roles": ["x_2058901_fresher.agent"]
       },
       "opened_at": "2026-06-01 09:15:00",
       "updated_at": "2026-06-02 14:30:00",
@@ -149,14 +152,17 @@ curl -s \
     "category": "technical",
     "source": "email",
     "requester": {
-      "email": "customer@example.com",
+      "id": "c1d2e3f4a5b6789012345678901234cd",
       "name": "Jane Customer",
-      "id": "c1d2e3f4a5b6789012345678901234cd"
+      "email": "customer@example.com",
+      "username": "jane.customer"
     },
     "assignee": {
       "id": "e1f2a3b4c5d6789012345678901234ef",
       "name": "Support Agent",
-      "email": "agent@example.com"
+      "email": "agent@example.com",
+      "username": "support.agent",
+      "roles": ["x_2058901_fresher.agent"]
     },
     "opened_at": "2026-06-01 09:15:00",
     "updated_at": "2026-06-02 14:30:00",
@@ -214,8 +220,8 @@ curl -s \
 | `priority` | string | `critical`, `high`, `medium`, `low`, or `planning` |
 | `category` | string | `general`, `billing`, `technical`, or `account` |
 | `source` | string | How the ticket was created: `email`, `form`, or `api` |
-| `requester` | object | `{ email, name, id }` — `id` is the opened-by user sys_id |
-| `assignee` | object \| null | `{ id, name, email }` or `null` if unassigned |
+| `requester` | object | `{ id, name, email, username }` — loaded from `opened_by` user; `email` falls back to ticket `requester_email` |
+| `assignee` | object \| null | `{ id, name, email, username, roles }` or `null` if unassigned — `roles` lists ServiceNow role names |
 | `opened_at` | string | Instance display datetime |
 | `updated_at` | string | Instance display datetime |
 | `comments` | array | Conversation thread (empty in list responses) |
@@ -228,7 +234,7 @@ curl -s \
 | `id` | string | Comment sys_id |
 | `type` | string | `public_reply` or `internal_note` |
 | `body` | string | Comment text |
-| `author` | object \| null | `{ id, name, email }` |
+| `author` | object \| null | `{ id, name, email, username }` |
 | `source` | string | `agent`, `email`, or `system` |
 | `created_at` | string | Instance display datetime |
 
