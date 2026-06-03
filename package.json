@@ -11,7 +11,10 @@
     "deploy": "now-sdk install",
     "transform": "now-sdk transform",
     "types": "now-sdk dependencies",
-    "dev": "now-sdk run dev"
+    "dev": "now-sdk run dev",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "audit:ci": "npm audit --omit=dev --audit-level=high"
   },
   "devDependencies": {
     "@servicenow/sdk": "4.7.0",
