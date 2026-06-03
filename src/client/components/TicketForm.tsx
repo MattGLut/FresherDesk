@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { getDisplayValue, getValue } from '../utils/snValue'
-
-const inputClass =
-    'w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-rh-green focus:outline-none focus:ring-2 focus:ring-rh-green/20 dark:border-rh-border dark:bg-rh-surface-2 dark:text-white dark:focus:border-rh-green'
+import './TicketForm.css'
 
 export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
     const isEditing = !!ticket
@@ -40,30 +38,21 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
     }
 
     return (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="w-full max-w-[600px] overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-rh-surface">
-                <div className="flex items-center justify-between bg-gray-900 px-5 py-4 dark:bg-rh-black">
-                    <h2 className="m-0 text-lg font-semibold text-white">
-                        {isEditing ? `Edit ${getDisplayValue(ticket.number)}` : 'Create New Ticket'}
-                    </h2>
-                    <button
-                        type="button"
-                        className="cursor-pointer border-none bg-transparent text-2xl leading-none text-gray-400 hover:text-white"
-                        onClick={onCancel}
-                    >
+        <div className="form-overlay">
+            <div className="form-container">
+                <div className="form-header">
+                    <h2>{isEditing ? `Edit ${getDisplayValue(ticket.number)}` : 'Create New Ticket'}</h2>
+                    <button type="button" className="close-button" onClick={onCancel}>
                         ×
                     </button>
                 </div>
-                <form className="p-5" onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label htmlFor="short_description" className="mb-1.5 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                            Subject *
-                        </label>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="short_description">Subject *</label>
                         <input
                             type="text"
                             id="short_description"
                             name="short_description"
-                            className={inputClass}
                             value={formData.short_description}
                             onChange={handleChange}
                             required
@@ -71,40 +60,32 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
                         />
                     </div>
 
-                    <div className="mb-4">
-                        <label htmlFor="requester_email" className="mb-1.5 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                            Requester Email
-                        </label>
+                    <div className="form-group">
+                        <label htmlFor="requester_email">Requester Email</label>
                         <input
                             type="email"
                             id="requester_email"
                             name="requester_email"
-                            className={inputClass}
                             value={formData.requester_email}
                             onChange={handleChange}
                         />
                     </div>
 
-                    <div className="mb-4">
-                        <label htmlFor="description" className="mb-1.5 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                            Description
-                        </label>
+                    <div className="form-group">
+                        <label htmlFor="description">Description</label>
                         <textarea
                             id="description"
                             name="description"
-                            className={inputClass}
                             value={formData.description}
                             onChange={handleChange}
                             rows={5}
                         />
                     </div>
 
-                    <div className="mb-4 flex gap-4">
-                        <div className="flex-1">
-                            <label htmlFor="state" className="mb-1.5 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                                Status
-                            </label>
-                            <select id="state" name="state" className={inputClass} value={formData.state} onChange={handleChange}>
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="state">Status</label>
+                            <select id="state" name="state" value={formData.state} onChange={handleChange}>
                                 <option value="1">Open</option>
                                 <option value="2">Pending</option>
                                 <option value="6">Resolved</option>
@@ -112,11 +93,9 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
                             </select>
                         </div>
 
-                        <div className="flex-1">
-                            <label htmlFor="priority" className="mb-1.5 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                                Priority
-                            </label>
-                            <select id="priority" name="priority" className={inputClass} value={formData.priority} onChange={handleChange}>
+                        <div className="form-group">
+                            <label htmlFor="priority">Priority</label>
+                            <select id="priority" name="priority" value={formData.priority} onChange={handleChange}>
                                 <option value="1">Critical</option>
                                 <option value="2">High</option>
                                 <option value="3">Medium</option>
@@ -125,11 +104,9 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
                         </div>
                     </div>
 
-                    <div className="mb-4">
-                        <label htmlFor="category" className="mb-1.5 block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                            Category
-                        </label>
-                        <select id="category" name="category" className={inputClass} value={formData.category} onChange={handleChange}>
+                    <div className="form-group">
+                        <label htmlFor="category">Category</label>
+                        <select id="category" name="category" value={formData.category} onChange={handleChange}>
                             <option value="general">General</option>
                             <option value="billing">Billing</option>
                             <option value="technical">Technical</option>
@@ -137,18 +114,11 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
                         </select>
                     </div>
 
-                    <div className="mt-6 flex justify-end gap-2.5">
-                        <button
-                            type="button"
-                            className="cursor-pointer rounded-md bg-gray-200 px-5 py-2.5 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-300 dark:bg-rh-surface-2 dark:text-gray-200 dark:hover:bg-rh-border"
-                            onClick={onCancel}
-                        >
+                    <div className="form-actions">
+                        <button type="button" className="cancel-button" onClick={onCancel}>
                             Cancel
                         </button>
-                        <button
-                            type="submit"
-                            className="cursor-pointer rounded-md bg-rh-green px-5 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-rh-green-dim"
-                        >
+                        <button type="submit" className="submit-button">
                             {isEditing ? 'Update' : 'Create'}
                         </button>
                     </div>
