@@ -1,5 +1,5 @@
 import React from 'react'
-import { getDisplayValue, getSysId } from '../utils/snValue'
+import { getDisplayValue, getSysId, getCommentTypeLabel, isInternalComment } from '../utils/snValue'
 import './ConversationThread.css'
 
 export default function ConversationThread({ comments, loading }) {
@@ -14,14 +14,13 @@ export default function ConversationThread({ comments, loading }) {
     return (
         <div className="conversation-thread">
             {comments.map((comment) => {
-                const type = getDisplayValue(comment.comment_type)
-                const isInternal = type === 'Internal Note' || comment.comment_type === 'internal_note'
+                const isInternal = isInternalComment(comment.comment_type)
 
                 return (
                     <div key={getSysId(comment)} className={`comment-bubble ${isInternal ? 'internal' : 'public'}`}>
                         <div className="comment-header">
                             <span className="comment-author">{getDisplayValue(comment.author) || 'System'}</span>
-                            <span className="comment-type">{isInternal ? 'Internal Note' : 'Public Reply'}</span>
+                            <span className="comment-type">{getCommentTypeLabel(comment.comment_type)}</span>
                             <span className="comment-time">{getDisplayValue(comment.sys_created_on)}</span>
                         </div>
                         <div className="comment-body">{getDisplayValue(comment.body)}</div>

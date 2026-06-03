@@ -2,7 +2,14 @@
 
 Read-only JSON API for listing and retrieving helpdesk tickets. All endpoints require a valid API key.
 
-**Base URL:** `https://<instance>.service-now.com/api/x_2058901_fresher/v1`
+**Base URL:** `https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets`
+
+The API ID (`tickets`) is part of the path. Resource URLs:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/tickets/tickets` | List tickets with optional filters and pagination |
+| `GET` | `/tickets/tickets/{id}` | Get a single ticket by number or sys_id |
 
 **Content type:** `application/json`
 
@@ -33,19 +40,10 @@ On each successful request, the matching key record's `last_used` timestamp is u
 
 ---
 
-## Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/tickets` | List tickets with optional filters and pagination |
-| `GET` | `/tickets/{id}` | Get a single ticket by number or sys_id |
-
----
-
 ## List tickets
 
 ```http
-GET /api/x_2058901_fresher/v1/tickets
+GET /api/x_2058901_fresher/v1/tickets/tickets
 ```
 
 Returns a paginated list of ticket summaries. Comments and attachments are **not** included in list responses.
@@ -70,7 +68,7 @@ Results are ordered by most recently updated first.
 ```bash
 curl -s \
   -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets?status=open&priority=high&limit=25&offset=0"
+  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&limit=25&offset=0"
 ```
 
 ### Example response (200)
@@ -116,7 +114,7 @@ curl -s \
 ## Get ticket
 
 ```http
-GET /api/x_2058901_fresher/v1/tickets/{id}
+GET /api/x_2058901_fresher/v1/tickets/tickets/{id}
 ```
 
 Returns a single ticket with its full conversation thread and attachments.
@@ -134,7 +132,7 @@ Numbers are detected by the `TKT` prefix. All other values are treated as sys_id
 ```bash
 curl -s \
   -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/TKT0001001"
+  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
 ### Example response (200)
