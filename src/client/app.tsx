@@ -82,11 +82,11 @@ export default function App() {
     const handleFormSubmit = async (formData) => {
         try {
             setListLoading(true)
-            const { result } = await ticketService.create(formData)
+            const created = await ticketService.create(formData)
             setShowForm(false)
             await refreshTickets()
-            if (result) {
-                await loadTicketDetail(getSysId(result))
+            if (created) {
+                await loadTicketDetail(getSysId(created))
             }
         } catch (err) {
             setError('Failed to create ticket: ' + (err.message || 'Unknown error'))

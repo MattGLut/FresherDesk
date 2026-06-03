@@ -118,7 +118,7 @@ export class TicketService {
         return result
     }
 
-    async create(data: Record<string, string>): Promise<unknown> {
+    async create(data: Record<string, string>): Promise<TicketRecord> {
         const response = await fetch(`/api/now/table/${this.tableName}`, {
             method: 'POST',
             headers: this.jsonHeaders(),
@@ -133,7 +133,8 @@ export class TicketService {
             throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
         }
 
-        return response.json()
+        const { result } = await response.json()
+        return result
     }
 
     async update(sysId: string, data: Record<string, string>): Promise<unknown> {
