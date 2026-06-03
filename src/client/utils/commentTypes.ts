@@ -1,5 +1,3 @@
-export const COMMENT_TYPE_PUBLIC = 'public_reply'
-export const COMMENT_TYPE_INTERNAL = 'internal_note'
 export const COMMENT_TYPE_AUDIT_DELTA = 'audit_delta'
 
 export function isAuditDeltaCommentType(type: string): boolean {

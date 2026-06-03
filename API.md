@@ -238,7 +238,7 @@ Send JSON with any combination of the fields below. At least one field must be p
 ### Side effects
 
 - Creates an **internal note** summarizing the API update (visible to agents in the workspace).
-- Triggers the ticket delta audit business rule, which writes **audit delta** comments for each changed field (hidden from the agent UI and REST comment output; query the comment table directly for forensics).
+- Triggers the ticket delta audit business rule, which writes **audit_delta** comments for each changed field (hidden from the agent UI and REST comment output; query the comment table directly for forensics).
 
 ### Example request
 

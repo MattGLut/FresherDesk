@@ -319,6 +319,16 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: '2b05dac2945f4c7f84992c4a7c5ac23d'
+                        deleted: true
+                        key: {
+                            name: 'x_2058901_fresher_ticket_comment'
+                            element: 'comment_type'
+                            value: 'delta'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '2b3b6bc31953496cacb20f934a967df8'
                         key: {
@@ -875,6 +885,7 @@ declare global {
                     {
                         table: 'sys_choice'
                         id: 'ee989f4d34b542afaf22a04177559834'
+                        deleted: false
                         key: {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'comment_type'
