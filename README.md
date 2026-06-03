@@ -70,7 +70,7 @@ Quick start:
 
 ```bash
 curl -s -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets?status=open&limit=50"
+  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&limit=50"
 ```
 
 ## Project structure
