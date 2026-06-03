@@ -33,13 +33,13 @@ function priorityClass(priorityValue: string): string {
     }
 }
 
-export default function TicketList({ tickets, selectedId, onSelect, loading, tagFilter, onTagFilterChange }) {
-    if (loading) {
+export default function TicketList({ tickets, selectedId, onSelect, loading, refreshing, tagFilter, onTagFilterChange }) {
+    if (loading && tickets.length === 0) {
         return <div className="ticket-list-panel"><div className="list-loading">Loading tickets...</div></div>
     }
 
     return (
-        <div className="ticket-list-panel">
+        <div className={`ticket-list-panel${refreshing ? ' is-refreshing' : ''}`}>
             <div className="list-header">
                 <h2>Tickets</h2>
                 <span className="ticket-count">{tickets.length}</span>
