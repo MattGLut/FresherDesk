@@ -21,7 +21,7 @@ export function getSysId(record: { sys_id?: unknown }): string {
 const COMMENT_TYPE_LABELS: Record<string, string> = {
     internal_note: 'Internal Note',
     public_reply: 'Public Reply',
-    audit_delta: 'Audit Delta',
+    audit_delta: 'Delta',
 }
 
 export function getCommentTypeValue(field: unknown): string {
@@ -46,6 +46,6 @@ export function isAuditDeltaComment(field: unknown): boolean {
     return getCommentTypeValue(field) === 'audit_delta'
 }
 
-export function isVisibleComment(field: unknown): boolean {
+export function isVisibleCommentType(field: unknown): boolean {
     return !isAuditDeltaComment(field)
 }
