@@ -73,9 +73,6 @@ export default function App() {
 
     const handleViewChange = (view) => {
         setActiveView(view)
-        setSelectedTicket(null)
-        setComments([])
-        setAttachments([])
     }
 
     const handleCreateClick = () => setShowForm(true)
@@ -85,9 +82,12 @@ export default function App() {
     const handleFormSubmit = async (formData) => {
         try {
             setListLoading(true)
-            await ticketService.create(formData)
+            const { result } = await ticketService.create(formData)
             setShowForm(false)
             await refreshTickets()
+            if (result) {
+                await loadTicketDetail(getSysId(result))
+            }
         } catch (err) {
             setError('Failed to create ticket: ' + (err.message || 'Unknown error'))
         } finally {
