@@ -17,6 +17,7 @@ export default function App() {
     const [comments, setComments] = useState([])
     const [attachments, setAttachments] = useState([])
     const [activeView, setActiveView] = useState('all')
+    const [tagFilter, setTagFilter] = useState('')
     const [listLoading, setListLoading] = useState(true)
     const [detailLoading, setDetailLoading] = useState(false)
     const [showForm, setShowForm] = useState(false)
@@ -30,7 +31,10 @@ export default function App() {
         try {
             setListLoading(true)
             setError(null)
-            const filter = activeView === 'all' ? {} : { view: activeView }
+            const filter = {
+                ...(activeView === 'all' ? {} : { view: activeView }),
+                ...(tagFilter.trim() ? { tag: tagFilter.trim() } : {}),
+            }
             const data = await ticketService.list(filter)
             setTickets(data)
         } catch (err) {
@@ -38,7 +42,7 @@ export default function App() {
         } finally {
             setListLoading(false)
         }
-    }, [ticketService, activeView])
+    }, [ticketService, activeView, tagFilter])
 
     const loadTicketDetail = useCallback(
         async (sysId) => {
@@ -142,6 +146,8 @@ export default function App() {
                         selectedId={selectedTicket ? getSysId(selectedTicket) : null}
                         onSelect={handleSelectTicket}
                         loading={listLoading}
+                        tagFilter={tagFilter}
+                        onTagFilterChange={setTagFilter}
                     />
                     <TicketDetail
                         ticket={selectedTicket}

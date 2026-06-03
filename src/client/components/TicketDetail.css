@@ -82,6 +82,78 @@
     color: #333;
 }
 
+.field-group-full {
+    grid-column: 1 / -1;
+}
+
+.tag-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 28px;
+}
+
+.tag-empty {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.tag-editor .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.tag-remove {
+    border: none;
+    background: transparent;
+    color: #2e7d32;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 2px;
+}
+
+.tag-add-form {
+    display: flex;
+    gap: 8px;
+}
+
+.tag-add-form input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.tag-add-form button {
+    padding: 6px 12px;
+    border: 1px solid #2ecc71;
+    border-radius: 4px;
+    background: #2ecc71;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.tag-add-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .detail-description {
     margin-bottom: 20px;
     padding: 12px 16px;

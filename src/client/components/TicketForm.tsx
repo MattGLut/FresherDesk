@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { getDisplayValue, getValue } from '../utils/snValue'
+import { parseTags, serializeTags, formatTagsInput, parseTagsInput } from '../utils/ticketTags'
 import './TicketForm.css'
 
 export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
@@ -12,6 +13,7 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
         priority: '3',
         requester_email: '',
         category: 'general',
+        tagsInput: '',
     })
 
     useEffect(() => {
@@ -23,6 +25,7 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
                 priority: getValue(ticket.priority) || '3',
                 requester_email: getValue(ticket.requester_email),
                 category: getValue(ticket.category) || 'general',
+                tagsInput: formatTagsInput(parseTags(ticket.tags)),
             })
         }
     }, [ticket])
@@ -34,7 +37,11 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        onSubmit(formData)
+        const { tagsInput, ...rest } = formData
+        onSubmit({
+            ...rest,
+            tags: serializeTags(parseTagsInput(tagsInput)),
+        })
     }
 
     return (
@@ -112,6 +119,18 @@ export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
                             <option value="technical">Technical</option>
                             <option value="account">Account</option>
                         </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="tagsInput">Tags</label>
+                        <input
+                            type="text"
+                            id="tagsInput"
+                            name="tagsInput"
+                            value={formData.tagsInput}
+                            onChange={handleChange}
+                            placeholder="Comma-separated, e.g. billing, urgent"
+                        />
                     </div>
 
                     <div className="form-actions">

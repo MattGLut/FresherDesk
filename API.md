@@ -55,6 +55,7 @@ Returns a paginated list of ticket summaries. Comments and attachments are **not
 | `status` | string | — | Filter by status: `open`, `pending`, `resolved`, `closed` |
 | `priority` | string | — | Filter by priority: `critical`, `high`, `medium`, `low`, `planning` |
 | `assignee` | string | — | Assignee user sys_id, or `unassigned` for tickets with no assignee |
+| `tag` | string | — | Filter tickets that include this tag (exact match within the stored tag list) |
 | `updated_since` | string | — | ISO datetime; returns tickets updated on or after this time |
 | `limit` | integer | `50` | Page size (minimum 1, maximum 200) |
 | `offset` | integer | `0` | Number of records to skip |
@@ -68,7 +69,7 @@ Results are ordered by most recently updated first.
 ```bash
 curl -s \
   -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&limit=25&offset=0"
+  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&tag=billing&limit=25&offset=0"
 ```
 
 ### Example response (200)
@@ -85,6 +86,7 @@ curl -s \
       "priority": "high",
       "category": "technical",
       "source": "email",
+      "tags": ["billing", "urgent"],
       "requester": {
         "id": "c1d2e3f4a5b6789012345678901234cd",
         "name": "Jane Customer",
@@ -151,6 +153,7 @@ curl -s \
     "priority": "high",
     "category": "technical",
     "source": "email",
+    "tags": ["billing", "urgent"],
     "requester": {
       "id": "c1d2e3f4a5b6789012345678901234cd",
       "name": "Jane Customer",
@@ -220,6 +223,7 @@ curl -s \
 | `priority` | string | `critical`, `high`, `medium`, `low`, or `planning` |
 | `category` | string | `general`, `billing`, `technical`, or `account` |
 | `source` | string | How the ticket was created: `email`, `form`, or `api` |
+| `tags` | string[] | Labels applied to the ticket (e.g. `["billing", "urgent"]`) |
 | `requester` | object | `{ id, name, email, username }` — loaded from `opened_by` user; `email` falls back to ticket `requester_email` |
 | `assignee` | object \| null | `{ id, name, email, username, roles }` or `null` if unassigned — `roles` lists ServiceNow role names |
 | `opened_at` | string | Instance display datetime |

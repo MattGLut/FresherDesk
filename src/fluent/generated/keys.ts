@@ -73,6 +73,10 @@ declare global {
                         table: 'sys_module'
                         id: '89623efc90a14179818a4b0ab2748fa4'
                     }
+                    src_server_tickets_ticketTags_ts: {
+                        table: 'sys_module'
+                        id: '52140668222944c2903b1c3376f373bb'
+                    }
                     'ticket-acl-create': {
                         table: 'sys_security_acl'
                         id: '0ce074bb7c024c31beb7555f5571d56c'
@@ -140,6 +144,15 @@ declare global {
                             name: 'x_2058901_fresher_ticket'
                             element: 'category'
                             value: 'billing'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '10fe1234730c45b5a4629b63e9cbb64c'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'tags'
+                            language: 'en'
                         }
                     },
                     {
@@ -743,6 +756,14 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'comment_type'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'c658dd5afb98464abe9465c2ab47975d'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'tags'
                         }
                     },
                     {

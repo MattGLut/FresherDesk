@@ -1,5 +1,6 @@
 import { GlideRecord } from '@servicenow/glide'
 import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries.ts'
+import { parseTags } from './ticketTags.ts'
 
 const COMMENT_TABLE = 'x_2058901_fresher_ticket_comment'
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
@@ -48,6 +49,7 @@ export interface TicketDto {
     priority: string
     category: string
     source: string
+    tags: string[]
     requester: RequesterDto
     assignee: AssigneeDto | null
     opened_at: string
@@ -198,6 +200,7 @@ export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, inc
         priority: mapPriorityToLabel(gr.getValue('priority') || '3'),
         category: gr.getValue('category') || 'general',
         source: gr.getValue('source') || 'form',
+        tags: parseTags(gr.getValue('tags') || '[]'),
         requester: serializeRequester(openedBy, requesterEmail),
         assignee: serializeAssignee(assignedTo),
         opened_at: gr.getDisplayValue('opened_at') || gr.getDisplayValue('sys_created_on') || '',

@@ -1,3 +1,5 @@
+import { buildTagQuery } from './ticketTags.ts'
+
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
 
 const STATUS_MAP: Record<string, string> = {
@@ -20,6 +22,7 @@ export interface TicketFilters {
     status?: string
     priority?: string
     assignee?: string
+    tag?: string
     updatedSince?: string
     limit?: number
     offset?: number
@@ -47,6 +50,13 @@ export function buildTicketQuery(filters: TicketFilters): string {
             parts.push('assigned_toISEMPTY')
         } else {
             parts.push(`assigned_to=${filters.assignee}`)
+        }
+    }
+
+    if (filters.tag) {
+        const tagQuery = buildTagQuery(filters.tag)
+        if (tagQuery) {
+            parts.push(tagQuery)
         }
     }
 
