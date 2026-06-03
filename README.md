@@ -7,7 +7,7 @@ A Freshdesk-style helpdesk built on ServiceNow using the [Now SDK](https://www.s
 - **Agent workspace** — three-pane UI (sidebar filters, ticket list, ticket detail with conversation thread)
 - **Ticket creation** — web form and inbound email ingestion
 - **Attachments** — ServiceNow native `sys_attachment` storage (Azure Blob planned for future)
-- **REST API** — API-key-authenticated read endpoints for individual and batch ticket JSON
+- **REST API** — API-key-authenticated read endpoints ([API.md](API.md))
 
 ## Prerequisites
 
@@ -64,52 +64,13 @@ gs.info(digest.getSHA256Hex('YOUR_SECRET_HERE'));
 
 ## REST API
 
-Base URL: `/api/x_2058901_fresher/v1/tickets`
+See **[API.md](API.md)** for full endpoint documentation, request/response schemas, and error codes.
 
-Authentication: header `X-API-Key: <your-secret>`
-
-### List tickets
+Quick start:
 
 ```bash
 curl -s -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets?status=open&limit=50&offset=0"
-```
-
-Query parameters:
-
-| Parameter | Description |
-|-----------|-------------|
-| `status` | `open`, `pending`, `resolved`, `closed` |
-| `priority` | `critical`, `high`, `medium`, `low` |
-| `assignee` | User sys_id, or `unassigned` |
-| `updated_since` | ISO datetime filter |
-| `limit` | Page size (max 200, default 50) |
-| `offset` | Pagination offset |
-
-Response:
-
-```json
-{
-  "tickets": [...],
-  "meta": { "total": 42, "limit": 50, "offset": 0 }
-}
-```
-
-### Get single ticket
-
-```bash
-curl -s -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/TKT0001001"
-```
-
-Accepts ticket `number` (e.g. `TKT0001001`) or `sys_id`.
-
-Response includes `comments` and `attachments` arrays.
-
-### Errors
-
-```json
-{ "error": { "code": "unauthorized", "message": "Valid X-API-Key header is required" } }
+  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets?status=open&limit=50"
 ```
 
 ## Project structure
