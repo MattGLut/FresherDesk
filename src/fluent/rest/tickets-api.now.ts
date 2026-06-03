@@ -2,6 +2,7 @@ import '@servicenow/sdk/global'
 import { RestApi } from '@servicenow/sdk/core'
 import { listTickets } from '../../server/rest/listTickets'
 import { getTicket } from '../../server/rest/getTicket'
+import { updateTicket } from '../../server/rest/updateTicket'
 
 RestApi({
     $id: Now.ID['tickets-rest-api'],
@@ -15,7 +16,7 @@ RestApi({
             $id: Now.ID['tickets-api-v1'],
             version: 1,
             isDefault: true,
-            shortDescription: 'FresherDesk ticket read API v1',
+            shortDescription: 'FresherDesk ticket API v1',
         },
     ],
     routes: [
@@ -40,6 +41,17 @@ RestApi({
             internalRole: false,
             version: 1,
             shortDescription: 'Get a single ticket by sys_id or number',
+        },
+        {
+            $id: Now.ID['tickets-update-route'],
+            path: '/tickets/{id}',
+            method: 'PATCH',
+            script: updateTicket,
+            authorization: false,
+            authentication: false,
+            internalRole: false,
+            version: 1,
+            shortDescription: 'Update ticket status, subject, or description',
         },
     ],
 })

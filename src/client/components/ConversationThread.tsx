@@ -1,5 +1,5 @@
 import React from 'react'
-import { getDisplayValue, getSysId, getCommentTypeLabel, isInternalComment } from '../utils/snValue'
+import { getDisplayValue, getSysId, getCommentTypeLabel, isInternalComment, isVisibleComment } from '../utils/snValue'
 import './ConversationThread.css'
 
 export default function ConversationThread({ comments, loading }) {
@@ -13,7 +13,7 @@ export default function ConversationThread({ comments, loading }) {
 
     return (
         <div className="conversation-thread">
-            {comments.map((comment) => {
+            {comments.filter((comment) => isVisibleComment(comment.comment_type)).map((comment) => {
                 const isInternal = isInternalComment(comment.comment_type)
 
                 return (

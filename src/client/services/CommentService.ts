@@ -35,7 +35,7 @@ export class CommentService {
         const searchParams = new URLSearchParams()
         searchParams.set('sysparm_display_value', 'all')
         searchParams.set('sysparm_fields', 'sys_id,ticket,body,author,comment_type,source,sys_created_on')
-        searchParams.set('sysparm_query', `ticket=${ticketSysId}^ORDERBYsys_created_on`)
+        searchParams.set('sysparm_query', `ticket=${ticketSysId}^comment_type!=audit_delta^ORDERBYsys_created_on`)
 
         const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
             method: 'GET',

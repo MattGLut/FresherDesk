@@ -1,4 +1,3 @@
-import { GlideRecord } from '@servicenow/glide'
 import { RESTAPIRequest, RESTAPIResponse } from '@servicenow/glide/sn_ws_int'
 import {
     validateApiKey,
@@ -8,7 +7,7 @@ import {
     logApiError,
 } from '../auth/validateApiKey.ts'
 import { serializeTicket } from '../tickets/ticketSerializer.ts'
-import { isTicketNumber, getTicketTableName } from '../tickets/ticketQueries.ts'
+import { findTicketByIdOrNumber } from '../tickets/ticketLookup.ts'
 
 export function getTicket(request: RESTAPIRequest, response: RESTAPIResponse): void {
     try {
@@ -23,18 +22,8 @@ export function getTicket(request: RESTAPIRequest, response: RESTAPIResponse): v
             return
         }
 
-        const gr = new GlideRecord(getTicketTableName())
-        let found = false
-
-        if (isTicketNumber(id)) {
-            gr.addQuery('number', id.toUpperCase())
-            gr.query()
-            found = gr.next()
-        } else {
-            found = gr.get(id)
-        }
-
-        if (!found) {
+        const gr = findTicketByIdOrNumber(id)
+        if (!gr) {
             setJsonResponse(response, 404, notFoundResponse('Ticket'))
             return
         }
