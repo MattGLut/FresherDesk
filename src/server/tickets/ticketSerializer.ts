@@ -1,5 +1,5 @@
 import { GlideRecord } from '@servicenow/glide'
-import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries'
+import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries.ts'
 
 const COMMENT_TABLE = 'x_2058901_fresher_ticket_comment'
 const TICKET_TABLE = 'x_2058901_fresher_ticket'

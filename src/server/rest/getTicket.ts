@@ -6,9 +6,9 @@ import {
     notFoundResponse,
     setJsonResponse,
     logApiError,
-} from '../auth/validateApiKey'
-import { serializeTicket } from '../tickets/ticketSerializer'
-import { isTicketNumber, getTicketTableName } from '../tickets/ticketQueries'
+} from '../auth/validateApiKey.ts'
+import { serializeTicket } from '../tickets/ticketSerializer.ts'
+import { isTicketNumber, getTicketTableName } from '../tickets/ticketQueries.ts'
 
 export function getTicket(request: RESTAPIRequest, response: RESTAPIResponse): void {
     try {

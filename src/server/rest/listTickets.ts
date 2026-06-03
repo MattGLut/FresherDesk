@@ -5,14 +5,14 @@ import {
     unauthorizedResponse,
     setJsonResponse,
     logApiError,
-} from '../auth/validateApiKey'
-import { serializeTicket } from '../tickets/ticketSerializer'
+} from '../auth/validateApiKey.ts'
+import { serializeTicket } from '../tickets/ticketSerializer.ts'
 import {
     buildTicketQuery,
     getTicketTableName,
     parseLimit,
     parseOffset,
-} from '../tickets/ticketQueries'
+} from '../tickets/ticketQueries.ts'
 
 export function listTickets(request: RESTAPIRequest, response: RESTAPIResponse): void {
     try {

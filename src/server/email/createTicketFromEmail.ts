@@ -1,5 +1,5 @@
 import { gs, GlideRecord } from '@servicenow/glide'
-import { createInitialEmailComment } from '../tickets/ticketSerializer'
+import { createInitialEmailComment } from '../tickets/ticketSerializer.ts'
 
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
 
