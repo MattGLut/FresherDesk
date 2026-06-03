@@ -1,0 +1,7 @@
+{
+  "plugins": {
+    "servicenow/fluent": {
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,60 @@
+# Build and deploy to ServiceNow when changes land on master.
+# Configure repository Settings → Secrets and variables → Actions:
+#
+#   Secrets:
+#     SN_SDK_USER_PWD          ServiceNow password (basic auth)
+#     SN_SDK_OAUTH_CLIENT_SECRET   (only if SN_SDK_AUTH_TYPE=oauth)
+#
+#   Variables:
+#     SN_SDK_INSTANCE_URL      e.g. https://yourinstance.service-now.com
+#     SN_SDK_USER              ServiceNow username (basic auth)
+#     SN_SDK_AUTH_TYPE         optional: "basic" (default) or "oauth"
+#     SN_SDK_OAUTH_CLIENT_ID   (only if using oauth)
+
+name: Deploy to ServiceNow
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: deploy-master
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      SN_SDK_NODE_ENV: SN_SDK_CI_INSTALL
+      SN_SDK_INSTANCE_URL: ${{ vars.SN_SDK_INSTANCE_URL }}
+      SN_SDK_USER: ${{ vars.SN_SDK_USER }}
+      SN_SDK_USER_PWD: ${{ secrets.SN_SDK_USER_PWD }}
+      # Omit SN_SDK_AUTH_TYPE to use SDK default (basic). For OAuth, add repo
+      # variable SN_SDK_AUTH_TYPE=oauth plus SN_SDK_OAUTH_CLIENT_ID and secret
+      # SN_SDK_OAUTH_CLIENT_SECRET (uncomment the two lines below).
+      # SN_SDK_AUTH_TYPE: ${{ vars.SN_SDK_AUTH_TYPE }}
+      # SN_SDK_OAUTH_CLIENT_ID: ${{ vars.SN_SDK_OAUTH_CLIENT_ID }}
+      # SN_SDK_OAUTH_CLIENT_SECRET: ${{ secrets.SN_SDK_OAUTH_CLIENT_SECRET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to instance
+        run: npm run deploy

@@ -1,103 +1,163 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { IncidentService } from './services/IncidentService'
-import IncidentList from './components/IncidentList'
-import IncidentForm from './components/IncidentForm'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { TicketService } from './services/TicketService'
+import { CommentService } from './services/CommentService'
+import { AttachmentService } from './services/AttachmentService'
+import { getSysId } from './utils/snValue'
+import TicketSidebar from './components/TicketSidebar'
+import TicketList from './components/TicketList'
+import TicketDetail from './components/TicketDetail'
+import TicketForm from './components/TicketForm'
 import './app.css'
 
+const TICKET_TABLE = 'x_2058901_fresher_ticket'
+
 export default function App() {
-    const [incidents, setIncidents] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [tickets, setTickets] = useState([])
+    const [selectedTicket, setSelectedTicket] = useState(null)
+    const [comments, setComments] = useState([])
+    const [attachments, setAttachments] = useState([])
+    const [activeView, setActiveView] = useState('all')
+    const [listLoading, setListLoading] = useState(true)
+    const [detailLoading, setDetailLoading] = useState(false)
     const [showForm, setShowForm] = useState(false)
-    const [selectedIncident, setSelectedIncident] = useState(null)
     const [error, setError] = useState(null)
 
-    const incidentService = useMemo(() => new IncidentService(), [])
+    const ticketService = useMemo(() => new TicketService(), [])
+    const commentService = useMemo(() => new CommentService(), [])
+    const attachmentService = useMemo(() => new AttachmentService(), [])
 
-    const refreshIncidents = async () => {
+    const refreshTickets = useCallback(async () => {
         try {
-            setLoading(true)
+            setListLoading(true)
             setError(null)
-            const data = await incidentService.list()
-            setIncidents(data)
+            const filter = activeView === 'all' ? {} : { view: activeView }
+            const data = await ticketService.list(filter)
+            setTickets(data)
         } catch (err) {
-            setError('Failed to load incidents: ' + (err.message || 'Unknown error'))
-            console.error(err)
+            setError('Failed to load tickets: ' + (err.message || 'Unknown error'))
         } finally {
-            setLoading(false)
+            setListLoading(false)
         }
-    }
+    }, [ticketService, activeView])
+
+    const loadTicketDetail = useCallback(
+        async (sysId) => {
+            if (!sysId) return
+            try {
+                setDetailLoading(true)
+                const [ticketData, commentData, attachmentData] = await Promise.all([
+                    ticketService.get(sysId),
+                    commentService.listForTicket(sysId),
+                    attachmentService.list(TICKET_TABLE, sysId),
+                ])
+                setSelectedTicket(ticketData)
+                setComments(commentData)
+                setAttachments(attachmentData)
+            } catch (err) {
+                setError('Failed to load ticket: ' + (err.message || 'Unknown error'))
+            } finally {
+                setDetailLoading(false)
+            }
+        },
+        [ticketService, commentService, attachmentService]
+    )
 
     useEffect(() => {
-        void refreshIncidents()
-    }, [])
+        void refreshTickets()
+    }, [refreshTickets])
 
-    const handleCreateClick = () => {
-        setSelectedIncident(null)
-        setShowForm(true)
+    const handleSelectTicket = (ticket) => {
+        const sysId = getSysId(ticket)
+        void loadTicketDetail(sysId)
     }
 
-    const handleEditClick = (incident) => {
-        setSelectedIncident(incident)
-        setShowForm(true)
+    const handleViewChange = (view) => {
+        setActiveView(view)
+        setSelectedTicket(null)
+        setComments([])
+        setAttachments([])
     }
 
-    const handleFormClose = () => {
-        setShowForm(false)
-        setSelectedIncident(null)
-    }
+    const handleCreateClick = () => setShowForm(true)
+
+    const handleFormClose = () => setShowForm(false)
 
     const handleFormSubmit = async (formData) => {
-        setLoading(true)
         try {
-            if (selectedIncident) {
-                const sysId =
-                    typeof selectedIncident.sys_id === 'object'
-                        ? selectedIncident.sys_id.value
-                        : selectedIncident.sys_id
-                await incidentService.update(sysId, formData)
-            } else {
-                await incidentService.create(formData)
-            }
+            setListLoading(true)
+            await ticketService.create(formData)
             setShowForm(false)
-            await refreshIncidents()
+            await refreshTickets()
         } catch (err) {
-            setError('Failed to save incident: ' + (err.message || 'Unknown error'))
-            console.error(err)
+            setError('Failed to create ticket: ' + (err.message || 'Unknown error'))
         } finally {
-            setLoading(false)
+            setListLoading(false)
         }
+    }
+
+    const handleUpdate = async (sysId, data) => {
+        await ticketService.update(sysId, data)
+        await refreshTickets()
+    }
+
+    const handleReply = async (sysId, body, commentType) => {
+        await commentService.create(sysId, body, commentType)
+    }
+
+    const handleUpload = async (sysId, file) => {
+        await attachmentService.upload(TICKET_TABLE, sysId, file)
+    }
+
+    const handleDelete = async (ticket) => {
+        const number = typeof ticket.number === 'object' ? ticket.number.display_value : ticket.number
+        if (!confirm(`Delete ticket ${number}?`)) return
+
+        const sysId = getSysId(ticket)
+        await ticketService.delete(sysId)
+        setSelectedTicket(null)
+        setComments([])
+        setAttachments([])
+        await refreshTickets()
     }
 
     return (
-        <div className="incident-app">
-            <header className="app-header">
-                <h1>Incident Response Manager</h1>
-                <button className="create-button" onClick={handleCreateClick}>
-                    Create New Incident
-                </button>
-            </header>
+        <div className="workspace-app">
+            <TicketSidebar
+                activeView={activeView}
+                onViewChange={handleViewChange}
+                onCreateClick={handleCreateClick}
+            />
 
-            {error && (
-                <div className="error-message">
-                    {error}
-                    <button onClick={() => setError(null)}>Dismiss</button>
+            <div className="workspace-main">
+                {error && (
+                    <div className="error-message">
+                        {error}
+                        <button onClick={() => setError(null)}>Dismiss</button>
+                    </div>
+                )}
+
+                <div className="workspace-panels">
+                    <TicketList
+                        tickets={tickets}
+                        selectedId={selectedTicket ? getSysId(selectedTicket) : null}
+                        onSelect={handleSelectTicket}
+                        loading={listLoading}
+                    />
+                    <TicketDetail
+                        ticket={selectedTicket}
+                        comments={comments}
+                        attachments={attachments}
+                        loading={detailLoading}
+                        onUpdate={handleUpdate}
+                        onReply={handleReply}
+                        onUpload={handleUpload}
+                        onRefresh={loadTicketDetail}
+                        onDelete={handleDelete}
+                    />
                 </div>
-            )}
+            </div>
 
-            {loading ? (
-                <div className="loading">Loading...</div>
-            ) : (
-                <IncidentList
-                    incidents={incidents}
-                    onEdit={handleEditClick}
-                    onRefresh={refreshIncidents}
-                    service={incidentService}
-                />
-            )}
-
-            {showForm && (
-                <IncidentForm incident={selectedIncident} onSubmit={handleFormSubmit} onCancel={handleFormClose} />
-            )}
+            {showForm && <TicketForm onSubmit={handleFormSubmit} onCancel={handleFormClose} />}
         </div>
     )
 }

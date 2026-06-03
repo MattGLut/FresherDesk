@@ -1,0 +1,167 @@
+declare global {
+    interface Window {
+        g_ck: string
+    }
+}
+
+export interface TicketRecord {
+    sys_id: unknown
+    number: unknown
+    short_description: unknown
+    description: unknown
+    state: unknown
+    priority: unknown
+    assigned_to: unknown
+    opened_by: unknown
+    requester_email: unknown
+    source: unknown
+    category: unknown
+    sys_updated_on: unknown
+    opened_at: unknown
+}
+
+export interface TicketFilter {
+    view?: string
+    status?: string
+    assignee?: string
+}
+
+export class TicketService {
+    private readonly tableName = 'x_2058901_fresher_ticket'
+
+    private headers(): Record<string, string> {
+        return {
+            Accept: 'application/json',
+            'X-UserToken': window.g_ck,
+        }
+    }
+
+    private jsonHeaders(): Record<string, string> {
+        return {
+            ...this.headers(),
+            'Content-Type': 'application/json',
+        }
+    }
+
+    buildQuery(filter: TicketFilter): string {
+        const parts: string[] = []
+
+        switch (filter.view) {
+            case 'open':
+                parts.push('state=1')
+                break
+            case 'pending':
+                parts.push('state=2')
+                break
+            case 'resolved':
+                parts.push('state=6')
+                break
+            case 'unassigned':
+                parts.push('assigned_toISEMPTY')
+                break
+            default:
+                break
+        }
+
+        if (filter.status) {
+            parts.push(`state=${filter.status}`)
+        }
+
+        if (filter.assignee === 'me') {
+            parts.push('assigned_to=javascript:gs.getUserID()')
+        } else if (filter.assignee) {
+            parts.push(`assigned_to=${filter.assignee}`)
+        }
+
+        parts.push('ORDERBYDESCsys_updated_on')
+        return parts.join('^')
+    }
+
+    async list(filter: TicketFilter = {}): Promise<TicketRecord[]> {
+        const searchParams = new URLSearchParams()
+        searchParams.set('sysparm_display_value', 'all')
+        searchParams.set(
+            'sysparm_fields',
+            'sys_id,number,short_description,description,state,priority,assigned_to,opened_by,requester_email,source,category,sys_updated_on,opened_at'
+        )
+        searchParams.set('sysparm_query', this.buildQuery(filter))
+
+        const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
+            method: 'GET',
+            headers: this.headers(),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+        }
+
+        const { result } = await response.json()
+        return result || []
+    }
+
+    async get(sysId: string): Promise<TicketRecord> {
+        const searchParams = new URLSearchParams()
+        searchParams.set('sysparm_display_value', 'all')
+
+        const response = await fetch(`/api/now/table/${this.tableName}/${sysId}?${searchParams.toString()}`, {
+            method: 'GET',
+            headers: this.headers(),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+        }
+
+        const { result } = await response.json()
+        return result
+    }
+
+    async create(data: Record<string, string>): Promise<unknown> {
+        const response = await fetch(`/api/now/table/${this.tableName}`, {
+            method: 'POST',
+            headers: this.jsonHeaders(),
+            body: JSON.stringify({
+                ...data,
+                source: 'form',
+            }),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+        }
+
+        return response.json()
+    }
+
+    async update(sysId: string, data: Record<string, string>): Promise<unknown> {
+        const response = await fetch(`/api/now/table/${this.tableName}/${sysId}`, {
+            method: 'PATCH',
+            headers: this.jsonHeaders(),
+            body: JSON.stringify(data),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+        }
+
+        return response.json()
+    }
+
+    async delete(sysId: string): Promise<boolean> {
+        const response = await fetch(`/api/now/table/${this.tableName}/${sysId}`, {
+            method: 'DELETE',
+            headers: this.headers(),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+        }
+
+        return response.ok
+    }
+}
