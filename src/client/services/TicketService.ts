@@ -16,6 +16,7 @@ export interface TicketRecord {
     requester_email: unknown
     source: unknown
     category: unknown
+    tags: unknown
     sys_updated_on: unknown
     opened_at: unknown
 }
@@ -24,6 +25,7 @@ export interface TicketFilter {
     view?: string
     status?: string
     assignee?: string
+    tag?: string
 }
 
 export class TicketService {
@@ -73,6 +75,10 @@ export class TicketService {
             parts.push(`assigned_to=${filter.assignee}`)
         }
 
+        if (filter.tag?.trim()) {
+            parts.push(`tagsLIKE"${filter.tag.trim()}"`)
+        }
+
         parts.push('ORDERBYDESCsys_updated_on')
         return parts.join('^')
     }
@@ -82,7 +88,7 @@ export class TicketService {
         searchParams.set('sysparm_display_value', 'all')
         searchParams.set(
             'sysparm_fields',
-            'sys_id,number,short_description,description,state,priority,assigned_to,opened_by,requester_email,source,category,sys_updated_on,opened_at'
+            'sys_id,number,short_description,description,state,priority,assigned_to,opened_by,requester_email,source,category,tags,sys_updated_on,opened_at'
         )
         searchParams.set('sysparm_query', this.buildQuery(filter))
 

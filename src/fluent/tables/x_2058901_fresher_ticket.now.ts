@@ -4,6 +4,7 @@ import {
     EmailColumn,
     ChoiceColumn,
     OverrideColumn,
+    StringColumn,
 } from '@servicenow/sdk/core'
 
 export const x_2058901_fresher_ticket = Table({
@@ -47,6 +48,11 @@ export const x_2058901_fresher_ticket = Table({
         priority: OverrideColumn({
             baseTable: 'task',
             default: '3',
+        }),
+        tags: StringColumn({
+            label: 'Tags',
+            maxLength: 4000,
+            default: '[]',
         }),
     },
 })

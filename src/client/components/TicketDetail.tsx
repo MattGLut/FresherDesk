@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { getDisplayValue, getValue, getSysId } from '../utils/snValue'
+import { parseTags, serializeTags } from '../utils/ticketTags'
 import { AgentService } from '../services/AgentService'
 import ConversationThread from './ConversationThread'
 import './TicketDetail.css'
@@ -20,6 +21,8 @@ export default function TicketDetail({
     const [submitting, setSubmitting] = useState(false)
     const [agents, setAgents] = useState([])
     const [localState, setLocalState] = useState({ state: '1', priority: '3', assigned_to: '' })
+    const [localTags, setLocalTags] = useState<string[]>([])
+    const [newTag, setNewTag] = useState('')
 
     useEffect(() => {
         const agentService = new AgentService()
@@ -36,6 +39,8 @@ export default function TicketDetail({
                 priority: getValue(ticket.priority) || '3',
                 assigned_to: getValue(ticket.assigned_to) || '',
             })
+            setLocalTags(parseTags(ticket.tags))
+            setNewTag('')
         }
     }, [ticket])
 
@@ -53,6 +58,27 @@ export default function TicketDetail({
         const updated = { ...localState, [field]: value }
         setLocalState(updated)
         await onUpdate(sysId, { [field]: value })
+    }
+
+    const handleTagsUpdate = async (nextTags: string[]) => {
+        setLocalTags(nextTags)
+        await onUpdate(sysId, { tags: serializeTags(nextTags) })
+        await onRefresh(sysId)
+    }
+
+    const handleAddTag = async (e) => {
+        e.preventDefault()
+        const trimmed = newTag.trim()
+        if (!trimmed || localTags.includes(trimmed)) {
+            setNewTag('')
+            return
+        }
+        await handleTagsUpdate([...localTags, trimmed])
+        setNewTag('')
+    }
+
+    const handleRemoveTag = async (tag: string) => {
+        await handleTagsUpdate(localTags.filter((t) => t !== tag))
     }
 
     const handleReplySubmit = async (e) => {
@@ -131,6 +157,36 @@ export default function TicketDetail({
                 <div className="field-group">
                     <label>Category</label>
                     <span className="field-readonly">{getDisplayValue(ticket.category)}</span>
+                </div>
+                <div className="field-group field-group-full">
+                    <label>Tags</label>
+                    <div className="tag-editor">
+                        <div className="tag-list">
+                            {localTags.length === 0 ? (
+                                <span className="tag-empty">No tags</span>
+                            ) : (
+                                localTags.map((tag) => (
+                                    <span key={tag} className="tag-chip">
+                                        {tag}
+                                        <button type="button" className="tag-remove" onClick={() => handleRemoveTag(tag)} aria-label={`Remove ${tag}`}>
+                                            ×
+                                        </button>
+                                    </span>
+                                ))
+                            )}
+                        </div>
+                        <form className="tag-add-form" onSubmit={handleAddTag}>
+                            <input
+                                type="text"
+                                value={newTag}
+                                onChange={(e) => setNewTag(e.target.value)}
+                                placeholder="Add tag..."
+                            />
+                            <button type="submit" disabled={!newTag.trim()}>
+                                Add
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 

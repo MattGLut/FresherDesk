@@ -1,5 +1,6 @@
 import React from 'react'
 import { getDisplayValue, getSysId } from '../utils/snValue'
+import { parseTags } from '../utils/ticketTags'
 import './TicketList.css'
 
 function statusClass(stateValue: string): string {
@@ -32,7 +33,7 @@ function priorityClass(priorityValue: string): string {
     }
 }
 
-export default function TicketList({ tickets, selectedId, onSelect, loading }) {
+export default function TicketList({ tickets, selectedId, onSelect, loading, tagFilter, onTagFilterChange }) {
     if (loading) {
         return <div className="ticket-list-panel"><div className="list-loading">Loading tickets...</div></div>
     }
@@ -44,6 +45,20 @@ export default function TicketList({ tickets, selectedId, onSelect, loading }) {
                 <span className="ticket-count">{tickets.length}</span>
             </div>
 
+            <div className="list-tag-filter">
+                <input
+                    type="text"
+                    placeholder="Filter by tag..."
+                    value={tagFilter}
+                    onChange={(e) => onTagFilterChange(e.target.value)}
+                />
+                {tagFilter && (
+                    <button type="button" className="tag-filter-clear" onClick={() => onTagFilterChange('')}>
+                        Clear
+                    </button>
+                )}
+            </div>
+
             {tickets.length === 0 ? (
                 <div className="list-empty">No tickets in this view</div>
             ) : (
@@ -52,6 +67,7 @@ export default function TicketList({ tickets, selectedId, onSelect, loading }) {
                         const sysId = getSysId(ticket)
                         const stateValue = typeof ticket.state === 'object' ? ticket.state.value : ticket.state
                         const priorityValue = typeof ticket.priority === 'object' ? ticket.priority.value : ticket.priority
+                        const tags = parseTags(ticket.tags)
 
                         return (
                             <li
@@ -66,6 +82,23 @@ export default function TicketList({ tickets, selectedId, onSelect, loading }) {
                                     </span>
                                 </div>
                                 <p className="row-subject">{getDisplayValue(ticket.short_description)}</p>
+                                {tags.length > 0 && (
+                                    <div className="row-tags">
+                                        {tags.map((tag) => (
+                                            <button
+                                                key={tag}
+                                                type="button"
+                                                className="tag-chip"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    onTagFilterChange(tag)
+                                                }}
+                                            >
+                                                {tag}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                                 <div className="row-meta">
                                     <span>{getDisplayValue(ticket.requester_email) || getDisplayValue(ticket.opened_by)}</span>
                                     <span className={`priority-chip ${priorityClass(String(priorityValue))}`}>

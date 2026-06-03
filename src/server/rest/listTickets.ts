@@ -29,6 +29,7 @@ export function listTickets(request: RESTAPIRequest, response: RESTAPIResponse):
             status: queryParams.status,
             priority: queryParams.priority,
             assignee: queryParams.assignee,
+            tag: queryParams.tag,
             updatedSince: queryParams.updated_since,
         })
 
