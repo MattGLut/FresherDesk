@@ -1,4 +1,5 @@
 import { servicenowFrontEndPlugins, rollup, glob } from '@servicenow/isomorphic-rollup'
+import { tailwindPlugin } from './tailwind-plugin.mjs'
 
 /**
  * Prebuild script for building the client assets of the application before running the rest of the build.
@@ -31,7 +32,8 @@ export default async ({ rootDir, config, fs, path, logger, registerExplicitId })
         // Use the default set of ServiceNow plugins for Rollup
         // configured for the scope name and root directory
         plugins: [
-            servicenowFrontEndPlugins({
+            tailwindPlugin({ rootDir, config, fs, path, logger }),
+            ...(await servicenowFrontEndPlugins({
                 scope: config.scope,
                 rootDir: clientDir,
                 projectRootDir: rootDir,
@@ -52,7 +54,7 @@ export default async ({ rootDir, config, fs, path, logger, registerExplicitId })
                 //     ],
                 //   },
                 editableSourceCodeOnInstance: true,
-            }),
+            })),
         ],
     })
     // Write the build output to the configured destination
