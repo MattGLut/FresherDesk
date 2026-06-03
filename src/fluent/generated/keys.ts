@@ -21,6 +21,10 @@ declare global {
                         table: 'sys_security_acl'
                         id: '12b5d6b9fb9042c1bfeaa4f53fb01b36'
                     }
+                    'app.tailwind.css': {
+                        table: 'sys_ux_theme_asset'
+                        id: 'eab9b388e20547d5aba166c0c02ed89b'
+                    }
                     bom_json: {
                         table: 'sys_module'
                         id: 'd9b1a37882d94a6393cfb147ea5ec410'
