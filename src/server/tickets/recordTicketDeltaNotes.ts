@@ -1,5 +1,5 @@
 import { GlideRecord } from '@servicenow/glide'
-import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries.ts'
+import { mapStateToStatus, mapPriorityToLabel, getTicketTableName } from './ticketQueries.ts'
 import {
     createAuditDeltaNote,
     resolveUpdateSource,
@@ -41,9 +41,12 @@ function displayForField(
 
 export function recordTicketDeltaNotes(...args: unknown[]): void {
     const current = args[0] as GlideRecord<'x_2058901_fresher_ticket'>
-    const previous = args[1] as GlideRecord<'x_2058901_fresher_ticket'>
+    if (!current) {
+        return
+    }
 
-    if (!current || !previous) {
+    const previous = new GlideRecord(getTicketTableName())
+    if (!previous.get(current.getUniqueValue())) {
         return
     }
 

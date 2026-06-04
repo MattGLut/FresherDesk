@@ -6,7 +6,7 @@ BusinessRule({
     $id: Now.ID['ticket-delta-audit-br'],
     name: 'FresherDesk Ticket Delta Audit',
     table: 'x_2058901_fresher_ticket',
-    when: 'after',
+    when: 'before',
     action: ['update'],
     script: recordTicketDeltaNotes,
 })

@@ -41,8 +41,14 @@ export const x_2058901_fresher_ticket = Table({
             },
             default: 'general',
         }),
-        state: OverrideColumn({
-            baseTable: 'task',
+        state: ChoiceColumn({
+            label: 'Status',
+            choices: {
+                '1': 'Open',
+                '2': 'Pending',
+                '6': 'Resolved',
+                '7': 'Closed',
+            },
             default: '1',
         }),
         priority: OverrideColumn({
