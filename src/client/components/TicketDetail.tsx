@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getDisplayValue, getValue, getSysId } from '../utils/snValue'
+import { getDisplayValue, getValue, getSysId, getRequesterDisplay } from '../utils/snValue'
 import { parseTags, serializeTags } from '../utils/ticketTags'
 import { AgentService } from '../services/AgentService'
 import { UserService } from '../services/UserService'
@@ -159,9 +159,7 @@ export default function TicketDetail({
                 </div>
                 <div className="field-group">
                     <label>Requester</label>
-                    <span className="field-readonly">
-                        {getDisplayValue(ticket.requester_email) || getDisplayValue(ticket.opened_by)}
-                    </span>
+                    <span className="field-readonly">{getRequesterDisplay(ticket)}</span>
                 </div>
                 <div className="field-group">
                     <label>Category</label>

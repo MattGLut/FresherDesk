@@ -1,5 +1,5 @@
 import React from 'react'
-import { getDisplayValue, getSysId } from '../utils/snValue'
+import { getDisplayValue, getSysId, getChoiceDisplay, getRequesterDisplay, STATE_DISPLAY_LABELS, PRIORITY_DISPLAY_LABELS } from '../utils/snValue'
 import { parseTags } from '../utils/ticketTags'
 import './TicketList.css'
 
@@ -78,7 +78,7 @@ export default function TicketList({ tickets, selectedId, onSelect, loading, ref
                                 <div className="row-top">
                                     <span className="ticket-number">{getDisplayValue(ticket.number)}</span>
                                     <span className={`status-chip ${statusClass(String(stateValue))}`}>
-                                        {getDisplayValue(ticket.state)}
+                                        {getChoiceDisplay(ticket.state, STATE_DISPLAY_LABELS)}
                                     </span>
                                 </div>
                                 <p className="row-subject">{getDisplayValue(ticket.short_description)}</p>
@@ -100,9 +100,9 @@ export default function TicketList({ tickets, selectedId, onSelect, loading, ref
                                     </div>
                                 )}
                                 <div className="row-meta">
-                                    <span>{getDisplayValue(ticket.requester_email) || getDisplayValue(ticket.opened_by)}</span>
+                                    <span>{getRequesterDisplay(ticket)}</span>
                                     <span className={`priority-chip ${priorityClass(String(priorityValue))}`}>
-                                        {getDisplayValue(ticket.priority)}
+                                        {getChoiceDisplay(ticket.priority, PRIORITY_DISPLAY_LABELS)}
                                     </span>
                                 </div>
                                 <div className="row-updated">{getDisplayValue(ticket.sys_updated_on)}</div>

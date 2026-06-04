@@ -1,9 +1,60 @@
 export function getDisplayValue(field: unknown): string {
     if (field == null) return ''
-    if (typeof field === 'object' && field !== null && 'display_value' in field) {
-        return String((field as { display_value: string }).display_value || '')
+    if (typeof field !== 'object') return String(field)
+
+    const record = field as Record<string, unknown>
+    const display = record.display_value
+    if (display != null && String(display) !== '') {
+        return String(display)
     }
-    return String(field)
+
+    if ('value' in record && record.value != null && record.value !== '') {
+        return String(record.value)
+    }
+
+    return ''
+}
+
+export const STATE_DISPLAY_LABELS: Record<string, string> = {
+    '1': 'Open',
+    '2': 'Pending',
+    '6': 'Resolved',
+    '7': 'Closed',
+}
+
+export const PRIORITY_DISPLAY_LABELS: Record<string, string> = {
+    '1': 'Critical',
+    '2': 'High',
+    '3': 'Medium',
+    '4': 'Low',
+}
+
+export function getChoiceDisplay(field: unknown, labelMap: Record<string, string>): string {
+    const value = getValue(field)
+    const display = getDisplayValue(field)
+
+    if (display && display !== value) {
+        return display
+    }
+
+    return labelMap[value] || display || value
+}
+
+export function getRequesterDisplay(ticket: {
+    requester_email?: unknown
+    opened_by?: unknown
+}): string {
+    const email = getDisplayValue(ticket.requester_email)
+    if (email) {
+        return email
+    }
+
+    const openedByDisplay = getDisplayValue(ticket.opened_by)
+    if (openedByDisplay) {
+        return openedByDisplay
+    }
+
+    return ''
 }
 
 export function getValue(field: unknown): string {
