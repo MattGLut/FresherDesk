@@ -52,6 +52,30 @@ function asOptionalString(value: unknown): string | undefined {
     return normalized.length > 0 ? normalized : undefined
 }
 
+function logCreateChildInsertFailure(
+    child: GlideRecord<'x_2058901_fresher_ticket'>,
+    parent: GlideRecord<'x_2058901_fresher_ticket'>,
+    subject: string
+): void {
+    const parentSysId = parent.getUniqueValue()
+    const parentNumber = parent.getDisplayValue('number') || parent.getValue('number') || parentSysId
+    const lastError = child.getLastErrorMessage()
+    logApiError(
+        'createChildTicket insert',
+        'GlideRecord.insert returned empty',
+        [
+            `parent=${parentNumber} (${parentSysId})`,
+            `subject=${subject}`,
+            `canCreate=${child.canCreate()}`,
+            `lastError=${lastError || '(none)'}`,
+            `parent_field=${child.getValue('parent') || ''}`,
+            `source=${child.getValue('source') || ''}`,
+            `state=${child.getValue('state') || ''}`,
+            `priority=${child.getValue('priority') || ''}`,
+        ].join(' | ')
+    )
+}
+
 export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResponse): void {
     try {
         if (!validateApiKey(request)) {
@@ -74,6 +98,7 @@ export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResp
         const body = parseRequestBody(request)
         const subject = asOptionalString(body.subject)
         if (!subject) {
+            logApiError('createChildTicket', 'missing subject in request body', `parentId=${parentId}`)
             setJsonResponse(response, 400, badRequestResponse('subject is required'))
             return
         }
@@ -122,6 +147,8 @@ export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResp
                 return
             }
             child.setValue('priority', priorityValue)
+        } else {
+            child.setValue('priority', '3')
         }
 
         setUpdateSource('api')
@@ -130,12 +157,18 @@ export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResp
         clearUpdateSource()
 
         if (!childSysId) {
+            logCreateChildInsertFailure(child, parent, subject)
             setJsonResponse(response, 500, { error: { code: 'internal_error', message: 'Failed to create child ticket' } })
             return
         }
 
         const created = findTicketByIdOrNumber(childSysId)
         if (!created) {
+            logApiError(
+                'createChildTicket retrieve',
+                'insert succeeded but follow-up get failed',
+                `childSysId=${childSysId} parent=${parent.getDisplayValue('number') || parent.getUniqueValue()}`
+            )
             setJsonResponse(response, 500, { error: { code: 'internal_error', message: 'Failed to retrieve created ticket' } })
             return
         }

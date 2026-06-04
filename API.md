@@ -70,7 +70,7 @@ Results are ordered by most recently updated first.
 
 ```bash
 curl -s \
-  -H "X-API-Key: YOUR_SECRET" \
+  -H "X-API-Key: fd_live_your_secret_here" \
   "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&tag=billing&limit=25&offset=0"
 ```
 
@@ -140,7 +140,7 @@ Numbers are detected by the `TKT` prefix. All other values are treated as sys_id
 
 ```bash
 curl -s \
-  -H "X-API-Key: YOUR_SECRET" \
+  -H "X-API-Key: fd_live_your_secret_here" \
   "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
@@ -252,7 +252,7 @@ Creates a child ticket linked to the parent ticket identified in the path. The c
 
 ```bash
 curl -s -X POST \
-  -H "X-API-Key: YOUR_SECRET" \
+  -H "X-API-Key: fd_live_your_secret_here" \
   -H "Content-Type: application/json" \
   -d '{"subject":"Follow-up on password reset","description":"Customer still cannot log in.","priority":"medium"}' \
   "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
@@ -320,7 +320,7 @@ Send JSON with any combination of the fields below. At least one field must be p
 
 ```bash
 curl -s -X PATCH \
-  -H "X-API-Key: YOUR_SECRET" \
+  -H "X-API-Key: fd_live_your_secret_here" \
   -H "Content-Type: application/json" \
   -d '{"status":"pending","subject":"Password reset still failing"}' \
   "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
