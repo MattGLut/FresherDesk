@@ -41,8 +41,8 @@ function parseJsonValue<T>(value: unknown): T | undefined {
 
 /**
  * Reads JSON from a Scripted REST POST/PATCH body.
- * Read dataString before data: touching an empty body.data can consume the stream
- * and leave dataString unreadable (common with curl on Windows).
+ * Same order as the original handlers (data, then dataString), but skips an empty
+ * parsed `data` object so a populated dataString is still used.
  */
 export function parseRestJsonBody<T>(request: RESTAPIRequest): T {
     try {
@@ -51,14 +51,14 @@ export function parseRestJsonBody<T>(request: RESTAPIRequest): T {
             return {} as T
         }
 
-        const fromString = parseJsonValue<T>(body.dataString)
-        if (fromString) {
-            return fromString
-        }
-
         const fromData = parseJsonValue<T>(body.data)
         if (fromData) {
             return fromData
+        }
+
+        const fromString = parseJsonValue<T>(body.dataString)
+        if (fromString) {
+            return fromString
         }
 
         return {} as T
