@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { TicketService } from './services/TicketService'
 import { CommentService } from './services/CommentService'
 import { AttachmentService } from './services/AttachmentService'
-import { getSysId } from './utils/snValue'
+import { getSysId, getValue } from './utils/snValue'
 import { mergeTicketUpdate, replaceTicketInList } from './utils/ticketPatch'
 import TicketSidebar from './components/TicketSidebar'
 import TicketList from './components/TicketList'
@@ -24,6 +24,8 @@ export default function App() {
     const [listRefreshing, setListRefreshing] = useState(false)
     const [detailLoading, setDetailLoading] = useState(false)
     const [showForm, setShowForm] = useState(false)
+    const [childParentTicket, setChildParentTicket] = useState(null)
+    const [childrenRefreshKey, setChildrenRefreshKey] = useState(0)
     const [error, setError] = useState(null)
     const hasLoadedList = useRef(false)
 
@@ -107,6 +109,17 @@ export default function App() {
         void loadTicketDetail(sysId)
     }
 
+    const handleNavigateTicket = (sysId) => {
+        void loadTicketDetail(sysId)
+    }
+
+    const handleCreateChildClick = () => {
+        if (!selectedTicket) return
+        setChildParentTicket(selectedTicket)
+    }
+
+    const handleChildFormClose = () => setChildParentTicket(null)
+
     const handleViewChange = (view) => {
         setActiveView(view)
     }
@@ -125,6 +138,24 @@ export default function App() {
             }
         } catch (err) {
             setError('Failed to create ticket: ' + (err.message || 'Unknown error'))
+        }
+    }
+
+    const handleChildFormSubmit = async (formData) => {
+        if (!childParentTicket) return
+        const parentSysId = getSysId(childParentTicket)
+        try {
+            const created = await ticketService.create({
+                ...formData,
+                parent: parentSysId,
+                requester_email: getValue(childParentTicket.requester_email) || formData.requester_email,
+                opened_by: getValue(childParentTicket.opened_by),
+            })
+            setChildParentTicket(null)
+            setChildrenRefreshKey((k) => k + 1)
+            await loadTicketDetail(getSysId(created))
+        } catch (err) {
+            setError('Failed to create child ticket: ' + (err.message || 'Unknown error'))
         }
     }
 
@@ -199,11 +230,17 @@ export default function App() {
                         onUpload={handleUpload}
                         onRefresh={loadTicketDetail}
                         onDelete={handleDelete}
+                        onNavigateTicket={handleNavigateTicket}
+                        onCreateChild={handleCreateChildClick}
+                        childrenRefreshKey={childrenRefreshKey}
                     />
                 </div>
             </div>
 
             {showForm && <TicketForm onSubmit={handleFormSubmit} onCancel={handleFormClose} />}
+            {childParentTicket && (
+                <TicketForm parentTicket={childParentTicket} onSubmit={handleChildFormSubmit} onCancel={handleChildFormClose} />
+            )}
         </div>
     )
 }
