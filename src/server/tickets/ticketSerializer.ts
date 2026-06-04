@@ -41,6 +41,15 @@ export interface AttachmentDto {
     created_at: string
 }
 
+export interface ChildTicketDto {
+    id: string
+    number: string
+    subject: string
+    status: string
+    priority: string
+    updated_at: string
+}
+
 export interface TicketDto {
     id: string
     number: string
@@ -51,10 +60,12 @@ export interface TicketDto {
     category: string
     source: string
     tags: string[]
+    parent_id: string | null
     requester: RequesterDto
     assignee: AssigneeDto | null
     opened_at: string
     updated_at: string
+    children: ChildTicketDto[]
     comments: CommentDto[]
     attachments: AttachmentDto[]
 }
@@ -192,11 +203,33 @@ function loadAttachments(ticketSysId: string): AttachmentDto[] {
     return attachments
 }
 
+function loadChildTickets(parentSysId: string): ChildTicketDto[] {
+    const children: ChildTicketDto[] = []
+    const gr = new GlideRecord(TICKET_TABLE)
+    gr.addQuery('parent', parentSysId)
+    gr.orderByDesc('sys_updated_on')
+    gr.query()
+
+    while (gr.next()) {
+        children.push({
+            id: gr.getUniqueValue(),
+            number: gr.getValue('number') || '',
+            subject: gr.getValue('short_description') || '',
+            status: mapStateToStatus(gr.getValue('state') || '1'),
+            priority: mapPriorityToLabel(gr.getValue('priority') || '3'),
+            updated_at: gr.getDisplayValue('sys_updated_on') || '',
+        })
+    }
+
+    return children
+}
+
 export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, includeRelated = true): TicketDto {
     const ticketId = gr.getUniqueValue()
     const openedBy = gr.getValue('opened_by') || ''
     const assignedTo = gr.getValue('assigned_to') || ''
     const requesterEmail = gr.getValue('requester_email') || ''
+    const parentId = gr.getValue('parent') || ''
 
     const ticket: TicketDto = {
         id: ticketId,
@@ -208,10 +241,12 @@ export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, inc
         category: gr.getValue('category') || 'general',
         source: gr.getValue('source') || 'form',
         tags: parseTags(gr.getValue('tags') || '[]'),
+        parent_id: parentId || null,
         requester: serializeRequester(openedBy, requesterEmail),
         assignee: serializeAssignee(assignedTo),
         opened_at: gr.getDisplayValue('opened_at') || gr.getDisplayValue('sys_created_on') || '',
         updated_at: gr.getDisplayValue('sys_updated_on') || '',
+        children: [],
         comments: [],
         attachments: [],
     }
@@ -219,6 +254,7 @@ export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, inc
     if (includeRelated) {
         ticket.comments = loadComments(ticketId)
         ticket.attachments = loadAttachments(ticketId)
+        ticket.children = loadChildTickets(ticketId)
     }
 
     return ticket

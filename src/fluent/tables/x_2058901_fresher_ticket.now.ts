@@ -5,6 +5,7 @@ import {
     ChoiceColumn,
     OverrideColumn,
     StringColumn,
+    ReferenceColumn,
 } from '@servicenow/sdk/core'
 
 export const x_2058901_fresher_ticket = Table({
@@ -59,6 +60,10 @@ export const x_2058901_fresher_ticket = Table({
             label: 'Tags',
             maxLength: 4000,
             default: '[]',
+        }),
+        parent: ReferenceColumn({
+            label: 'Parent Ticket',
+            referenceTable: 'x_2058901_fresher_ticket',
         }),
     },
 })
