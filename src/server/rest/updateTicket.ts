@@ -53,6 +53,11 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
         }
 
         const body = parseRestJsonBody<UpdateTicketBody>(request)
+        if (body === null) {
+            setJsonResponse(response, 400, badRequestResponse('Invalid or unreadable JSON request body'))
+            return
+        }
+
         const updates: Record<string, string> = {}
         let providedFieldCount = 0
 
