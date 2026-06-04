@@ -70,9 +70,6 @@ export function setJsonResponse(response: { setStatus: (code: number) => void; s
     response.setBody(body)
 }
 
-export function logApiError(context: string, err: unknown, detail?: string): void {
-    const message = detail
-        ? `FresherDesk API ${context}: ${String(err)} | ${detail}`
-        : `FresherDesk API ${context}: ${String(err)}`
-    gs.error(message)
+export function logApiError(context: string, err: unknown): void {
+    gs.error(`FresherDesk API ${context}: ${String(err)}`)
 }
