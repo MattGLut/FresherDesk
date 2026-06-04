@@ -131,7 +131,8 @@ export default function App() {
     const handleUpdate = async (sysId, data) => {
         applyTicketUpdate(sysId, data)
         try {
-            const updated = await ticketService.update(sysId, data)
+            await ticketService.update(sysId, data)
+            const updated = await ticketService.get(sysId)
             applyTicketUpdate(sysId, data, updated)
         } catch (err) {
             setError('Failed to update ticket: ' + (err.message || 'Unknown error'))

@@ -1,19 +1,5 @@
-import { getSysId } from './snValue'
+import { getSysId, STATE_DISPLAY_LABELS, PRIORITY_DISPLAY_LABELS } from './snValue'
 import type { TicketRecord } from '../services/TicketService'
-
-const STATE_LABELS: Record<string, string> = {
-    '1': 'Open',
-    '2': 'Pending',
-    '6': 'Resolved',
-    '7': 'Closed',
-}
-
-const PRIORITY_LABELS: Record<string, string> = {
-    '1': 'Critical',
-    '2': 'High',
-    '3': 'Medium',
-    '4': 'Low',
-}
 
 function snField(value: string, displayValue?: string) {
     return { value, display_value: displayValue ?? value }
@@ -35,9 +21,9 @@ export function mergeTicketUpdate(ticket: TicketRecord, data: Record<string, str
 
     for (const [field, value] of Object.entries(data)) {
         if (field === 'state') {
-            next.state = mergeField(ticket.state, value, STATE_LABELS[value] ?? value)
+            next.state = mergeField(ticket.state, value, STATE_DISPLAY_LABELS[value] ?? value)
         } else if (field === 'priority') {
-            next.priority = mergeField(ticket.priority, value, PRIORITY_LABELS[value] ?? value)
+            next.priority = mergeField(ticket.priority, value, PRIORITY_DISPLAY_LABELS[value] ?? value)
         } else if (field === 'tags') {
             next.tags = snField(value, value)
         } else if (field === 'assigned_to') {
