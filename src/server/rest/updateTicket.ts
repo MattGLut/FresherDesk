@@ -15,13 +15,33 @@ import {
     clearUpdateSource,
 } from '../tickets/ticketComments.ts'
 import { applyResolvedStateFields } from '../tickets/ticketState.ts'
-import { parseRestJsonBody } from './parseRestJsonBody.ts'
 
 interface UpdateTicketBody {
     status?: unknown
     subject?: unknown
     title?: unknown
     description?: unknown
+}
+
+function parseRequestBody(request: RESTAPIRequest): UpdateTicketBody {
+    const body = request.body as { data?: unknown; dataString?: string } | undefined
+    if (!body) {
+        return {}
+    }
+
+    if (typeof body.data === 'object' && body.data !== null) {
+        return body.data as UpdateTicketBody
+    }
+
+    if (typeof body.dataString === 'string' && body.dataString) {
+        try {
+            return JSON.parse(body.dataString) as UpdateTicketBody
+        } catch {
+            return {}
+        }
+    }
+
+    return {}
 }
 
 function asOptionalString(value: unknown): string | undefined {
@@ -52,12 +72,7 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
             return
         }
 
-        const body = parseRestJsonBody<UpdateTicketBody>(request)
-        if (body === null) {
-            setJsonResponse(response, 400, badRequestResponse('Invalid or unreadable JSON request body'))
-            return
-        }
-
+        const body = parseRequestBody(request)
         const updates: Record<string, string> = {}
         let providedFieldCount = 0
 
