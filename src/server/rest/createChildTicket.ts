@@ -52,6 +52,14 @@ function asOptionalString(value: unknown): string | undefined {
     return normalized.length > 0 ? normalized : undefined
 }
 
+const VALID_CATEGORIES = new Set(['general', 'billing', 'technical', 'account'])
+
+function parseCategory(value: unknown): string | null {
+    const category = asOptionalString(value) ?? 'general'
+    const normalized = category.toLowerCase()
+    return VALID_CATEGORIES.has(normalized) ? normalized : null
+}
+
 export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResponse): void {
     try {
         if (!validateApiKey(request)) {
@@ -92,7 +100,16 @@ export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResp
         child.setValue('source', 'api')
         child.setValue('requester_email', parent.getValue('requester_email') || '')
         child.setValue('opened_by', parent.getValue('opened_by') || '')
-        child.setValue('category', asOptionalString(body.category) ?? 'general')
+        const category = parseCategory(body.category)
+        if (!category) {
+            setJsonResponse(
+                response,
+                400,
+                badRequestResponse('category must be one of: general, billing, technical, account')
+            )
+            return
+        }
+        child.setValue('category', category)
 
         const status = asOptionalString(body.status)
         if (status) {

@@ -19,58 +19,84 @@ const PRIORITY_MAP: Record<string, string> = {
 }
 
 export interface TicketFilters {
-    status?: string
-    priority?: string
-    assignee?: string
-    tag?: string
-    updatedSince?: string
+    status?: unknown
+    priority?: unknown
+    assignee?: unknown
+    tag?: unknown
+    updatedSince?: unknown
     limit?: number
     offset?: number
 }
 
-export function buildTicketQuery(filters: TicketFilters): string {
+export function queryParamAsString(value: unknown): string | undefined {
+    if (value == null || value === '') {
+        return undefined
+    }
+
+    if (Array.isArray(value)) {
+        const first = value[0]
+        if (first == null || first === '') {
+            return undefined
+        }
+        const normalized = String(first).trim()
+        return normalized || undefined
+    }
+
+    const normalized = String(value).trim()
+    return normalized || undefined
+}
+
+/** Filter-only encoded query (no sort). Used for list + aggregate count. */
+export function buildTicketFilterQuery(filters: TicketFilters): string {
     const parts: string[] = []
 
-    if (filters.status) {
-        const statusValue = mapStatusToState(filters.status)
+    const status = queryParamAsString(filters.status)
+    if (status) {
+        const statusValue = mapStatusToState(status)
         if (statusValue) {
             parts.push(`state=${statusValue}`)
         }
     }
 
-    if (filters.priority) {
-        const priorityValue = mapPriorityToValue(filters.priority)
+    const priority = queryParamAsString(filters.priority)
+    if (priority) {
+        const priorityValue = mapPriorityToValue(priority)
         if (priorityValue) {
             parts.push(`priority=${priorityValue}`)
         }
     }
 
-    if (filters.assignee) {
-        if (filters.assignee === 'unassigned') {
+    const assignee = queryParamAsString(filters.assignee)
+    if (assignee) {
+        if (assignee === 'unassigned') {
             parts.push('assigned_toISEMPTY')
         } else {
-            parts.push(`assigned_to=${filters.assignee}`)
+            parts.push(`assigned_to=${assignee}`)
         }
     }
 
-    if (filters.tag) {
-        const tagQuery = buildTagQuery(filters.tag)
+    const tag = queryParamAsString(filters.tag)
+    if (tag) {
+        const tagQuery = buildTagQuery(tag)
         if (tagQuery) {
             parts.push(tagQuery)
         }
     }
 
-    if (filters.updatedSince) {
-        parts.push(`sys_updated_on>=${filters.updatedSince}`)
+    const updatedSince = queryParamAsString(filters.updatedSince)
+    if (updatedSince) {
+        parts.push(`sys_updated_on>=${updatedSince}`)
     }
 
     parts.push('parentISEMPTY')
-    parts.push('ORDERBYDESCsys_updated_on')
     return parts.join('^')
 }
 
-export function mapStatusToState(status: string): string | null {
-    const normalized = status.toLowerCase()
+export function mapStatusToState(status: unknown): string | null {
+    const normalized = String(status ?? '').trim().toLowerCase()
+    if (!normalized) {
+        return null
+    }
     switch (normalized) {
         case 'open':
             return '1'
@@ -85,8 +111,11 @@ export function mapStatusToState(status: string): string | null {
     }
 }
 
-export function mapPriorityToValue(priority: string): string | null {
-    const normalized = priority.toLowerCase()
+export function mapPriorityToValue(priority: unknown): string | null {
+    const normalized = String(priority ?? '').trim().toLowerCase()
+    if (!normalized) {
+        return null
+    }
     switch (normalized) {
         case 'critical':
             return '1'
