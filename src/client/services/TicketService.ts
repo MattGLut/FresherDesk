@@ -18,7 +18,6 @@ export interface TicketRecord {
     requester_email: unknown
     source: unknown
     category: unknown
-    parent: unknown
     tags: unknown
     sys_updated_on: unknown
     opened_at: unknown
@@ -82,7 +81,6 @@ export class TicketService {
             parts.push(`tagsLIKE"${filter.tag.trim()}"`)
         }
 
-        parts.push('parentISEMPTY')
         parts.push('ORDERBYDESCsys_updated_on')
         return parts.join('^')
     }
@@ -92,32 +90,9 @@ export class TicketService {
         searchParams.set('sysparm_display_value', 'all')
         searchParams.set(
             'sysparm_fields',
-            'sys_id,number,short_description,description,state,priority,assigned_to,opened_by,requester_email,source,category,tags,parent,sys_updated_on,opened_at'
+            'sys_id,number,short_description,description,state,priority,assigned_to,opened_by,requester_email,source,category,tags,sys_updated_on,opened_at'
         )
         searchParams.set('sysparm_query', this.buildQuery(filter))
-
-        const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
-            method: 'GET',
-            headers: this.headers(),
-        })
-
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
-        }
-
-        const { result } = await response.json()
-        return result || []
-    }
-
-    async listChildren(parentSysId: string): Promise<TicketRecord[]> {
-        const searchParams = new URLSearchParams()
-        searchParams.set('sysparm_display_value', 'all')
-        searchParams.set(
-            'sysparm_fields',
-            'sys_id,number,short_description,description,state,priority,assigned_to,opened_by,requester_email,source,category,tags,parent,sys_updated_on,opened_at'
-        )
-        searchParams.set('sysparm_query', `parent=${parentSysId}^ORDERBYDESCsys_updated_on`)
 
         const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
             method: 'GET',

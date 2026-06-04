@@ -11,7 +11,6 @@ The API ID (`tickets`) is part of the path. Resource URLs:
 | `GET` | `/tickets/tickets` | List tickets with optional filters and pagination |
 | `GET` | `/tickets/tickets/{id}` | Get a single ticket by number or sys_id |
 | `PATCH` | `/tickets/tickets/{id}` | Update ticket status, subject, or description |
-| `POST` | `/tickets/tickets/{id}/create_child` | Create a child ticket under a parent |
 
 **Content type:** `application/json`
 
@@ -48,7 +47,7 @@ On each successful request, the matching key record's `last_used` timestamp is u
 GET /api/x_2058901_fresher/v1/tickets/tickets
 ```
 
-Returns a paginated list of ticket summaries. Comments and attachments are **not** included in list responses. Only **top-level** tickets are returned (child tickets are excluded via `parentISEMPTY`); use [Get ticket](#get-ticket) on a parent to see its `children` array.
+Returns a paginated list of ticket summaries. Comments and attachments are **not** included in list responses.
 
 ### Query parameters
 
@@ -104,8 +103,6 @@ curl -s \
       },
       "opened_at": "2026-06-01 09:15:00",
       "updated_at": "2026-06-02 14:30:00",
-      "parent_id": null,
-      "children": [],
       "comments": [],
       "attachments": []
     }
@@ -126,7 +123,7 @@ curl -s \
 GET /api/x_2058901_fresher/v1/tickets/tickets/{id}
 ```
 
-Returns a single ticket with its full conversation thread, attachments, and direct child ticket summaries.
+Returns a single ticket with its full conversation thread and attachments.
 
 ### Path parameters
 
@@ -173,17 +170,6 @@ curl -s \
     },
     "opened_at": "2026-06-01 09:15:00",
     "updated_at": "2026-06-02 14:30:00",
-    "parent_id": null,
-    "children": [
-      {
-        "id": "d2e3f4a5b6c7890123456789012345de",
-        "number": "TKT0001002",
-        "subject": "Follow-up on password reset",
-        "status": "open",
-        "priority": "medium",
-        "updated_at": "2026-06-02 16:00:00"
-      }
-    ],
     "comments": [
       {
         "id": "f1a2b3c4d5e6789012345678901234fa",
@@ -218,69 +204,6 @@ curl -s \
   "error": {
     "code": "not_found",
     "message": "Ticket not found"
-  }
-}
-```
-
----
-
-## Create child ticket
-
-```http
-POST /api/x_2058901_fresher/v1/tickets/tickets/{id}/create_child
-```
-
-Creates a child ticket linked to the parent ticket identified in the path. The child inherits `requester_email` and `opened_by` from the parent. Returns the created ticket with `parent_id` set and an empty `children` array.
-
-### Path parameters
-
-| Parameter | Description |
-|-----------|-------------|
-| `id` | Parent ticket number (e.g. `TKT0001001`, case-insensitive) or parent sys_id |
-
-### Request body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `subject` | string | Yes | Child ticket title (max 160 characters) |
-| `description` | string | No | Full ticket body |
-| `status` | string | No | `open`, `pending`, `resolved`, or `closed` (default: `open`) |
-| `priority` | string | No | `critical`, `high`, `medium`, `low`, or `planning` |
-| `category` | string | No | `general`, `billing`, `technical`, or `account` (default: `general`) |
-
-### Example request
-
-```bash
-curl -s -X POST \
-  -H "X-API-Key: YOUR_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"subject":"Follow-up on password reset","description":"Customer still cannot log in.","priority":"medium"}' \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
-```
-
-### Example response (201)
-
-Same structure as [Get ticket](#get-ticket). The child ticket includes `parent_id` pointing at the parent sys_id and `children: []`.
-
-```json
-{
-  "ticket": {
-    "id": "d2e3f4a5b6c7890123456789012345de",
-    "number": "TKT0001002",
-    "subject": "Follow-up on password reset",
-    "parent_id": "a1b2c3d4e5f6789012345678901234ab",
-    "children": []
-  }
-}
-```
-
-### Bad request (400)
-
-```json
-{
-  "error": {
-    "code": "bad_request",
-    "message": "subject is required"
   }
 }
 ```
@@ -362,21 +285,8 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 | `assignee` | object \| null | `{ id, name, email, username, roles }` or `null` if unassigned — `roles` lists ServiceNow role names |
 | `opened_at` | string | Instance display datetime |
 | `updated_at` | string | Instance display datetime |
-| `parent_id` | string \| null | Parent ticket sys_id, or `null` for top-level tickets |
-| `children` | array | Direct child ticket summaries (populated on single-ticket GET and create_child; always `[]` in list responses) |
 | `comments` | array | Conversation thread (empty in list responses) |
 | `attachments` | array | File metadata (empty in list responses) |
-
-### Child ticket summary (in `children`)
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Child ticket sys_id |
-| `number` | string | Child ticket number |
-| `subject` | string | Short description |
-| `status` | string | `open`, `pending`, `resolved`, or `closed` |
-| `priority` | string | `critical`, `high`, `medium`, `low`, or `planning` |
-| `updated_at` | string | Instance display datetime |
 
 ### Comment object
 
@@ -432,7 +342,6 @@ All errors return JSON with an `error` object containing `code` and `message`.
 ## Limitations (v1)
 
 - **Partial write support** — `PATCH` updates status, subject/title, and description only
-- **Child tickets** — list endpoint returns top-level tickets only; nested children are reachable via GET on the parent or by navigating to the child sys_id
 - **No attachment download** — metadata only
 - **No public comment creation** via REST — agent replies use the workspace; API updates create internal notes automatically
 - **Audit deltas** — field-level change history is stored as `audit_delta` comments but excluded from REST and UI conversation views

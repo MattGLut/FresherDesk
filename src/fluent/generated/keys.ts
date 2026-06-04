@@ -57,10 +57,6 @@ declare global {
                         table: 'sys_module'
                         id: '7937cbe0d4bc475dadce82fba2f207d2'
                     }
-                    src_server_rest_createChildTicket_ts: {
-                        table: 'sys_module'
-                        id: '873dad471e1d486dbc1ce3e8cc56c4f6'
-                    }
                     src_server_rest_getTicket_ts: {
                         table: 'sys_module'
                         id: 'c3ff9e569c304c2c8e0ca32e9c68c1cd'
@@ -132,10 +128,6 @@ declare global {
                     'tickets-api-v1': {
                         table: 'sys_ws_version'
                         id: 'f1d94d564b0642d2bc17b7305374f2da'
-                    }
-                    'tickets-create-child-route': {
-                        table: 'sys_ws_operation'
-                        id: '3508cbd8ef474e389a847512625ad51b'
                     }
                     'tickets-get-route': {
                         table: 'sys_ws_operation'
@@ -504,15 +496,6 @@ declare global {
                         }
                     },
                     {
-                        table: 'sys_documentation'
-                        id: '5805123e7a15405f9b6297bc1870c282'
-                        key: {
-                            name: 'x_2058901_fresher_ticket'
-                            element: 'parent'
-                            language: 'en'
-                        }
-                    },
-                    {
                         table: 'sn_glider_source_artifact_m2m'
                         id: '5869d21072b749fdadeb188915e0a83d'
                         key: {
@@ -683,14 +666,6 @@ declare global {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'author'
                             language: 'en'
-                        }
-                    },
-                    {
-                        table: 'sys_dictionary'
-                        id: '992e5b08f7374b618c6580896abbede4'
-                        key: {
-                            name: 'x_2058901_fresher_ticket'
-                            element: 'parent'
                         }
                     },
                     {

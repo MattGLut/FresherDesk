@@ -21,7 +21,6 @@ const TRACKED_FIELDS: TrackedField[] = [
     { name: 'category', label: 'category' },
     { name: 'tags', label: 'tags' },
     { name: 'requester_email', label: 'requester_email' },
-    { name: 'parent', label: 'parent', useRecordDisplay: true },
 ]
 
 function displayForField(
