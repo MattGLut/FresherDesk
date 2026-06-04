@@ -1,3 +1,5 @@
+import { prepareTicketUpdate } from '../utils/ticketUpdate'
+
 declare global {
     interface Window {
         g_ck: string
@@ -144,10 +146,11 @@ export class TicketService {
     }
 
     async update(sysId: string, data: Record<string, string>): Promise<TicketRecord> {
+        const payload = prepareTicketUpdate(data)
         const response = await fetch(`/api/now/table/${this.tableName}/${sysId}`, {
             method: 'PATCH',
             headers: this.jsonHeaders(),
-            body: JSON.stringify(data),
+            body: JSON.stringify(payload),
         })
 
         if (!response.ok) {

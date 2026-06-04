@@ -93,6 +93,10 @@ declare global {
                         table: 'sys_module'
                         id: '89623efc90a14179818a4b0ab2748fa4'
                     }
+                    src_server_tickets_ticketState_ts: {
+                        table: 'sys_module'
+                        id: 'd4ab7f6ee9f1426ca3672cf0a779565f'
+                    }
                     src_server_tickets_ticketTags_ts: {
                         table: 'sys_module'
                         id: '52140668222944c2903b1c3376f373bb'
@@ -155,6 +159,15 @@ declare global {
                         id: '093aebaf2b7b40849153a93700a0bcfa'
                         key: {
                             name: 'x_2058901_fresher_api_key'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '0b6ea21572084bbaaf4e285f79dd8c37'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'state'
+                            language: 'en'
                         }
                     },
                     {
@@ -425,6 +438,7 @@ declare global {
                     {
                         table: 'sys_dictionary_override'
                         id: '4094a3220e11436ab1d17e7b9f70914c'
+                        deleted: true
                         key: {
                             name: 'x_2058901_fresher_ticket'
                             element: 'state'
@@ -470,6 +484,15 @@ declare global {
                         id: '5604814769e949fba410da4900a0bb00'
                         key: {
                             name: 'x_2058901_fresher/main.js.map'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '567b2782b51c493cbe69d1041bbce085'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'state'
+                            value: '6'
                         }
                     },
                     {
@@ -557,6 +580,15 @@ declare global {
                     },
                     {
                         table: 'sys_choice'
+                        id: '7982bb9437934865a8b8b128a3f13717'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'state'
+                            value: '1'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
                         id: '7a304242399d4a44a22c715576981cbe'
                         key: {
                             name: 'x_2058901_fresher_ticket'
@@ -570,6 +602,14 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_ticket'
                             element: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '7d65562d300b4b3ba38a898e9cc5e70d'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'state'
                         }
                     },
                     {
@@ -626,6 +666,14 @@ declare global {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'author'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice_set'
+                        id: '9c46cef47ebb459d82e7168ef73a2a93'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'state'
                         }
                     },
                     {
@@ -805,6 +853,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'cad72cf8a60f4a5189e5ec43ed70f355'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'state'
+                            value: '2'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'cc94581bf1dd4097ab7f36a253b1a7b7'
                         key: {
@@ -880,6 +937,15 @@ declare global {
                         id: 'e0ea087293d34feb8cdfd4471c532e88'
                         key: {
                             name: 'x_2058901_fresher_ticket'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'e77510157a1043f697fd70721b67b45e'
+                        key: {
+                            name: 'x_2058901_fresher_ticket'
+                            element: 'state'
+                            value: '7'
                         }
                     },
                     {

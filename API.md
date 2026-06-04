@@ -237,7 +237,6 @@ Send JSON with any combination of the fields below. At least one field must be p
 
 ### Side effects
 
-- Creates an **internal note** summarizing the API update (visible to agents in the workspace).
 - Triggers the ticket delta audit business rule, which writes **audit_delta** comments for each changed field (hidden from the agent UI and REST comment output; query the comment table directly for forensics).
 
 ### Example request
@@ -252,7 +251,7 @@ curl -s -X PATCH \
 
 ### Example response (200)
 
-Same structure as the [Get ticket](#get-ticket) response, including the updated ticket fields and any new internal notes in `comments`.
+Same structure as the [Get ticket](#get-ticket) response, including the updated ticket fields. Audit delta comments are not included in `comments`.
 
 ### Bad request (400)
 

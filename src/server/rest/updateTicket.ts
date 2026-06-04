@@ -11,11 +11,10 @@ import { serializeTicket } from '../tickets/ticketSerializer.ts'
 import { mapStatusToState } from '../tickets/ticketQueries.ts'
 import { findTicketByIdOrNumber } from '../tickets/ticketLookup.ts'
 import {
-    createApiUpdateInternalNote,
     setUpdateSource,
     clearUpdateSource,
-    type ApiFieldChange,
 } from '../tickets/ticketComments.ts'
+import { applyResolvedStateFields } from '../tickets/ticketState.ts'
 
 interface UpdateTicketBody {
     status?: unknown
@@ -54,21 +53,6 @@ function asOptionalString(value: unknown): string | undefined {
     return normalized.length > 0 ? normalized : undefined
 }
 
-function statusLabel(stateValue: string): string {
-    switch (stateValue) {
-        case '1':
-            return 'open'
-        case '2':
-            return 'pending'
-        case '6':
-            return 'resolved'
-        case '7':
-            return 'closed'
-        default:
-            return stateValue
-    }
-}
-
 export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse): void {
     try {
         if (!validateApiKey(request)) {
@@ -89,7 +73,6 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
         }
 
         const body = parseRequestBody(request)
-        const changes: ApiFieldChange[] = []
         const updates: Record<string, string> = {}
         let providedFieldCount = 0
 
@@ -103,7 +86,6 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
                 }
                 const current = gr.getValue('short_description') || ''
                 if (subject !== current) {
-                    changes.push({ field: 'subject', from: current, to: subject })
                     updates.short_description = subject
                 }
             }
@@ -114,7 +96,6 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
             const description = asOptionalString(body.description) ?? ''
             const current = gr.getValue('description') || ''
             if (description !== current) {
-                changes.push({ field: 'description', from: current, to: description })
                 updates.description = description
             }
         }
@@ -143,7 +124,6 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
 
             const current = gr.getValue('state') || ''
             if (stateValue !== current) {
-                changes.push({ field: 'status', from: statusLabel(current), to: status.toLowerCase() })
                 updates.state = stateValue
             }
         }
@@ -165,8 +145,8 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
             gr.setValue(field, value)
         }
 
+        applyResolvedStateFields(gr, updates.state)
         gr.update()
-        createApiUpdateInternalNote(ticketSysId, changes)
         clearUpdateSource()
 
         const refreshed = findTicketByIdOrNumber(ticketSysId)
