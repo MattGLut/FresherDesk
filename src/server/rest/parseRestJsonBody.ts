@@ -5,7 +5,7 @@ import { logApiError } from '../auth/validateApiKey.ts'
  * Reads JSON from a Scripted REST POST/PATCH body without throwing on malformed input.
  * Prefer dataString (raw payload) before data (parsed object), which can throw on read.
  */
-export function parseRestJsonBody<T extends Record<string, unknown>>(request: RESTAPIRequest): T | null {
+export function parseRestJsonBody<T>(request: RESTAPIRequest): T | null {
     try {
         const body = request.body
         if (!body) {
