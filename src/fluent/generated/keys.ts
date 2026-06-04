@@ -52,6 +52,7 @@ declare global {
                     src_server_auth_apiKeySession_ts: {
                         table: 'sys_module'
                         id: 'ce021989944247069630f9d3d977f2c7'
+                        deleted: true
                     }
                     src_server_auth_validateApiKey_ts: {
                         table: 'sys_module'
@@ -72,6 +73,10 @@ declare global {
                     src_server_rest_listTickets_ts: {
                         table: 'sys_module'
                         id: '857cdf93b2bf4c6aa4b1765e8c42d2b3'
+                    }
+                    src_server_rest_parseRestJsonBody_ts: {
+                        table: 'sys_module'
+                        id: 'c5652142ee4f49eda029bd09c2a8bba0'
                     }
                     src_server_rest_updateTicket_ts: {
                         table: 'sys_module'
@@ -112,14 +117,17 @@ declare global {
                     'ticket-acl-api-create': {
                         table: 'sys_security_acl'
                         id: '227c3a00faa5417ca096444bd6f38d68'
+                        deleted: true
                     }
                     'ticket-acl-api-read': {
                         table: 'sys_security_acl'
                         id: '93a2ee4307014664a1988c0884b28951'
+                        deleted: true
                     }
                     'ticket-acl-api-write': {
                         table: 'sys_security_acl'
                         id: 'ef345410cc7c4112951ca46d264921ce'
+                        deleted: true
                     }
                     'ticket-acl-create': {
                         table: 'sys_security_acl'
