@@ -260,12 +260,14 @@ export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, inc
     return ticket
 }
 
-export function createInitialEmailComment(ticketSysId: string, body: string, authorSysId: string): void {
+export function createInitialEmailComment(ticketSysId: string, body: string, authorSysId?: string): void {
     const gr = new GlideRecord(COMMENT_TABLE)
     gr.initialize()
     gr.setValue('ticket', ticketSysId)
     gr.setValue('body', body)
-    gr.setValue('author', authorSysId)
+    if (authorSysId) {
+        gr.setValue('author', authorSysId)
+    }
     gr.setValue('comment_type', 'public_reply')
     gr.setValue('source', 'email')
     gr.insert()
