@@ -49,10 +49,6 @@ declare global {
                         table: 'sys_module'
                         id: '8f2f2e4ad49541e6bd9d9f17badf7ae8'
                     }
-                    src_server_auth_apiKeySession_ts: {
-                        table: 'sys_module'
-                        id: 'ce021989944247069630f9d3d977f2c7'
-                    }
                     src_server_auth_validateApiKey_ts: {
                         table: 'sys_module'
                         id: 'a618b053ab7941d19b0dde2a723d3487'
@@ -108,18 +104,6 @@ declare global {
                     src_server_tickets_ticketTags_ts: {
                         table: 'sys_module'
                         id: '52140668222944c2903b1c3376f373bb'
-                    }
-                    'ticket-acl-api-create': {
-                        table: 'sys_security_acl'
-                        id: '227c3a00faa5417ca096444bd6f38d68'
-                    }
-                    'ticket-acl-api-read': {
-                        table: 'sys_security_acl'
-                        id: '93a2ee4307014664a1988c0884b28951'
-                    }
-                    'ticket-acl-api-write': {
-                        table: 'sys_security_acl'
-                        id: 'ef345410cc7c4112951ca46d264921ce'
                     }
                     'ticket-acl-create': {
                         table: 'sys_security_acl'
@@ -356,15 +340,6 @@ declare global {
                         }
                     },
                     {
-                        table: 'sys_dictionary_override'
-                        id: '2a644061dcd344bb8f9136030b62fa63'
-                        deleted: true
-                        key: {
-                            name: 'x_2058901_fresher_ticket'
-                            element: 'parent'
-                        }
-                    },
-                    {
                         table: 'sys_choice'
                         id: '2b05dac2945f4c7f84992c4a7c5ac23d'
                         deleted: true
@@ -531,7 +506,6 @@ declare global {
                     {
                         table: 'sys_documentation'
                         id: '5805123e7a15405f9b6297bc1870c282'
-                        deleted: false
                         key: {
                             name: 'x_2058901_fresher_ticket'
                             element: 'parent'
@@ -714,7 +688,6 @@ declare global {
                     {
                         table: 'sys_dictionary'
                         id: '992e5b08f7374b618c6580896abbede4'
-                        deleted: false
                         key: {
                             name: 'x_2058901_fresher_ticket'
                             element: 'parent'
