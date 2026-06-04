@@ -15,6 +15,8 @@ The API ID (`tickets`) is part of the path. Resource URLs:
 
 **Content type:** `application/json`
 
+Example requests below use **Windows Command Prompt** (`cmd.exe`) and **`curl.exe`**. JSON bodies use double quotes with inner quotes escaped as `\"` (do not use single-quoted `'...'` — that is Bash syntax, not cmd). To continue a command on the next line, end the line with `^`. Add `--ssl-no-revoke` after `curl.exe` if your environment requires it for HTTPS.
+
 ---
 
 ## Authentication
@@ -68,10 +70,8 @@ Results are ordered by most recently updated first.
 
 ### Example request
 
-```bash
-curl -s \
-  -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&tag=billing&limit=25&offset=0"
+```cmd
+curl.exe -s -H "X-API-Key: fd_live_your_secret_here" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&tag=billing&limit=25&offset=0"
 ```
 
 ### Example response (200)
@@ -138,10 +138,8 @@ Numbers are detected by the `TKT` prefix. All other values are treated as sys_id
 
 ### Example request
 
-```bash
-curl -s \
-  -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+```cmd
+curl.exe -s -H "X-API-Key: fd_live_your_secret_here" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
 ### Example response (200)
@@ -250,11 +248,17 @@ Creates a child ticket linked to the parent ticket identified in the path. The c
 
 ### Example request
 
-```bash
-curl -s -X POST \
-  -H "X-API-Key: YOUR_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"subject":"Follow-up on password reset","description":"Customer still cannot log in.","priority":"medium"}' \
+```cmd
+curl.exe -s -X POST -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" -d "{\"subject\":\"Follow-up on password reset\",\"description\":\"Customer still cannot log in.\",\"priority\":\"medium\"}" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
+```
+
+Multi-line (cmd line continuation):
+
+```cmd
+curl.exe -s -X POST ^
+  -H "X-API-Key: fd_live_your_secret_here" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"subject\":\"Follow-up on password reset\",\"description\":\"Customer still cannot log in.\",\"priority\":\"medium\"}" ^
   "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
 ```
 
@@ -318,11 +322,17 @@ Send JSON with any combination of the fields below. At least one field must be p
 
 ### Example request
 
-```bash
-curl -s -X PATCH \
-  -H "X-API-Key: YOUR_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"status":"pending","subject":"Password reset still failing"}' \
+```cmd
+curl.exe -s -X PATCH -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\"}" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+```
+
+Multi-line (cmd line continuation):
+
+```cmd
+curl.exe -s -X PATCH ^
+  -H "X-API-Key: fd_live_your_secret_here" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\"}" ^
   "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
