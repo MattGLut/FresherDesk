@@ -18,14 +18,14 @@ import {
 function countMatchingTickets(filterQuery: string): number {
     const aggregate = new GlideAggregate(getTicketTableName())
     aggregate.addEncodedQuery(filterQuery)
-    aggregate.addAggregate('COUNT')
+    aggregate.addAggregate('COUNT', 'sys_id')
     aggregate.query()
 
     if (!aggregate.next()) {
         return 0
     }
 
-    return parseInt(aggregate.getAggregate('COUNT') || '0', 10) || 0
+    return parseInt(aggregate.getAggregate('COUNT', 'sys_id') || '0', 10) || 0
 }
 
 export function listTickets(request: RESTAPIRequest, response: RESTAPIResponse): void {
