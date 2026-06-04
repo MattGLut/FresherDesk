@@ -13,7 +13,6 @@ import { mapStatusToState, mapPriorityToValue, getTicketTableName } from '../tic
 import { findTicketByIdOrNumber } from '../tickets/ticketLookup.ts'
 import { setUpdateSource, clearUpdateSource } from '../tickets/ticketComments.ts'
 import { applyResolvedStateFields } from '../tickets/ticketState.ts'
-import { parseRestJsonBody } from './parseRestJsonBody.ts'
 
 interface CreateChildTicketBody {
     subject?: unknown
@@ -21,6 +20,27 @@ interface CreateChildTicketBody {
     status?: unknown
     priority?: unknown
     category?: unknown
+}
+
+function parseRequestBody(request: RESTAPIRequest): CreateChildTicketBody {
+    const body = request.body as { data?: unknown; dataString?: string } | undefined
+    if (!body) {
+        return {}
+    }
+
+    if (typeof body.data === 'object' && body.data !== null) {
+        return body.data as CreateChildTicketBody
+    }
+
+    if (typeof body.dataString === 'string' && body.dataString) {
+        try {
+            return JSON.parse(body.dataString) as CreateChildTicketBody
+        } catch {
+            return {}
+        }
+    }
+
+    return {}
 }
 
 function asOptionalString(value: unknown): string | undefined {
@@ -75,12 +95,7 @@ export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResp
             return
         }
 
-        const body = parseRestJsonBody<CreateChildTicketBody>(request)
-        if (body === null) {
-            setJsonResponse(response, 400, badRequestResponse('Invalid or unreadable JSON request body'))
-            return
-        }
-
+        const body = parseRequestBody(request)
         const subject = asOptionalString(body.subject)
         if (!subject) {
             logApiError('createChildTicket', 'missing subject in request body', `parentId=${parentId}`)
