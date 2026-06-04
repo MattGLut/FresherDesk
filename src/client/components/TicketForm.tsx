@@ -3,9 +3,8 @@ import { getDisplayValue, getValue } from '../utils/snValue'
 import { parseTags, serializeTags, formatTagsInput, parseTagsInput } from '../utils/ticketTags'
 import './TicketForm.css'
 
-export default function TicketForm({ ticket = null, parentTicket = null, onSubmit, onCancel }) {
+export default function TicketForm({ ticket = null, onSubmit, onCancel }) {
     const isEditing = !!ticket
-    const isChildCreate = !!parentTicket && !isEditing
 
     const [formData, setFormData] = useState({
         short_description: '',
@@ -28,13 +27,8 @@ export default function TicketForm({ ticket = null, parentTicket = null, onSubmi
                 category: getValue(ticket.category) || 'general',
                 tagsInput: formatTagsInput(parseTags(ticket.tags)),
             })
-        } else if (parentTicket) {
-            setFormData((prev) => ({
-                ...prev,
-                requester_email: getValue(parentTicket.requester_email),
-            }))
         }
-    }, [ticket, parentTicket])
+    }, [ticket])
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -54,13 +48,7 @@ export default function TicketForm({ ticket = null, parentTicket = null, onSubmi
         <div className="form-overlay">
             <div className="form-container">
                 <div className="form-header">
-                    <h2>
-                        {isEditing
-                            ? `Edit ${getDisplayValue(ticket.number)}`
-                            : isChildCreate
-                              ? `Create Child of ${getDisplayValue(parentTicket.number)}`
-                              : 'Create New Ticket'}
-                    </h2>
+                    <h2>{isEditing ? `Edit ${getDisplayValue(ticket.number)}` : 'Create New Ticket'}</h2>
                     <button type="button" className="close-button" onClick={onCancel}>
                         ×
                     </button>

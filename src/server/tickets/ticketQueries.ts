@@ -64,7 +64,6 @@ export function buildTicketQuery(filters: TicketFilters): string {
         parts.push(`sys_updated_on>=${filters.updatedSince}`)
     }
 
-    parts.push('parentISEMPTY')
     parts.push('ORDERBYDESCsys_updated_on')
     return parts.join('^')
 }
