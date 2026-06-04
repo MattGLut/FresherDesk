@@ -1,4 +1,4 @@
-import { commentExclusionQuery } from '../utils/commentTypes'
+import { commentExclusionQuery, COMMENT_TYPE_AUDIT_DELTA } from '../utils/commentTypes'
 
 declare global {
     interface Window {
@@ -37,6 +37,29 @@ export class CommentService {
         searchParams.set('sysparm_display_value', 'all')
         searchParams.set('sysparm_fields', 'sys_id,ticket,body,author,comment_type,source,sys_created_on')
         searchParams.set('sysparm_query', `ticket=${ticketSysId}^${commentExclusionQuery()}^ORDERBYsys_created_on`)
+
+        const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
+            method: 'GET',
+            headers: this.headers(),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+        }
+
+        const { result } = await response.json()
+        return result || []
+    }
+
+    async listAuditDeltasForTicket(ticketSysId: string): Promise<CommentRecord[]> {
+        const searchParams = new URLSearchParams()
+        searchParams.set('sysparm_display_value', 'all')
+        searchParams.set('sysparm_fields', 'sys_id,ticket,body,author,comment_type,source,sys_created_on')
+        searchParams.set(
+            'sysparm_query',
+            `ticket=${ticketSysId}^comment_type=${COMMENT_TYPE_AUDIT_DELTA}^ORDERBYsys_created_on`
+        )
 
         const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
             method: 'GET',

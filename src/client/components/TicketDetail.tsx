@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { getDisplayValue, getValue, getSysId } from '../utils/snValue'
 import { parseTags, serializeTags } from '../utils/ticketTags'
 import { AgentService } from '../services/AgentService'
-import ConversationThread from './ConversationThread'
+import { UserService } from '../services/UserService'
+import ConversationPanel from './ConversationPanel'
 import './TicketDetail.css'
 
 export default function TicketDetail({
@@ -23,6 +24,7 @@ export default function TicketDetail({
     const [localState, setLocalState] = useState({ state: '1', priority: '3', assigned_to: '' })
     const [localTags, setLocalTags] = useState<string[]>([])
     const [newTag, setNewTag] = useState('')
+    const [isAdmin, setIsAdmin] = useState(false)
 
     useEffect(() => {
         const agentService = new AgentService()
@@ -30,6 +32,14 @@ export default function TicketDetail({
             .list()
             .then(setAgents)
             .catch(() => setAgents([]))
+    }, [])
+
+    useEffect(() => {
+        const userService = new UserService()
+        userService
+            .isAdmin()
+            .then(setIsAdmin)
+            .catch(() => setIsAdmin(false))
     }, [])
 
     useEffect(() => {
@@ -198,38 +208,19 @@ export default function TicketDetail({
 
             <div className="detail-section">
                 <h3>Conversation</h3>
-                <ConversationThread comments={comments} loading={loading} />
-            </div>
-
-            <form className="reply-composer" onSubmit={handleReplySubmit}>
-                <div className="reply-type-toggle">
-                    <button
-                        type="button"
-                        className={replyType === 'public_reply' ? 'active' : ''}
-                        onClick={() => setReplyType('public_reply')}
-                    >
-                        Public Reply
-                    </button>
-                    <button
-                        type="button"
-                        className={replyType === 'internal_note' ? 'active' : ''}
-                        onClick={() => setReplyType('internal_note')}
-                    >
-                        Internal Note
-                    </button>
-                </div>
-                <textarea
-                    value={replyBody}
-                    onChange={(e) => setReplyBody(e.target.value)}
-                    placeholder={replyType === 'internal_note' ? 'Add an internal note...' : 'Write a reply...'}
-                    rows={4}
+                <ConversationPanel
+                    ticketSysId={sysId}
+                    comments={comments}
+                    detailLoading={loading}
+                    isAdmin={isAdmin}
+                    replyBody={replyBody}
+                    replyType={replyType}
+                    submitting={submitting}
+                    onReplyBodyChange={setReplyBody}
+                    onReplyTypeChange={setReplyType}
+                    onReplySubmit={handleReplySubmit}
                 />
-                <div className="reply-actions">
-                    <button type="submit" className="reply-submit" disabled={submitting || !replyBody.trim()}>
-                        {submitting ? 'Sending...' : 'Send'}
-                    </button>
-                </div>
-            </form>
+            </div>
 
             <div className="detail-section attachments-section">
                 <div className="attachments-header">
