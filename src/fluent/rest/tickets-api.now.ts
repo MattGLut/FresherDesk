@@ -3,6 +3,7 @@ import { RestApi } from '@servicenow/sdk/core'
 import { listTickets } from '../../server/rest/listTickets'
 import { getTicket } from '../../server/rest/getTicket'
 import { updateTicket } from '../../server/rest/updateTicket'
+import { createChildTicket } from '../../server/rest/createChildTicket'
 
 RestApi({
     $id: Now.ID['tickets-rest-api'],
@@ -52,6 +53,17 @@ RestApi({
             internalRole: false,
             version: 1,
             shortDescription: 'Update ticket status, subject, or description',
+        },
+        {
+            $id: Now.ID['tickets-create-child-route'],
+            path: '/tickets/{id}/create_child',
+            method: 'POST',
+            script: createChildTicket,
+            authorization: false,
+            authentication: false,
+            internalRole: false,
+            version: 1,
+            shortDescription: 'Create a child ticket under a parent',
         },
     ],
 })

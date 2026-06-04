@@ -4,6 +4,7 @@ import { parseTags, serializeTags } from '../utils/ticketTags'
 import { AgentService } from '../services/AgentService'
 import { UserService } from '../services/UserService'
 import ConversationPanel from './ConversationPanel'
+import ChildTicketsPanel from './ChildTicketsPanel'
 import './TicketDetail.css'
 
 export default function TicketDetail({
@@ -16,6 +17,9 @@ export default function TicketDetail({
     onUpload,
     onRefresh,
     onDelete,
+    onNavigateTicket,
+    onCreateChild,
+    childrenRefreshKey = 0,
 }) {
     const [replyBody, setReplyBody] = useState('')
     const [replyType, setReplyType] = useState('public_reply')
@@ -196,6 +200,13 @@ export default function TicketDetail({
                     </div>
                 </div>
             </div>
+
+            <ChildTicketsPanel
+                key={childrenRefreshKey}
+                parentTicket={ticket}
+                onNavigateTicket={onNavigateTicket}
+                onCreateChild={onCreateChild}
+            />
 
             {getDisplayValue(ticket.description) && (
                 <div className="detail-description">
