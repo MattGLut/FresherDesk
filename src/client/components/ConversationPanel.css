@@ -1,0 +1,93 @@
+.conversation-panel {
+    margin-bottom: 20px;
+}
+
+.conversation-panel .conversation-tabs {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 4px;
+}
+
+.conversation-panel .conversation-tabs button {
+    padding: 10px 16px;
+    border: none;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: 13px;
+    color: #666;
+}
+
+.conversation-panel .conversation-tabs button.active {
+    background: #fff;
+    color: #264653;
+    font-weight: 600;
+    border-bottom: 2px solid #2ecc71;
+}
+
+.conversation-panel .conversation-tabs button:last-child.active {
+    border-bottom-color: #7e57c2;
+}
+
+.conversation-panel .reply-composer {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.conversation-panel .reply-type-toggle {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.conversation-panel .reply-type-toggle button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: 13px;
+    color: #666;
+}
+
+.conversation-panel .reply-type-toggle button.active {
+    background: #fff;
+    color: #264653;
+    font-weight: 600;
+    border-bottom: 2px solid #2ecc71;
+}
+
+.conversation-panel .reply-composer textarea {
+    width: 100%;
+    border: none;
+    padding: 12px;
+    font-size: 14px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.conversation-panel .reply-composer textarea:focus {
+    outline: none;
+}
+
+.conversation-panel .reply-actions {
+    padding: 8px 12px;
+    background: #fafafa;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.conversation-panel .reply-submit {
+    padding: 8px 20px;
+    background: #2ecc71;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.conversation-panel .reply-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
