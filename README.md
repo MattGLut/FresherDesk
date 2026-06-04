@@ -43,9 +43,13 @@ Pushes to `master` run [`.github/workflows/deploy.yml`](.github/workflows/deploy
 
 ## Email ingestion setup
 
-1. In ServiceNow, configure **System Mailboxes → Inbound Actions** (or Email Actions) for your support address.
-2. Ensure the **FresherDesk Create Ticket from Email** inbound action is active (deployed with the app).
-3. Send a test email to the configured address — a ticket is created with source `email`, and an initial public reply comment is added via business rule.
+Full guide: **[docs/EMAIL.md](docs/EMAIL.md)** (mailbox on `dev385836`, inbound action binding, test checklist, troubleshooting).
+
+Summary:
+
+1. Deploy the app so **FresherDesk Create Ticket from Email** and **FresherDesk Email Comment on Insert** are active in scope `x_2058901_fresher`.
+2. Create an **IMAP/POP inbound email account** in ServiceNow and bind it on the inbound action **Mailbox** field.
+3. Send a test email — ticket with `source=email`, initial **public_reply** comment, and email attachments copied to the ticket.
 
 ## API key provisioning
 

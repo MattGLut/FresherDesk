@@ -403,7 +403,7 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 | `status` | string | `open`, `pending`, `resolved`, or `closed` |
 | `priority` | string | `critical`, `high`, `medium`, `low`, or `planning` |
 | `category` | string | `general`, `billing`, `technical`, or `account` |
-| `source` | string | How the ticket was created: `email`, `form`, or `api` |
+| `source` | string | How the ticket was created: `email`, `form`, or `api` (email tickets: see [docs/EMAIL.md](docs/EMAIL.md)) |
 | `tags` | string[] | Labels applied to the ticket (e.g. `["billing", "urgent"]`) |
 | `requester` | object | `{ id, name, email, username }` — `id` may be `null` when `opened_by` is empty; `email` falls back to ticket `requester_email` |
 | `assignee` | object \| null | `{ id, name, email, username, roles }` or `null` if unassigned — `roles` lists ServiceNow role names |

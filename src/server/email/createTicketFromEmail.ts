@@ -1,12 +1,25 @@
-import { gs, GlideRecord } from '@servicenow/glide'
+import { GlideRecord } from '@servicenow/glide'
 import { createInitialEmailComment } from '../tickets/ticketSerializer.ts'
 
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
 
+interface InboundEmailLogger {
+    info?: (message: string) => void
+    warn?: (message: string) => void
+}
+
+interface InboundEmailWrapper {
+    origfrom?: string
+    body_text?: string
+    body?: string
+    subject?: string
+    saveAttachments?: (record: GlideRecord) => void
+}
+
 function resolveRequester(fromAddress: string): { userId: string; email: string } {
     const email = (fromAddress || '').trim().toLowerCase()
     if (!email) {
-        return { userId: gs.getUserID(), email: '' }
+        return { userId: '', email: '' }
     }
 
     const userGr = new GlideRecord('sys_user')
@@ -16,17 +29,29 @@ function resolveRequester(fromAddress: string): { userId: string; email: string 
         return { userId: userGr.getUniqueValue(), email }
     }
 
-    return { userId: gs.getUserID(), email }
+    return { userId: '', email }
+}
+
+function saveEmailAttachments(
+    email: InboundEmailWrapper,
+    current: GlideRecord<'x_2058901_fresher_ticket'>,
+    logger?: InboundEmailLogger
+): void {
+    if (typeof email.saveAttachments !== 'function') {
+        return
+    }
+
+    try {
+        email.saveAttachments(current)
+    } catch (err) {
+        logger?.warn?.(`Failed to save email attachments: ${String(err)}`)
+    }
 }
 
 export function createTicketFromEmail(...args: unknown[]): void {
     const current = args[0] as GlideRecord<'x_2058901_fresher_ticket'>
-    const email = args[2] as {
-        origfrom?: string
-        body_text?: string
-        body?: string
-        subject?: string
-    }
+    const email = args[2] as InboundEmailWrapper
+    const logger = args[3] as InboundEmailLogger | undefined
 
     const fromAddress = email.origfrom || ''
     const requester = resolveRequester(fromAddress)
@@ -36,11 +61,15 @@ export function createTicketFromEmail(...args: unknown[]): void {
     current.setValue('short_description', subject.substring(0, 160))
     current.setValue('description', body)
     current.setValue('requester_email', requester.email)
-    current.setValue('opened_by', requester.userId)
+    if (requester.userId) {
+        current.setValue('opened_by', requester.userId)
+    }
     current.setValue('source', 'email')
     current.setValue('state', '1')
     current.setValue('priority', '3')
     current.setValue('category', 'general')
+
+    saveEmailAttachments(email, current, logger)
 }
 
 export function createEmailCommentAfterInsert(
@@ -55,8 +84,8 @@ export function createEmailCommentAfterInsert(
         return
     }
 
-    const authorId = current.getValue('opened_by') || gs.getUserID()
-    createInitialEmailComment(current.getUniqueValue(), body, authorId)
+    const authorId = current.getValue('opened_by') || ''
+    createInitialEmailComment(current.getUniqueValue(), body, authorId || undefined)
 }
 
 export { TICKET_TABLE }
