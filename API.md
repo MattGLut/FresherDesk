@@ -44,18 +44,29 @@ On each successful request, the matching key record's `last_used` timestamp is u
 
 ## Testing with curl on Windows
 
-PowerShell can strip or alter inline `-d` JSON when passed directly on the command line. If you see `subject is required` with a body that looks correct, try passing the JSON from a variable (still inline, no file):
+In **PowerShell**, this often sends **no JSON body** to the server (you get `subject is required` even though the command looks right):
+
+```powershell
+# Does not send the body reliably from PowerShell → curl.exe
+curl.exe ... -d '{"subject":"Follow-up on password reset","priority":"medium"}' ...
+```
+
+Use one of these instead (same JSON, no temp file required):
+
+**Pipe JSON on stdin** (recommended one-liner):
+
+```powershell
+'{"subject":"Follow-up on password reset","priority":"medium"}' | curl.exe --ssl-no-revoke -i -X POST -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" -d "@-" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
+```
+
+**Variable + `--data-raw`:**
 
 ```powershell
 $body = '{"subject":"Follow-up on password reset","priority":"medium"}'
-curl.exe --ssl-no-revoke -i -X POST `
-  -H "X-API-Key: fd_live_your_secret_here" `
-  -H "Content-Type: application/json" `
-  --data-raw $body `
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
+curl.exe --ssl-no-revoke -i -X POST -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" --data-raw $body "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
 ```
 
-Or use `--data-binary "@create-child.json"` if you prefer a file. Git Bash and WSL can use the inline `-d '...'` examples below.
+Do not use Unix `\` line continuations or `curl` (PowerShell alias) — use **`curl.exe`** on one line or with PowerShell backticks `` ` ``. Git Bash and WSL can use the inline `-d '...'` examples below.
 
 ---
 
@@ -304,7 +315,7 @@ Missing or unreadable body:
 }
 ```
 
-If you see `subject is required` with inline `-d` on Windows PowerShell, pass the JSON via a `$body` variable and `--data-raw` as in [Testing with curl on Windows](#testing-with-curl-on-windows).
+If you see `subject is required` with `-d '{"..."}'` in PowerShell, the JSON never reached ServiceNow — use the pipe or `--data-raw` examples in [Testing with curl on Windows](#testing-with-curl-on-windows).
 
 ---
 
