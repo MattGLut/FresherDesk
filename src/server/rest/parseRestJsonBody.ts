@@ -1,69 +1,53 @@
 import { RESTAPIRequest } from '@servicenow/glide/sn_ws_int'
 import { logApiError } from '../auth/validateApiKey.ts'
 
-function hasKeys(value: Record<string, unknown>): boolean {
-    for (const key in value) {
-        if (Object.prototype.hasOwnProperty.call(value, key)) {
-            return true
-        }
-    }
-    return false
-}
-
-function parseJsonValue<T>(value: unknown): T | undefined {
-    if (value == null || value === '') {
-        return undefined
-    }
-
-    if (typeof value === 'object') {
-        const record = value as Record<string, unknown>
-        return hasKeys(record) ? (record as T) : undefined
-    }
-
-    if (typeof value === 'string') {
-        const trimmed = value.trim()
-        if (!trimmed) {
-            return undefined
-        }
-
-        try {
-            const parsed = JSON.parse(trimmed) as unknown
-            if (typeof parsed === 'object' && parsed !== null && hasKeys(parsed as Record<string, unknown>)) {
-                return parsed as T
-            }
-        } catch (err) {
-            logApiError('parseRestJsonBody', err, `invalid JSON string: ${trimmed.substring(0, 200)}`)
-        }
-    }
-
-    return undefined
-}
-
 /**
  * Reads JSON from a Scripted REST POST/PATCH body.
- * Same order as the original handlers (data, then dataString), but skips an empty
- * parsed `data` object so a populated dataString is still used.
+ * For application/json, use request.body.data first — the stream can only be read once,
+ * so reading dataString before data can make data throw and leave the body unreadable.
  */
-export function parseRestJsonBody<T>(request: RESTAPIRequest): T {
+export function parseRestJsonBody<T>(request: RESTAPIRequest): T | null {
+    let body
     try {
-        const body = request.body
-        if (!body) {
-            return {} as T
-        }
-
-        const fromData = parseJsonValue<T>(body.data)
-        if (fromData) {
-            return fromData
-        }
-
-        const fromString = parseJsonValue<T>(body.dataString)
-        if (fromString) {
-            return fromString
-        }
-
-        return {} as T
+        body = request.body
     } catch (err) {
-        logApiError('parseRestJsonBody', err, 'Exception while reading request body')
+        logApiError('parseRestJsonBody', err, 'request.body access failed')
+        return null
+    }
+
+    if (!body) {
         return {} as T
     }
+
+    try {
+        const data = body.data
+        if (data != null && data !== '') {
+            if (typeof data === 'object') {
+                return data as T
+            }
+            if (typeof data === 'string') {
+                const parsed = JSON.parse(data) as unknown
+                if (typeof parsed === 'object' && parsed !== null) {
+                    return parsed as T
+                }
+            }
+        }
+    } catch (err) {
+        logApiError('parseRestJsonBody', err, 'request.body.data read failed')
+    }
+
+    try {
+        const raw = body.dataString
+        if (typeof raw === 'string' && raw.trim().length > 0) {
+            const parsed = JSON.parse(raw) as unknown
+            if (typeof parsed === 'object' && parsed !== null) {
+                return parsed as T
+            }
+        }
+    } catch (err) {
+        logApiError('parseRestJsonBody', err, 'request.body.dataString read failed')
+        return null
+    }
+
+    return {} as T
 }

@@ -76,6 +76,11 @@ export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResp
         }
 
         const body = parseRestJsonBody<CreateChildTicketBody>(request)
+        if (body === null) {
+            setJsonResponse(response, 400, badRequestResponse('Invalid or unreadable JSON request body'))
+            return
+        }
+
         const subject = asOptionalString(body.subject)
         if (!subject) {
             logApiError('createChildTicket', 'missing subject in request body', `parentId=${parentId}`)

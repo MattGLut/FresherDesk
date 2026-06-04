@@ -42,23 +42,6 @@ On each successful request, the matching key record's `last_used` timestamp is u
 
 ---
 
-## Testing with curl on Windows
-
-PowerShell can strip or alter inline `-d` JSON when passed directly on the command line. If you see `subject is required` with a body that looks correct, try passing the JSON from a variable (still inline, no file):
-
-```powershell
-$body = '{"subject":"Follow-up on password reset","priority":"medium"}'
-curl.exe --ssl-no-revoke -i -X POST `
-  -H "X-API-Key: fd_live_your_secret_here" `
-  -H "Content-Type: application/json" `
-  --data-raw $body `
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
-```
-
-Or use `--data-binary "@create-child.json"` if you prefer a file. Git Bash and WSL can use the inline `-d '...'` examples below.
-
----
-
 ## List tickets
 
 ```http
@@ -293,8 +276,6 @@ Same structure as [Get ticket](#get-ticket). The child ticket includes `parent_i
 
 ### Bad request (400)
 
-Missing or unreadable body:
-
 ```json
 {
   "error": {
@@ -303,8 +284,6 @@ Missing or unreadable body:
   }
 }
 ```
-
-If you see `subject is required` with inline `-d` on Windows PowerShell, pass the JSON via a `$body` variable and `--data-raw` as in [Testing with curl on Windows](#testing-with-curl-on-windows).
 
 ---
 
