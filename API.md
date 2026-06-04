@@ -10,7 +10,7 @@ The API ID (`tickets`) is part of the path. Resource URLs:
 |--------|------|-------------|
 | `GET` | `/tickets/tickets` | List tickets with optional filters and pagination |
 | `GET` | `/tickets/tickets/{id}` | Get a single ticket by number or sys_id |
-| `PATCH` | `/tickets/tickets/{id}` | Update ticket status, subject, or description |
+| `PATCH` | `/tickets/tickets/{id}` | Update ticket status, subject, description, or tags |
 | `POST` | `/tickets/tickets/{id}/create_child` | Create a child ticket under a parent |
 
 **Content type:** `application/json`
@@ -315,6 +315,7 @@ Send JSON with any combination of the fields below. At least one field must be p
 | `subject` | string | Ticket title (maps to `short_description`, max 160 characters) |
 | `title` | string | Alias for `subject` |
 | `description` | string | Full ticket body |
+| `tags` | string[] | Replaces the full tag list (e.g. `["billing", "urgent"]`). Send `[]` to clear all tags. Duplicates are removed; order is not preserved. |
 
 ### Side effects
 
@@ -323,7 +324,7 @@ Send JSON with any combination of the fields below. At least one field must be p
 ### Example request
 
 ```cmd
-curl.exe -s -X PATCH -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\"}" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+curl.exe -s -X PATCH -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\",\"tags\":[\"billing\",\"urgent\"]}" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
 Multi-line (cmd line continuation):
@@ -332,7 +333,7 @@ Multi-line (cmd line continuation):
 curl.exe -s -X PATCH ^
   -H "X-API-Key: fd_live_your_secret_here" ^
   -H "Content-Type: application/json" ^
-  -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\"}" ^
+  -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\",\"tags\":[\"billing\",\"urgent\"]}" ^
   "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
@@ -346,7 +347,7 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 {
   "error": {
     "code": "bad_request",
-    "message": "Provide at least one updatable field: status, subject, description"
+    "message": "Provide at least one updatable field: status, subject, description, tags"
   }
 }
 ```
@@ -441,7 +442,7 @@ All errors return JSON with an `error` object containing `code` and `message`.
 
 ## Limitations (v1)
 
-- **Partial write support** — `PATCH` updates status, subject/title, and description only
+- **Partial write support** — `PATCH` updates status, subject/title, description, and tags (full tag list replacement)
 - **Child tickets** — list endpoint returns top-level tickets only; nested children are reachable via GET on the parent or by navigating to the child sys_id
 - **No attachment download** — metadata only
 - **No public comment creation** via REST — agent replies use the workspace; API updates create internal notes automatically

@@ -15,12 +15,14 @@ import {
     clearUpdateSource,
 } from '../tickets/ticketComments.ts'
 import { applyResolvedStateFields } from '../tickets/ticketState.ts'
+import { serializeTags } from '../tickets/ticketTags.ts'
 
 interface UpdateTicketBody {
     status?: unknown
     subject?: unknown
     title?: unknown
     description?: unknown
+    tags?: unknown
 }
 
 function parseRequestBody(request: RESTAPIRequest): UpdateTicketBody {
@@ -128,8 +130,33 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
             }
         }
 
+        if (body.tags !== undefined) {
+            providedFieldCount += 1
+            if (!Array.isArray(body.tags)) {
+                setJsonResponse(response, 400, badRequestResponse('tags must be an array of strings'))
+                return
+            }
+
+            if (body.tags.some((tag) => typeof tag !== 'string')) {
+                setJsonResponse(response, 400, badRequestResponse('tags must be an array of strings'))
+                return
+            }
+
+            const nextTags = serializeTags(
+                body.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+            )
+            const currentTags = gr.getValue('tags') || '[]'
+            if (nextTags !== currentTags) {
+                updates.tags = nextTags
+            }
+        }
+
         if (providedFieldCount === 0) {
-            setJsonResponse(response, 400, badRequestResponse('Provide at least one updatable field: status, subject, description'))
+            setJsonResponse(
+                response,
+                400,
+                badRequestResponse('Provide at least one updatable field: status, subject, description, tags')
+            )
             return
         }
 
