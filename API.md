@@ -1,8 +1,10 @@
 # FresherDesk REST API
 
-JSON API for listing, retrieving, and updating helpdesk tickets. All endpoints require a valid API key.
+JSON API for listing, retrieving, updating, and creating child helpdesk tickets. All endpoints require a valid API key.
 
-**Base URL:** `https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets`
+**Base URL:** `https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets`
+
+Examples use the dev instance `dev385836.service-now.com` (no trailing slash on URLs) and the dev API key `fd_live_dev_test_abc123xyz` (hash must exist in **FresherDesk API Key** on that instance — see [README.md — API key provisioning](README.md#api-key-provisioning)).
 
 The API ID (`tickets`) is part of the path. Resource URLs:
 
@@ -15,7 +17,9 @@ The API ID (`tickets`) is part of the path. Resource URLs:
 
 **Content type:** `application/json`
 
-Example requests below use **Windows Command Prompt** (`cmd.exe`) and **`curl.exe`**. JSON bodies use double quotes with inner quotes escaped as `\"` (do not use single-quoted `'...'` — that is Bash syntax, not cmd). To continue a command on the next line, end the line with `^`. Add `--ssl-no-revoke` after `curl.exe` if your environment requires it for HTTPS.
+Example requests below use **Windows Command Prompt** (`cmd.exe`) and **`curl.exe --ssl-no-revoke`** (required on many Windows setups for ServiceNow HTTPS). JSON bodies use double quotes with inner quotes escaped as `\"` (do not use single-quoted `'...'` — that is Bash syntax, not cmd). To continue a command on the next line, end the line with `^`.
+
+Successful responses are wrapped by ServiceNow as `{"result":{...}}` (e.g. `result.tickets`, `result.ticket`, `result.error`).
 
 ---
 
@@ -24,7 +28,7 @@ Example requests below use **Windows Command Prompt** (`cmd.exe`) and **`curl.ex
 Every request must include an API key in the `X-API-Key` header.
 
 ```http
-X-API-Key: fd_live_your_secret_here
+X-API-Key: fd_live_dev_test_abc123xyz
 ```
 
 Keys are stored as SHA-256 hashes in the `x_2058901_fresher_api_key` table. Only users with the `x_2058901_fresher.admin` role can create key records. See [README.md — API key provisioning](README.md#api-key-provisioning) for setup steps.
@@ -50,7 +54,7 @@ On each successful request, the matching key record's `last_used` timestamp is u
 GET /api/x_2058901_fresher/v1/tickets/tickets
 ```
 
-Returns a paginated list of ticket summaries. Comments and attachments are **not** included in list responses. Only **top-level** tickets are returned (child tickets are excluded via `parentISEMPTY`); use [Get ticket](#get-ticket) on a parent to see its `children` array.
+Returns a paginated list of ticket summaries. `comments` and `attachments` are always present but **always empty arrays** on list responses (no thread or file metadata is loaded). Only **top-level** tickets are returned (child tickets are excluded via `parentISEMPTY`); use [Get ticket](#get-ticket) on a parent to see its `children` array, or GET the child by number/sys_id directly.
 
 ### Query parameters
 
@@ -59,8 +63,8 @@ Returns a paginated list of ticket summaries. Comments and attachments are **not
 | `status` | string | — | Filter by status: `open`, `pending`, `resolved`, `closed` |
 | `priority` | string | — | Filter by priority: `critical`, `high`, `medium`, `low`, `planning` |
 | `assignee` | string | — | Assignee user sys_id, or `unassigned` for tickets with no assignee |
-| `tag` | string | — | Filter tickets that include this tag (exact match within the stored tag list) |
-| `updated_since` | string | — | ISO datetime; returns tickets updated on or after this time |
+| `tag` | string | — | Filter tickets whose stored JSON tag field contains this substring (e.g. `tag=billing` matches `billing` in `["billing","urgent"]`). Use distinctive tag names; short values can match unintended substrings inside the JSON. |
+| `updated_since` | string | — | Glide/datetime string compared to `sys_updated_on` (e.g. `2026-06-01 00:00:00` in the instance timezone). Invalid values may yield empty results rather than an error. |
 | `limit` | integer | `50` | Page size (minimum 1, maximum 200) |
 | `offset` | integer | `0` | Number of records to skip |
 
@@ -71,7 +75,7 @@ Results are ordered by most recently updated first.
 ### Example request
 
 ```cmd
-curl.exe -s -H "X-API-Key: fd_live_your_secret_here" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&tag=billing&limit=25&offset=0"
+curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&priority=high&tag=billing&limit=25&offset=0"
 ```
 
 ### Example response (200)
@@ -134,12 +138,20 @@ Returns a single ticket with its full conversation thread, attachments, and dire
 |-----------|-------------|
 | `id` | Ticket number (e.g. `TKT0001001`, case-insensitive) or ticket sys_id |
 
-Numbers are detected by the `TKT` prefix. All other values are treated as sys_id lookups.
+Numbers are detected by the `TKT` prefix (case-insensitive). All other path values are treated as ticket sys_id lookups.
 
-### Example request
+### Example requests
+
+By ticket number:
 
 ```cmd
-curl.exe -s -H "X-API-Key: fd_live_your_secret_here" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+```
+
+By sys_id:
+
+```cmd
+curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/a1b2c3d4e5f6789012345678901234ab"
 ```
 
 ### Example response (200)
@@ -190,7 +202,8 @@ curl.exe -s -H "X-API-Key: fd_live_your_secret_here" "https://<instance>.service
         "author": {
           "id": "c1d2e3f4a5b6789012345678901234cd",
           "name": "Jane Customer",
-          "email": "customer@example.com"
+          "email": "customer@example.com",
+          "username": "jane.customer"
         },
         "source": "email",
         "created_at": "2026-06-01 09:15:00"
@@ -228,7 +241,7 @@ curl.exe -s -H "X-API-Key: fd_live_your_secret_here" "https://<instance>.service
 POST /api/x_2058901_fresher/v1/tickets/tickets/{id}/create_child
 ```
 
-Creates a child ticket linked to the parent ticket identified in the path. The child inherits `requester_email` and `opened_by` from the parent. Returns the created ticket with `parent_id` set and an empty `children` array.
+Creates a child ticket linked to the parent ticket identified in the path. The child inherits `requester_email` and `opened_by` from the parent, sets `source` to `api`, and does **not** copy parent tags. Returns **201** with the created ticket (`parent_id` set, `children: []`). There is no REST endpoint to create a top-level ticket in v1.
 
 ### Path parameters
 
@@ -238,28 +251,30 @@ Creates a child ticket linked to the parent ticket identified in the path. The c
 
 ### Request body
 
+Send a JSON object with `Content-Type: application/json`. Malformed JSON or an empty body returns **400** with `subject is required`.
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `subject` | string | Yes | Child ticket title (max 160 characters) |
 | `description` | string | No | Full ticket body |
 | `status` | string | No | `open`, `pending`, `resolved`, or `closed` (default: `open`) |
 | `priority` | string | No | `critical`, `high`, `medium`, `low`, or `planning` |
-| `category` | string | No | `general`, `billing`, `technical`, or `account` (default: `general`) |
+| `category` | string | No | `general`, `billing`, `technical`, or `account` (default: `general`). Other values return **400**. |
 
 ### Example request
 
 ```cmd
-curl.exe -s -X POST -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" -d "{\"subject\":\"Follow-up on password reset\",\"description\":\"Customer still cannot log in.\",\"priority\":\"medium\"}" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
+curl.exe --ssl-no-revoke -s -X POST -H "X-API-Key: fd_live_dev_test_abc123xyz" -H "Content-Type: application/json" -d "{\"subject\":\"Follow-up on password reset\",\"description\":\"Customer still cannot log in.\",\"priority\":\"medium\"}" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
 ```
 
 Multi-line (cmd line continuation):
 
 ```cmd
-curl.exe -s -X POST ^
-  -H "X-API-Key: fd_live_your_secret_here" ^
+curl.exe --ssl-no-revoke -s -X POST ^
+  -H "X-API-Key: fd_live_dev_test_abc123xyz" ^
   -H "Content-Type: application/json" ^
   -d "{\"subject\":\"Follow-up on password reset\",\"description\":\"Customer still cannot log in.\",\"priority\":\"medium\"}" ^
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
+  "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/create_child"
 ```
 
 ### Example response (201)
@@ -307,7 +322,7 @@ Updates one or more ticket fields. Returns the updated ticket (same shape as [Ge
 
 ### Request body
 
-Send JSON with any combination of the fields below. At least one field must be present.
+Send a JSON object with `Content-Type: application/json` and any combination of the fields below. At least one recognized field key must be present (values may match the current record — see [No-op updates](#no-op-updates)).
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -317,24 +332,45 @@ Send JSON with any combination of the fields below. At least one field must be p
 | `description` | string | Full ticket body |
 | `tags` | string[] | Replaces the full tag list (e.g. `["billing", "urgent"]`). Send `[]` to clear all tags. Duplicates are removed; order is not preserved. |
 
+Malformed JSON or an empty body is treated as no fields and returns **400** with `Provide at least one updatable field: …`.
+
 ### Side effects
 
-- Triggers the ticket delta audit business rule, which writes **audit_delta** comments for each changed field (hidden from the agent UI and REST comment output; query the comment table directly for forensics).
+- Triggers the ticket delta audit business rule, which writes **audit_delta** comments for each changed field (hidden from the agent UI and REST `comments`; query `x_2058901_fresher_ticket_comment` for forensics).
+- Setting `status` to `resolved` or `closed` may set `close_notes` to `Updated in FresherDesk` when that field was empty (platform task behavior).
 
-### Example request
+### No-op updates
+
+If every supplied field already matches the stored value, the handler skips the database update and returns **200** with the current ticket (no audit deltas).
+
+### Example requests
+
+Full update:
 
 ```cmd
-curl.exe -s -X PATCH -H "X-API-Key: fd_live_your_secret_here" -H "Content-Type: application/json" -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\",\"tags\":[\"billing\",\"urgent\"]}" "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+curl.exe --ssl-no-revoke -s -X PATCH -H "X-API-Key: fd_live_dev_test_abc123xyz" -H "Content-Type: application/json" -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\",\"tags\":[\"billing\",\"urgent\"]}" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+```
+
+Tags only (replaces entire tag list):
+
+```cmd
+curl.exe --ssl-no-revoke -s -X PATCH -H "X-API-Key: fd_live_dev_test_abc123xyz" -H "Content-Type: application/json" -d "{\"tags\":[\"billing\"]}" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+```
+
+Clear all tags:
+
+```cmd
+curl.exe --ssl-no-revoke -s -X PATCH -H "X-API-Key: fd_live_dev_test_abc123xyz" -H "Content-Type: application/json" -d "{\"tags\":[]}" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
 Multi-line (cmd line continuation):
 
 ```cmd
-curl.exe -s -X PATCH ^
-  -H "X-API-Key: fd_live_your_secret_here" ^
+curl.exe --ssl-no-revoke -s -X PATCH ^
+  -H "X-API-Key: fd_live_dev_test_abc123xyz" ^
   -H "Content-Type: application/json" ^
   -d "{\"status\":\"pending\",\"subject\":\"Password reset still failing\",\"tags\":[\"billing\",\"urgent\"]}" ^
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
+  "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001"
 ```
 
 ### Example response (200)
@@ -369,7 +405,7 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 | `category` | string | `general`, `billing`, `technical`, or `account` |
 | `source` | string | How the ticket was created: `email`, `form`, or `api` |
 | `tags` | string[] | Labels applied to the ticket (e.g. `["billing", "urgent"]`) |
-| `requester` | object | `{ id, name, email, username }` — loaded from `opened_by` user; `email` falls back to ticket `requester_email` |
+| `requester` | object | `{ id, name, email, username }` — `id` may be `null` when `opened_by` is empty; `email` falls back to ticket `requester_email` |
 | `assignee` | object \| null | `{ id, name, email, username, roles }` or `null` if unassigned — `roles` lists ServiceNow role names |
 | `opened_at` | string | Instance display datetime |
 | `updated_at` | string | Instance display datetime |
@@ -423,11 +459,25 @@ All errors return JSON with an `error` object containing `code` and `message`.
 | HTTP status | Code | When |
 |-------------|------|------|
 | 401 | `unauthorized` | Missing, invalid, or inactive API key |
-| 400 | `bad_request` | Invalid update payload or field values |
-| 404 | `not_found` | Ticket does not exist |
+| 400 | `bad_request` | Invalid payload, missing required fields, or invalid field values (see messages below) |
+| 404 | `not_found` | Ticket does not exist (`Ticket not found`) |
 | 500 | `internal_error` | Unexpected server failure |
 
+### Common `bad_request` messages
+
+| Message | Endpoint | Cause |
+|---------|----------|--------|
+| `subject is required` | `POST …/create_child` | Missing/empty `subject` or unreadable JSON body |
+| `subject must be 160 characters or fewer` | `POST …/create_child`, `PATCH` | Subject too long |
+| `status must be one of: open, pending, resolved, closed` | `POST …/create_child`, `PATCH` | Invalid or empty `status` |
+| `priority must be one of: critical, high, medium, low, planning` | `POST …/create_child` | Invalid `priority` |
+| `category must be one of: general, billing, technical, account` | `POST …/create_child` | Invalid `category` |
+| `tags must be an array of strings` | `PATCH` | `tags` not a string array |
+| `Provide at least one updatable field: status, subject, description, tags` | `PATCH` | Empty body, invalid JSON (parsed as empty), or no recognized keys |
+
 ### Internal error (500)
+
+Messages vary by handler: `Failed to list tickets`, `Failed to retrieve ticket`, `Failed to update ticket`, `Failed to create child ticket`, `Failed to retrieve created ticket`, `Failed to retrieve updated ticket`.
 
 ```json
 {
@@ -440,13 +490,35 @@ All errors return JSON with an `error` object containing `code` and `message`.
 
 ---
 
+## Manual test checklist
+
+Use a real ticket number/sys_id from your instance after [deploy](README.md#local-development). Expect **401** if the header is missing or wrong.
+
+| # | Command (from sections above) | Expected |
+|---|------------------------------|----------|
+| 1 | List with filters (`?status=open&…`) | **200**, `tickets` + `meta` |
+| 2 | GET by `TKT…` number | **200**, `ticket` with comments/attachments when present |
+| 3 | GET by sys_id | **200**, same shape |
+| 4 | GET unknown id | **404** |
+| 5 | `POST …/create_child` with subject | **201**, `parent_id` set, `source` `api` |
+| 6 | `POST …/create_child` without subject | **400** `subject is required` |
+| 7 | `PATCH` with status/subject/tags | **200**, fields updated |
+| 8 | `PATCH` tags-only / `tags:[]` | **200**, tags replaced or cleared |
+| 9 | `PATCH` with no recognized fields | **400** |
+| 10 | `PATCH` with invalid `status` | **400** |
+
+**cmd.exe pitfalls:** Use `curl.exe --ssl-no-revoke` and escaped double quotes (`\"`) in `-d` JSON. Without `--ssl-no-revoke`, curl often exits **35** with no output. Bash-style `-d '{"…"}'` often sends an empty body and triggers **400**/**500**. Prefer a JSON file: `curl.exe --ssl-no-revoke … -d @payload.json` when bodies are large.
+
+---
+
 ## Limitations (v1)
 
-- **Partial write support** — `PATCH` updates status, subject/title, description, and tags (full tag list replacement)
-- **Child tickets** — list endpoint returns top-level tickets only; nested children are reachable via GET on the parent or by navigating to the child sys_id
+- **No top-level ticket create** — only `POST …/create_child` under an existing parent
+- **Partial write support** — `PATCH` updates `status`, `subject`/`title`, `description`, and `tags` only (full tag list replacement). Ignored if sent: `priority`, `category`, `assignee`, `parent`, `requester`, etc.
+- **Child tickets** — list endpoint returns top-level tickets only; children via parent GET `children` or direct GET by child id
 - **No attachment download** — metadata only
-- **No public comment creation** via REST — agent replies use the workspace; API updates create internal notes automatically
-- **Audit deltas** — field-level change history is stored as `audit_delta` comments but excluded from REST and UI conversation views
+- **No comment creation** via REST — conversation replies use the agent workspace
+- **Audit deltas** — `PATCH` changes emit `audit_delta` comments (not returned in `comments`); no separate public/internal API comment endpoint
 - ServiceNow platform authentication is disabled on these routes; access is controlled solely by API key validation
 
 Implementation source: [`src/fluent/rest/tickets-api.now.ts`](src/fluent/rest/tickets-api.now.ts), [`src/server/rest/`](src/server/rest/).

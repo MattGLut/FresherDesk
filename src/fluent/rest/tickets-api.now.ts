@@ -52,7 +52,7 @@ RestApi({
             authentication: false,
             internalRole: false,
             version: 1,
-            shortDescription: 'Update ticket status, subject, or description',
+            shortDescription: 'Update ticket status, subject, description, or tags',
         },
         {
             $id: Now.ID['tickets-create-child-route'],

@@ -1,4 +1,4 @@
-import { GlideRecord } from '@servicenow/glide'
+import { GlideAggregate, GlideRecord } from '@servicenow/glide'
 import { RESTAPIRequest, RESTAPIResponse } from '@servicenow/glide/sn_ws_int'
 import {
     validateApiKey,
@@ -8,11 +8,25 @@ import {
 } from '../auth/validateApiKey.ts'
 import { serializeTicket } from '../tickets/ticketSerializer.ts'
 import {
-    buildTicketQuery,
+    buildTicketFilterQuery,
     getTicketTableName,
     parseLimit,
     parseOffset,
+    queryParamAsString,
 } from '../tickets/ticketQueries.ts'
+
+function countMatchingTickets(filterQuery: string): number {
+    const aggregate = new GlideAggregate(getTicketTableName())
+    aggregate.addEncodedQuery(filterQuery)
+    aggregate.addAggregate('COUNT')
+    aggregate.query()
+
+    if (!aggregate.next()) {
+        return 0
+    }
+
+    return parseInt(aggregate.getAggregate('COUNT') || '0', 10) || 0
+}
 
 export function listTickets(request: RESTAPIRequest, response: RESTAPIResponse): void {
     try {
@@ -22,10 +36,10 @@ export function listTickets(request: RESTAPIRequest, response: RESTAPIResponse):
         }
 
         const queryParams = request.queryParams
-        const limit = parseLimit(queryParams.limit, 50, 200)
-        const offset = parseOffset(queryParams.offset)
+        const limit = parseLimit(queryParamAsString(queryParams.limit), 50, 200)
+        const offset = parseOffset(queryParamAsString(queryParams.offset))
 
-        const encodedQuery = buildTicketQuery({
+        const filterQuery = buildTicketFilterQuery({
             status: queryParams.status,
             priority: queryParams.priority,
             assignee: queryParams.assignee,
@@ -34,8 +48,10 @@ export function listTickets(request: RESTAPIRequest, response: RESTAPIResponse):
         })
 
         const gr = new GlideRecord(getTicketTableName())
-        gr.addEncodedQuery(encodedQuery)
-        gr.chooseWindow(offset, offset + limit, false)
+        gr.addEncodedQuery(filterQuery)
+        gr.orderByDesc('sys_updated_on')
+        const lastRow = offset + limit - 1
+        gr.chooseWindow(offset, lastRow < offset ? offset : lastRow, false)
         gr.query()
 
         const tickets = []
@@ -43,10 +59,7 @@ export function listTickets(request: RESTAPIRequest, response: RESTAPIResponse):
             tickets.push(serializeTicket(gr, false))
         }
 
-        const countGr = new GlideRecord(getTicketTableName())
-        countGr.addEncodedQuery(encodedQuery)
-        countGr.query()
-        const total = countGr.getRowCount()
+        const total = countMatchingTickets(filterQuery)
 
         setJsonResponse(response, 200, {
             tickets,

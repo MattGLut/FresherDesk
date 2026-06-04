@@ -7,7 +7,7 @@ A Freshdesk-style helpdesk built on ServiceNow using the [Now SDK](https://www.s
 - **Agent workspace** — three-pane UI (sidebar filters, ticket list, ticket detail with conversation thread)
 - **Ticket creation** — web form and inbound email ingestion
 - **Attachments** — ServiceNow native `sys_attachment` storage (Azure Blob planned for future)
-- **REST API** — API-key-authenticated read endpoints ([API.md](API.md))
+- **REST API** — API-key-authenticated ticket API: list, get, PATCH update, child create ([API.md](API.md))
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ npm run deploy   # deploys to instance configured in now.config.json / env vars
 Open the agent workspace:
 
 ```
-https://<instance>.service-now.com/x_2058901_fresher_ticket_workspace.do
+https://dev385836.service-now.com/x_2058901_fresher_ticket_workspace.do
 ```
 
 ## GitHub Actions deployment
@@ -66,11 +66,10 @@ gs.info(digest.getSHA256Hex('YOUR_SECRET_HERE'));
 
 See **[API.md](API.md)** for full endpoint documentation, request/response schemas, and error codes.
 
-Quick start:
+Quick start (Windows cmd — see [API.md](API.md) for full examples):
 
-```bash
-curl -s -H "X-API-Key: YOUR_SECRET" \
-  "https://<instance>.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&limit=50"
+```cmd
+curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&limit=50"
 ```
 
 ## Project structure
@@ -93,5 +92,5 @@ src/
 
 - Customer portal
 - Azure Blob attachments (ServiceNow storage used for now)
-- REST write endpoints (POST/PATCH)
+- REST top-level ticket create, comment create, attachment upload/download
 - Email reply threading
