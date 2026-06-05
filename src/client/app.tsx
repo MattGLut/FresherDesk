@@ -10,6 +10,8 @@ import TicketDetail from './components/TicketDetail'
 import TicketForm from './components/TicketForm'
 import './app.css'
 
+const TICKET_TABLE = 'x_2058901_fresher_ticket'
+
 export default function App() {
     const [tickets, setTickets] = useState([])
     const [selectedTicket, setSelectedTicket] = useState(null)
@@ -84,7 +86,7 @@ export default function App() {
                 const [ticketData, commentData, attachmentData] = await Promise.all([
                     ticketService.get(sysId),
                     commentService.listForTicket(sysId),
-                    attachmentService.list(sysId),
+                    attachmentService.list(TICKET_TABLE, sysId),
                 ])
                 setSelectedTicket(ticketData)
                 setComments(commentData)
@@ -177,11 +179,7 @@ export default function App() {
     }
 
     const handleUpload = async (sysId, file) => {
-        await attachmentService.upload(sysId, file)
-    }
-
-    const handleDownloadAttachment = async (ticketSysId, attachmentSysId) => {
-        return attachmentService.getDownloadUrl(ticketSysId, attachmentSysId)
+        await attachmentService.upload(TICKET_TABLE, sysId, file)
     }
 
     const handleDelete = async (ticket) => {
@@ -230,7 +228,6 @@ export default function App() {
                         onUpdate={handleUpdate}
                         onReply={handleReply}
                         onUpload={handleUpload}
-                        onDownloadAttachment={handleDownloadAttachment}
                         onRefresh={loadTicketDetail}
                         onDelete={handleDelete}
                         onNavigateTicket={handleNavigateTicket}

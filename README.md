@@ -6,7 +6,7 @@ A Freshdesk-style helpdesk built on ServiceNow using the [Now SDK](https://www.s
 
 - **Agent workspace** — three-pane UI (sidebar filters, ticket list, ticket detail with conversation thread)
 - **Ticket creation** — web form and inbound email ingestion
-- **Attachments** — Azure Blob storage with read SAS download URLs ([docs/AZURE.md](docs/AZURE.md)); agent UI upload and inbound email ingest
+- **Attachments** — ServiceNow native `sys_attachment` storage (Azure Blob planned for future)
 - **REST API** — API-key-authenticated ticket API: list, get, PATCH update, child create ([API.md](API.md))
 
 ## Prerequisites
@@ -49,7 +49,7 @@ Summary:
 
 1. Deploy the app so **FresherDesk Create Ticket from Email** and **FresherDesk Email Comment on Insert** are active in scope `x_2058901_fresher`.
 2. Create an **IMAP/POP inbound email account** in ServiceNow and bind it on the inbound action **Mailbox** field.
-3. Send a test email — ticket with `source=email`, initial **public_reply** comment, and email attachments migrated to Azure Blob (see [docs/AZURE.md](docs/AZURE.md)).
+3. Send a test email — ticket with `source=email`, initial **public_reply** comment, and email attachments copied to the ticket.
 
 ## API key provisioning
 
@@ -65,10 +65,6 @@ gs.info(digest.getSHA256Hex('YOUR_SECRET_HERE'));
 
 3. Create a record in **FresherDesk API Key** with `name`, `key_hash` (output from step 2), and `active=true`.
 4. Store the plaintext secret securely — it cannot be recovered from the hash.
-
-## Azure Blob attachments
-
-Provisioning, system properties, and test checklist: **[docs/AZURE.md](docs/AZURE.md)**.
 
 ## REST API
 

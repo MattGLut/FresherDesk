@@ -83,46 +83,6 @@ Acl({
 })
 
 Acl({
-    $id: Now.ID['attachment-acl-read'],
-    type: 'record',
-    table: 'x_2058901_fresher_ticket_attachment',
-    operation: 'read',
-    decisionType: 'allow',
-    roles: [x_2058901_fresher_agent],
-    adminOverrides: true,
-})
-
-Acl({
-    $id: Now.ID['attachment-acl-create'],
-    type: 'record',
-    table: 'x_2058901_fresher_ticket_attachment',
-    operation: 'create',
-    decisionType: 'allow',
-    roles: [x_2058901_fresher_agent],
-    adminOverrides: true,
-})
-
-Acl({
-    $id: Now.ID['attachment-acl-write'],
-    type: 'record',
-    table: 'x_2058901_fresher_ticket_attachment',
-    operation: 'write',
-    decisionType: 'allow',
-    roles: [x_2058901_fresher_agent],
-    adminOverrides: true,
-})
-
-Acl({
-    $id: Now.ID['attachment-acl-delete'],
-    type: 'record',
-    table: 'x_2058901_fresher_ticket_attachment',
-    operation: 'delete',
-    decisionType: 'allow',
-    roles: [x_2058901_fresher_agent],
-    adminOverrides: true,
-})
-
-Acl({
     $id: Now.ID['api-key-acl-read'],
     type: 'record',
     table: 'x_2058901_fresher_api_key',
