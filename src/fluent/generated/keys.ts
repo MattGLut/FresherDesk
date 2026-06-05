@@ -113,6 +113,10 @@ declare global {
                         table: 'sys_module'
                         id: '857cdf93b2bf4c6aa4b1765e8c42d2b3'
                     }
+                    src_server_rest_parseRestBody_ts: {
+                        table: 'sys_module'
+                        id: 'b5d37c94fc7e40bdbc8dbaa16a6dadef'
+                    }
                     src_server_rest_updateTicket_ts: {
                         table: 'sys_module'
                         id: '988d3531662546caafc6fdf75f840dae'
@@ -180,6 +184,14 @@ declare global {
                     'ticket-email-comment-br': {
                         table: 'sys_script'
                         id: '9ce096be130b40ec9d8f6511c7ef5a57'
+                    }
+                    'tickets-agent-attachment-download-route': {
+                        table: 'sys_ws_operation'
+                        id: '80443ab645cf4704bb62d929b5bd7180'
+                    }
+                    'tickets-agent-upload-attachment-route': {
+                        table: 'sys_ws_operation'
+                        id: '6b0ea16a963c464b86c83ae5f844d083'
                     }
                     'tickets-api-v1': {
                         table: 'sys_ws_version'

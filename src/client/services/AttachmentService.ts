@@ -5,7 +5,7 @@ declare global {
 }
 
 const ATTACHMENT_TABLE = 'x_2058901_fresher_ticket_attachment'
-const API_BASE = '/api/x_2058901_fresher/v1/tickets/tickets'
+const AGENT_API_BASE = '/api/x_2058901_fresher/v1/tickets/agent/tickets'
 
 export interface AttachmentRecord {
     sys_id: unknown
@@ -28,6 +28,20 @@ function readFileAsBase64(file: File): Promise<string> {
     })
 }
 
+function extractErrorMessage(errorData: unknown, status: number): string {
+    const payload = errorData as {
+        error?: { message?: string }
+        result?: { error?: { message?: string } }
+        status?: string
+    }
+    return (
+        payload.error?.message ||
+        payload.result?.error?.message ||
+        (payload.status === 'failure' ? 'Request failed' : '') ||
+        `HTTP error ${status}`
+    )
+}
+
 export class AttachmentService {
     private headers(): Record<string, string> {
         return {
@@ -45,6 +59,7 @@ export class AttachmentService {
 
         const response = await fetch(`/api/now/table/${ATTACHMENT_TABLE}?${searchParams.toString()}`, {
             method: 'GET',
+            credentials: 'same-origin',
             headers: {
                 Accept: 'application/json',
                 'X-UserToken': window.g_ck,
@@ -53,7 +68,7 @@ export class AttachmentService {
 
         if (!response.ok) {
             const errorData = await response.json()
-            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+            throw new Error(extractErrorMessage(errorData, response.status))
         }
 
         const { result } = await response.json()
@@ -62,8 +77,9 @@ export class AttachmentService {
 
     async upload(ticketSysId: string, file: File): Promise<unknown> {
         const contentBase64 = await readFileAsBase64(file)
-        const response = await fetch(`${API_BASE}/${ticketSysId}/attachments`, {
+        const response = await fetch(`${AGENT_API_BASE}/${ticketSysId}/attachments`, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: this.headers(),
             body: JSON.stringify({
                 file_name: file.name,
@@ -74,24 +90,28 @@ export class AttachmentService {
 
         if (!response.ok) {
             const errorData = await response.json()
-            throw new Error(errorData.error?.message || errorData.result?.error?.message || `HTTP error ${response.status}`)
+            throw new Error(extractErrorMessage(errorData, response.status))
         }
 
         return response.json()
     }
 
     async getDownloadUrl(ticketSysId: string, attachmentSysId: string): Promise<string> {
-        const response = await fetch(`${API_BASE}/${ticketSysId}/attachments/${attachmentSysId}/download`, {
-            method: 'GET',
-            headers: {
-                Accept: 'application/json',
-                'X-UserToken': window.g_ck,
-            },
-        })
+        const response = await fetch(
+            `${AGENT_API_BASE}/${ticketSysId}/attachments/${attachmentSysId}/download`,
+            {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-UserToken': window.g_ck,
+                },
+            }
+        )
 
         if (!response.ok) {
             const errorData = await response.json()
-            throw new Error(errorData.error?.message || errorData.result?.error?.message || `HTTP error ${response.status}`)
+            throw new Error(extractErrorMessage(errorData, response.status))
         }
 
         const payload = await response.json()

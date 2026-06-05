@@ -4,8 +4,8 @@ import { listTickets } from '../../server/rest/listTickets'
 import { getTicket } from '../../server/rest/getTicket'
 import { updateTicket } from '../../server/rest/updateTicket'
 import { createChildTicket } from '../../server/rest/createChildTicket'
-import { uploadTicketAttachmentHandler } from '../../server/rest/uploadTicketAttachment'
-import { getAttachmentDownloadUrlHandler } from '../../server/rest/getAttachmentDownloadUrl'
+import { uploadTicketAttachmentHandler, uploadTicketAttachmentForAgent } from '../../server/rest/uploadTicketAttachment'
+import { getAttachmentDownloadUrlHandler, getAttachmentDownloadUrlForAgent } from '../../server/rest/getAttachmentDownloadUrl'
 
 RestApi({
     $id: Now.ID['tickets-rest-api'],
@@ -76,7 +76,18 @@ RestApi({
             authentication: false,
             internalRole: false,
             version: 1,
-            shortDescription: 'Upload a ticket attachment to Azure Blob storage',
+            shortDescription: 'Upload a ticket attachment (API key, base64 JSON)',
+        },
+        {
+            $id: Now.ID['tickets-agent-upload-attachment-route'],
+            path: '/agent/tickets/{id}/attachments',
+            method: 'POST',
+            script: uploadTicketAttachmentForAgent,
+            authorization: true,
+            authentication: true,
+            internalRole: false,
+            version: 1,
+            shortDescription: 'Upload a ticket attachment from the agent workspace (session auth)',
         },
         {
             $id: Now.ID['tickets-attachment-download-route'],
@@ -88,6 +99,17 @@ RestApi({
             internalRole: false,
             version: 1,
             shortDescription: 'Refresh a time-limited Azure SAS download URL for an attachment',
+        },
+        {
+            $id: Now.ID['tickets-agent-attachment-download-route'],
+            path: '/agent/tickets/{id}/attachments/{attachmentId}/download',
+            method: 'GET',
+            script: getAttachmentDownloadUrlForAgent,
+            authorization: true,
+            authentication: true,
+            internalRole: false,
+            version: 1,
+            shortDescription: 'Refresh attachment download URL for the agent workspace (session auth)',
         },
     ],
 })

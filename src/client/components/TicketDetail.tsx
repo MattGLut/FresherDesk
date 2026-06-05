@@ -112,9 +112,14 @@ export default function TicketDetail({
     const handleFileChange = async (e) => {
         const file = e.target.files?.[0]
         if (!file) return
-        await onUpload(sysId, file)
-        e.target.value = ''
-        await onRefresh(sysId, { showLoading: false })
+        try {
+            await onUpload(sysId, file)
+            e.target.value = ''
+            await onRefresh(sysId, { showLoading: false })
+        } catch (err) {
+            e.target.value = ''
+            window.alert(`Upload failed: ${err.message || 'Unknown error'}`)
+        }
     }
 
     const handleAttachmentClick = async (event, attachment) => {
