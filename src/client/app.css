@@ -7,17 +7,6 @@ body {
     font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
-/* ServiceNow UI frame styles + Tailwind preflight (a { text-decoration: inherit })
-   can underline all text when hovering anywhere inside an ancestor link/wrapper. */
-#root,
-#root * {
-    text-decoration: none;
-}
-
-#root a:hover {
-    text-decoration: underline;
-}
-
 .workspace-app {
     display: flex;
     min-height: 100dvh;
@@ -109,7 +98,6 @@ body {
     color: #d32f2f;
     cursor: pointer;
     font-weight: bold;
-    text-decoration: underline !important;
     min-height: 44px;
     padding: 0 8px;
 }

@@ -114,8 +114,8 @@
   }
   a {
     color: inherit;
-    -webkit-text-decoration: inherit;
-    text-decoration: inherit;
+    -webkit-text-decoration: none;
+    text-decoration: none;
   }
   b, strong {
     font-weight: bolder;
@@ -1343,4 +1343,24 @@
       --tw-backdrop-sepia: initial;
     }
   }
+}
+
+/* ServiceNow UI frame underlines descendants on :hover — reset at end of bundle. */
+#root,
+#root *,
+#root *:hover,
+#root *:focus,
+#root *:focus-visible {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  -webkit-text-decoration: none !important;
+}
+
+#root a:hover,
+#root .error-message button,
+#root .error-message button:hover,
+#root .parent-link-btn:hover,
+#root .attachment-list a:hover {
+  text-decoration: underline !important;
+  text-decoration-line: underline !important;
 }

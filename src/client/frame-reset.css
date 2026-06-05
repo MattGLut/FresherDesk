@@ -1,0 +1,19 @@
+/* Loaded last — ServiceNow frame styles underline descendants on :hover. */
+#root,
+#root *,
+#root *:hover,
+#root *:focus,
+#root *:focus-visible {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    -webkit-text-decoration: none !important;
+}
+
+#root a:hover,
+#root .error-message button,
+#root .error-message button:hover,
+#root .parent-link-btn:hover,
+#root .attachment-list a:hover {
+    text-decoration: underline !important;
+    text-decoration-line: underline !important;
+}
