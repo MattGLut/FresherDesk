@@ -137,15 +137,15 @@ export default function TicketDetail({
                     <span className="detail-number">{getDisplayValue(ticket.number)}</span>
                     <h2>{getDisplayValue(ticket.short_description)}</h2>
                 </div>
-                <button className="delete-btn" onClick={() => onDelete(ticket)}>
+                <button type="button" className="delete-btn" onClick={() => onDelete(ticket)}>
                     Delete
                 </button>
             </div>
 
             <div className="detail-fields">
                 <div className="field-group">
-                    <label>Status</label>
-                    <select value={localState.state} onChange={(e) => handleFieldUpdate('state', e.target.value)}>
+                    <span className="field-label">Status</span>
+                    <select id="ticket-status" value={localState.state} onChange={(e) => handleFieldUpdate('state', e.target.value)}>
                         <option value="1">Open</option>
                         <option value="2">Pending</option>
                         <option value="6">Resolved</option>
@@ -153,8 +153,8 @@ export default function TicketDetail({
                     </select>
                 </div>
                 <div className="field-group">
-                    <label>Priority</label>
-                    <select value={localState.priority} onChange={(e) => handleFieldUpdate('priority', e.target.value)}>
+                    <span className="field-label">Priority</span>
+                    <select id="ticket-priority" value={localState.priority} onChange={(e) => handleFieldUpdate('priority', e.target.value)}>
                         <option value="1">Critical</option>
                         <option value="2">High</option>
                         <option value="3">Medium</option>
@@ -162,8 +162,9 @@ export default function TicketDetail({
                     </select>
                 </div>
                 <div className="field-group">
-                    <label>Assignee</label>
+                    <span className="field-label">Assignee</span>
                     <select
+                        id="ticket-assignee"
                         value={localState.assigned_to}
                         onChange={(e) => handleFieldUpdate('assigned_to', e.target.value)}
                     >
@@ -176,15 +177,15 @@ export default function TicketDetail({
                     </select>
                 </div>
                 <div className="field-group">
-                    <label>Requester</label>
+                    <span className="field-label">Requester</span>
                     <span className="field-readonly">{getRequesterDisplay(ticket)}</span>
                 </div>
                 <div className="field-group">
-                    <label>Category</label>
+                    <span className="field-label">Category</span>
                     <span className="field-readonly">{getDisplayValue(ticket.category)}</span>
                 </div>
                 <div className="field-group field-group-tags">
-                    <label>Tags</label>
+                    <span className="field-label">Tags</span>
                     <div className="tag-editor">
                         <div className="tag-list">
                             {localTags.length === 0 ? (

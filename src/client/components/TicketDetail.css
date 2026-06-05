@@ -5,6 +5,11 @@
     background: #fff;
     height: 100%;
     width: 100%;
+    text-decoration: none;
+}
+
+.ticket-detail-panel :where(h1, h2, h3, h4, p, span, div, button, select, textarea, li, option) {
+    text-decoration: none;
 }
 
 .ticket-detail-panel.empty {
@@ -100,7 +105,7 @@
     border-bottom: 1px solid #eee;
 }
 
-.field-group label {
+.field-group .field-label {
     display: block;
     font-size: 11px;
     text-transform: uppercase;
@@ -347,6 +352,11 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 13px;
+    text-decoration: none;
+}
+
+.upload-btn:hover {
+    text-decoration: none;
 }
 
 .no-attachments {
