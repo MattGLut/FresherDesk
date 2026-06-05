@@ -183,7 +183,7 @@ export default function TicketDetail({
                     <label>Category</label>
                     <span className="field-readonly">{getDisplayValue(ticket.category)}</span>
                 </div>
-                <div className="field-group field-group-full">
+                <div className="field-group field-group-tags">
                     <label>Tags</label>
                     <div className="tag-editor">
                         <div className="tag-list">
