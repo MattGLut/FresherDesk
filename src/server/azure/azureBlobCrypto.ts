@@ -58,14 +58,6 @@ export function encodeBase64(bytes: number[]): string {
     return output
 }
 
-export function bytesToIso8859String(bytes: number[]): string {
-    let output = ''
-    for (let i = 0; i < bytes.length; i += 1) {
-        output += String.fromCharCode(bytes[i] & 0xff)
-    }
-    return output
-}
-
 function rightRotate(value: number, amount: number): number {
     return (value >>> amount) | (value << (32 - amount))
 }

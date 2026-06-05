@@ -9,5 +9,6 @@ BusinessRule({
     when: 'after',
     action: ['insert'],
     condition: 'table_name=x_2058901_fresher_ticket',
+    access: 'public',
     script: syncTicketAttachmentToAzure,
 })
