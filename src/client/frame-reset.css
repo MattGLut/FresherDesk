@@ -1,5 +1,4 @@
-/* ServiceNow frame styles can decorate text via standard or -webkit- properties,
-   or via border-bottom on interactive elements. Loaded last in main.tsx. */
+/* No underlines anywhere in the app shell. */
 #root,
 #root *,
 #root *::before,
@@ -11,49 +10,4 @@
     text-decoration-line: none !important;
     -webkit-text-decoration-line: none !important;
     text-decoration-thickness: 0 !important;
-    text-underline-offset: unset !important;
-}
-
-/* SN sometimes simulates link underline with border-bottom on buttons/spans. */
-#root .nav-item,
-#root .nav-item:hover,
-#root .ticket-row,
-#root .ticket-row:hover,
-#root .ticket-row span,
-#root .ticket-row span:hover,
-#root .field-label,
-#root .field-readonly,
-#root .detail-header h2,
-#root .detail-number,
-#root .detail-description p,
-#root .detail-section h3,
-#root .child-tickets-header h3,
-#root .child-tickets-empty,
-#root .conversation-empty,
-#root .comment-body,
-#root .no-attachments {
-    border-bottom: none !important;
-    box-shadow: none !important;
-    background-image: none !important;
-}
-
-#root a:hover,
-#root .error-message button,
-#root .error-message button:hover,
-#root .parent-link-btn:hover,
-#root .attachment-list a:hover {
-    text-decoration: underline !important;
-    text-decoration-line: underline !important;
-    -webkit-text-decoration-line: underline !important;
-    text-decoration-thickness: auto !important;
-}
-
-/* Keep tab active indicators (they use border-bottom intentionally). */
-#root .conversation-tabs button.active,
-#root .reply-type-toggle button.active {
-    border-bottom: 2px solid #2ecc71 !important;
-}
-
-#root .conversation-tabs button:last-child.active {
-    border-bottom-color: #7e57c2 !important;
 }

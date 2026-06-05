@@ -374,7 +374,7 @@
 }
 
 .attachment-list a:hover {
-    text-decoration: underline;
+    color: #0d47a1;
 }
 
 .att-size {

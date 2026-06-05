@@ -105,8 +105,8 @@
     border-top-width: 1px;
   }
   abbr:where([title]) {
-    -webkit-text-decoration: underline dotted;
-    text-decoration: underline dotted;
+    -webkit-text-decoration: none;
+    text-decoration: none;
   }
   h1, h2, h3, h4, h5, h6 {
     font-size: inherit;
@@ -1364,7 +1364,7 @@
 #root .error-message button:hover,
 #root .parent-link-btn:hover,
 #root .attachment-list a:hover {
-  text-decoration: underline !important;
-  text-decoration-line: underline !important;
-  -webkit-text-decoration-line: underline !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  -webkit-text-decoration-line: none !important;
 }

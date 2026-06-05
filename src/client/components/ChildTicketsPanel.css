@@ -32,7 +32,7 @@
 }
 
 .parent-link-btn:hover {
-    text-decoration: underline;
+    color: #0d47a1;
 }
 
 .child-tickets-header {

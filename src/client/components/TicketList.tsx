@@ -71,7 +71,7 @@ export default function TicketList({ tickets, onSelect, loading, refreshing, tag
                         <span>Status</span>
                         <span>Updated</span>
                     </div>
-                    <ul className="ticket-rows">
+                    <ul className="ticket-rows" spellCheck={false}>
                         {tickets.map((ticket) => {
                             const sysId = getSysId(ticket)
                             const stateValue = typeof ticket.state === 'object' ? ticket.state.value : ticket.state
