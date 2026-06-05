@@ -62,54 +62,67 @@ export default function TicketList({ tickets, onSelect, loading, refreshing, tag
             {tickets.length === 0 ? (
                 <div className="list-empty">No tickets in this view</div>
             ) : (
-                <ul className="ticket-rows">
-                    {tickets.map((ticket) => {
-                        const sysId = getSysId(ticket)
-                        const stateValue = typeof ticket.state === 'object' ? ticket.state.value : ticket.state
-                        const priorityValue = typeof ticket.priority === 'object' ? ticket.priority.value : ticket.priority
-                        const tags = parseTags(ticket.tags)
+                <>
+                    <div className="ticket-row-header" aria-hidden="true">
+                        <span>Number</span>
+                        <span>Subject</span>
+                        <span>Requester</span>
+                        <span>Priority</span>
+                        <span>Status</span>
+                        <span>Updated</span>
+                    </div>
+                    <ul className="ticket-rows">
+                        {tickets.map((ticket) => {
+                            const sysId = getSysId(ticket)
+                            const stateValue = typeof ticket.state === 'object' ? ticket.state.value : ticket.state
+                            const priorityValue = typeof ticket.priority === 'object' ? ticket.priority.value : ticket.priority
+                            const tags = parseTags(ticket.tags)
 
-                        return (
-                            <li
-                                key={sysId}
-                                className="ticket-row"
-                                onClick={() => onSelect(ticket)}
-                            >
-                                <div className="row-top">
+                            return (
+                                <li
+                                    key={sysId}
+                                    className="ticket-row"
+                                    onClick={() => onSelect(ticket)}
+                                >
                                     <span className="ticket-number">{getDisplayValue(ticket.number)}</span>
-                                    <span className={`status-chip ${statusClass(String(stateValue))}`}>
-                                        {getChoiceDisplay(ticket.state, STATE_DISPLAY_LABELS)}
-                                    </span>
-                                </div>
-                                <p className="row-subject">{getDisplayValue(ticket.short_description)}</p>
-                                {tags.length > 0 && (
-                                    <div className="row-tags">
-                                        {tags.map((tag) => (
-                                            <button
-                                                key={tag}
-                                                type="button"
-                                                className="tag-chip"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    onTagFilterChange(tag)
-                                                }}
-                                            >
-                                                {tag}
-                                            </button>
-                                        ))}
+
+                                    <div className="row-subject-cell">
+                                        <span className="row-subject">{getDisplayValue(ticket.short_description)}</span>
+                                        {tags.length > 0 && (
+                                            <div className="row-tags">
+                                                {tags.map((tag) => (
+                                                    <button
+                                                        key={tag}
+                                                        type="button"
+                                                        className="tag-chip"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            onTagFilterChange(tag)
+                                                        }}
+                                                    >
+                                                        {tag}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                                <div className="row-meta">
-                                    <span>{getRequesterDisplay(ticket)}</span>
+
+                                    <span className="row-requester">{getRequesterDisplay(ticket)}</span>
+
                                     <span className={`priority-chip ${priorityClass(String(priorityValue))}`}>
                                         {getChoiceDisplay(ticket.priority, PRIORITY_DISPLAY_LABELS)}
                                     </span>
-                                </div>
-                                <div className="row-updated">{getDisplayValue(ticket.sys_updated_on)}</div>
-                            </li>
-                        )
-                    })}
-                </ul>
+
+                                    <span className={`status-chip ${statusClass(String(stateValue))}`}>
+                                        {getChoiceDisplay(ticket.state, STATE_DISPLAY_LABELS)}
+                                    </span>
+
+                                    <span className="row-updated">{getDisplayValue(ticket.sys_updated_on)}</span>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                </>
             )}
         </div>
     )
