@@ -32,7 +32,7 @@
 }
 
 .parent-link-btn:hover {
-    text-decoration: underline;
+    text-decoration: underline !important;
 }
 
 .child-tickets-header {
