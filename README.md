@@ -6,7 +6,7 @@ A Freshdesk-style helpdesk built on ServiceNow using the [Now SDK](https://www.s
 
 - **Agent workspace** — three-pane UI (sidebar filters, ticket list, ticket detail with conversation thread)
 - **Ticket creation** — web form and inbound email ingestion
-- **Attachments** — ServiceNow native `sys_attachment` storage (Azure Blob planned for future)
+- **Attachments** — `sys_attachment` in the UI; Azure Blob sync + SAS download URLs on REST GET ([docs/AZURE.md](docs/AZURE.md))
 - **REST API** — API-key-authenticated ticket API: list, get, PATCH update, child create ([API.md](API.md))
 
 ## Prerequisites
@@ -49,7 +49,11 @@ Summary:
 
 1. Deploy the app so **FresherDesk Create Ticket from Email** and **FresherDesk Email Comment on Insert** are active in scope `x_2058901_fresher`.
 2. Create an **IMAP/POP inbound email account** in ServiceNow and bind it on the inbound action **Mailbox** field.
-3. Send a test email — ticket with `source=email`, initial **public_reply** comment, and email attachments copied to the ticket.
+3. Send a test email — ticket with `source=email`, initial **public_reply** comment, and attachments on the ticket (Azure sync when configured — [docs/AZURE.md](docs/AZURE.md)).
+
+## Azure Blob attachments
+
+See **[docs/AZURE.md](docs/AZURE.md)** for storage setup and the background script for instance properties.
 
 ## API key provisioning
 
@@ -95,6 +99,6 @@ src/
 ## Out of scope (v1)
 
 - Customer portal
-- Azure Blob attachments (ServiceNow storage used for now)
-- REST top-level ticket create, comment create, attachment upload/download
+- REST attachment upload (use agent UI / email; files land on `sys_attachment` first)
+- REST top-level ticket create, comment create
 - Email reply threading

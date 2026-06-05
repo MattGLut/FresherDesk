@@ -2,6 +2,8 @@ import { GlideRecord } from '@servicenow/glide'
 import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries.ts'
 import { parseTags } from './ticketTags.ts'
 import { commentExclusionQuery, isVisibleCommentType } from './commentTypes.ts'
+import { isAzureBlobConfigured } from '../azure/azureBlobConfig.ts'
+import { loadAttachmentsForTicket } from './ticketAttachments.ts'
 
 const COMMENT_TABLE = 'x_2058901_fresher_ticket_comment'
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
@@ -39,6 +41,9 @@ export interface AttachmentDto {
     size_bytes: number
     content_type: string
     created_at: string
+    sys_attachment_id?: string
+    download_url?: string
+    download_url_expires_at?: string
 }
 
 export interface ChildTicketDto {
@@ -182,7 +187,7 @@ function loadComments(ticketSysId: string): CommentDto[] {
     return comments
 }
 
-function loadAttachments(ticketSysId: string): AttachmentDto[] {
+function loadAttachmentsFromSysAttachment(ticketSysId: string): AttachmentDto[] {
     const attachments: AttachmentDto[] = []
     const gr = new GlideRecord('sys_attachment')
     gr.addQuery('table_name', TICKET_TABLE)
@@ -197,10 +202,22 @@ function loadAttachments(ticketSysId: string): AttachmentDto[] {
             size_bytes: parseInt(gr.getValue('size_bytes') || '0', 10),
             content_type: gr.getValue('content_type') || '',
             created_at: gr.getDisplayValue('sys_created_on') || '',
+            sys_attachment_id: gr.getUniqueValue(),
         })
     }
 
     return attachments
+}
+
+function loadAttachments(ticketSysId: string): AttachmentDto[] {
+    if (isAzureBlobConfigured()) {
+        const azureAttachments = loadAttachmentsForTicket(ticketSysId, true)
+        if (azureAttachments.length > 0) {
+            return azureAttachments
+        }
+    }
+
+    return loadAttachmentsFromSysAttachment(ticketSysId)
 }
 
 function loadChildTickets(parentSysId: string): ChildTicketDto[] {

@@ -21,6 +21,22 @@ declare global {
                         table: 'sys_security_acl'
                         id: '12b5d6b9fb9042c1bfeaa4f53fb01b36'
                     }
+                    'attachment-acl-create': {
+                        table: 'sys_security_acl'
+                        id: '0f785b4ecb5b4562b272a1468488ec5c'
+                    }
+                    'attachment-acl-delete': {
+                        table: 'sys_security_acl'
+                        id: 'be3138f8cffc48129c960529f6edd502'
+                    }
+                    'attachment-acl-read': {
+                        table: 'sys_security_acl'
+                        id: '04330d2be74b42e8b57d00095f46d5f4'
+                    }
+                    'attachment-acl-write': {
+                        table: 'sys_security_acl'
+                        id: '4a229b968421405ba5a22c63506c9a3b'
+                    }
                     bom_json: {
                         table: 'sys_module'
                         id: 'd9b1a37882d94a6393cfb147ea5ec410'
@@ -49,9 +65,29 @@ declare global {
                         table: 'sys_module'
                         id: '8f2f2e4ad49541e6bd9d9f17badf7ae8'
                     }
+                    src_server_attachments_syncTicketAttachmentToAzure_ts: {
+                        table: 'sys_module'
+                        id: '7d4df4739f3840e48c3016deb594c1f7'
+                    }
                     src_server_auth_validateApiKey_ts: {
                         table: 'sys_module'
                         id: 'a618b053ab7941d19b0dde2a723d3487'
+                    }
+                    src_server_azure_azureBlobConfig_ts: {
+                        table: 'sys_module'
+                        id: 'a9c90c7735e74b00b1e337c448ea2248'
+                    }
+                    src_server_azure_azureBlobCrypto_ts: {
+                        table: 'sys_module'
+                        id: 'a99241f5c2854a9896be92715310a34c'
+                    }
+                    src_server_azure_azureBlobSas_ts: {
+                        table: 'sys_module'
+                        id: '872c961515fa45768e6fa6dc030739dd'
+                    }
+                    src_server_azure_azureBlobUpload_ts: {
+                        table: 'sys_module'
+                        id: 'a8d076623e5747b1be31b0747fdbb6cf'
                     }
                     src_server_email_createTicketFromEmail_ts: {
                         table: 'sys_module'
@@ -60,6 +96,11 @@ declare global {
                     src_server_rest_createChildTicket_ts: {
                         table: 'sys_module'
                         id: '873dad471e1d486dbc1ce3e8cc56c4f6'
+                    }
+                    src_server_rest_getAttachmentDownloadUrl_ts: {
+                        table: 'sys_module'
+                        id: '821cdfcee4a440ed940a5f50dea21a11'
+                        deleted: true
                     }
                     src_server_rest_getTicket_ts: {
                         table: 'sys_module'
@@ -80,6 +121,10 @@ declare global {
                     src_server_tickets_recordTicketDeltaNotes_ts: {
                         table: 'sys_module'
                         id: '6a3a39d098ee475095a7613bcc1b5e1c'
+                    }
+                    src_server_tickets_ticketAttachments_ts: {
+                        table: 'sys_module'
+                        id: '9d043843474b4a28b79b824dbbc10157'
                     }
                     src_server_tickets_ticketComments_ts: {
                         table: 'sys_module'
@@ -104,6 +149,10 @@ declare global {
                     src_server_tickets_ticketTags_ts: {
                         table: 'sys_module'
                         id: '52140668222944c2903b1c3376f373bb'
+                    }
+                    'sync-ticket-attachment-to-azure-br': {
+                        table: 'sys_script'
+                        id: '074043ae5b2949148a35b169c7649b06'
                     }
                     'ticket-acl-create': {
                         table: 'sys_security_acl'
@@ -132,6 +181,11 @@ declare global {
                     'tickets-api-v1': {
                         table: 'sys_ws_version'
                         id: 'f1d94d564b0642d2bc17b7305374f2da'
+                    }
+                    'tickets-attachment-download-route': {
+                        table: 'sys_ws_operation'
+                        id: '6195715e065a46479b87deec6782da95'
+                        deleted: true
                     }
                     'tickets-create-child-route': {
                         table: 'sys_ws_operation'
@@ -184,6 +238,13 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'comment_type'
+                        }
+                    },
+                    {
+                        table: 'sys_db_object'
+                        id: '0f9cfb47f7fa4ff4aeabe7d0a9440d87'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
                         }
                     },
                     {
@@ -294,6 +355,19 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_security_acl_role'
+                        id: '1db1caab743e4b93ba157cccb2429c79'
+                        key: {
+                            sys_security_acl: '4a229b968421405ba5a22c63506c9a3b'
+                            sys_user_role: {
+                                id: 'd1efc529c53e41d08fd2fbe5399a7b81'
+                                key: {
+                                    name: 'x_2058901_fresher.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: '20056329cc1040acacf90db7ed35faff'
                         key: {
@@ -331,6 +405,32 @@ declare global {
                         id: '2669a9071a004032bb8c4767da91d88d'
                         key: {
                             sys_security_acl: 'a7c25cf57bf949a5ade28f02ad11b1f0'
+                            sys_user_role: {
+                                id: 'f0cc966f036246d593acf246828b4955'
+                                key: {
+                                    name: 'x_2058901_fresher.agent'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: '26bfd3c2205540d2a6bf71a9fb78e0e8'
+                        key: {
+                            sys_security_acl: 'be3138f8cffc48129c960529f6edd502'
+                            sys_user_role: {
+                                id: 'd1efc529c53e41d08fd2fbe5399a7b81'
+                                key: {
+                                    name: 'x_2058901_fresher.admin'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: '26fe3dbc94a946dda0a7a39057b8b9ea'
+                        key: {
+                            sys_security_acl: '0f785b4ecb5b4562b272a1468488ec5c'
                             sys_user_role: {
                                 id: 'f0cc966f036246d593acf246828b4955'
                                 key: {
@@ -403,6 +503,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '3a5b7625a72e46f4b2f1d7863b685bee'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'sys_attachment'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_security_acl_role'
                         id: '3ac3c0fad3cd4963a17845ce20836da0'
                         key: {
@@ -450,6 +559,22 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_ticket'
                             element: 'state'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '4341362302e64f7e87981054407fa30d'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'size_bytes'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '4650ce2129a548f5a588d9d83e4c22f0'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'ticket'
                         }
                     },
                     {
@@ -558,6 +683,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: '6b00e2f48f5b4840ac80e29d5c6c6c8a'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'source'
+                            value: 'agent'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '6bc3fee902754895b3d1703a14d0a96c'
                         key: {
@@ -579,6 +713,15 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_api_key'
                             element: 'active'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '752345ffc94e4a91b391d3863524e21d'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'NULL'
                             language: 'en'
                         }
                     },
@@ -614,6 +757,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '7a3666bdb37b4957b648075f07e67d37'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'blob_path'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '7b1416b44ad84838bf1d912cc402ab86'
                         key: {
@@ -638,11 +790,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '81be8c5e9dc44214b27a984633ea3c8b'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'size_bytes'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_choice_set'
                         id: '8740869fce9b4ccf99a5c218df36fe6f'
                         key: {
                             name: 'x_2058901_fresher_ticket_comment'
                             element: 'source'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '8bad6a00ae8e428eaa1e3f245a69f8bf'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'blob_container'
                         }
                     },
                     {
@@ -665,6 +834,14 @@ declare global {
                                     name: 'x_2058901_fresher.agent'
                                 }
                             }
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '94fca466d3044045b6e2669b974f2e56'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'content_type'
                         }
                     },
                     {
@@ -699,6 +876,32 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_ticket'
                             element: 'state'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '9c55f8b4300e48adabd4565a61aefb1b'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'source'
+                            value: 'api'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '9e0db958d3a44cc5a6cace3e9c21d186'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'blob_path'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '9e4759742bb94698be99270c51f2d252'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'blob_container'
+                            language: 'en'
                         }
                     },
                     {
@@ -748,10 +951,42 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_dictionary'
+                        id: 'ab91554cb5ea4f3897a9ed7613ac153e'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'file_name'
+                        }
+                    },
+                    {
                         table: 'sys_ui_page'
                         id: 'ac7603fcf22042c48beb66c076f2e5da'
                         key: {
                             endpoint: 'x_2058901_fresher_ticket_workspace.do'
+                        }
+                    },
+                    {
+                        table: 'ua_table_licensing_config'
+                        id: 'af7bfb09d1e54161897ea9774ca05d9f'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'b262450696f942b1985c39024d495355'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'b2729e55469844858de861f66dbcdc6b'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'file_name'
+                            language: 'en'
                         }
                     },
                     {
@@ -838,6 +1073,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'beeed4d9ea294c24b6ca1b6e7395cd05'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'source'
+                            value: 'email'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'bfd49d68dc8e488c80250044cf0eea23'
                         key: {
@@ -878,6 +1122,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_dictionary'
+                        id: 'c74cc1a99cee407e88f95f084283d052'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'sys_attachment'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: 'cad72cf8a60f4a5189e5ec43ed70f355'
                         key: {
@@ -909,6 +1161,15 @@ declare global {
                         key: {
                             name: 'x_2058901_fresher_api_key'
                             element: 'name'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'd0bd1973d8ab47b4b5f2ebaeca3beb9c'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'content_type'
+                            language: 'en'
                         }
                     },
                     {
@@ -958,10 +1219,48 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_dictionary'
+                        id: 'ddc4558134dc40cbbd2a29e6e35fef48'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'source'
+                        }
+                    },
+                    {
                         table: 'sys_db_object'
                         id: 'e0ea087293d34feb8cdfd4471c532e88'
                         key: {
                             name: 'x_2058901_fresher_ticket'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'e0ee978ec9924337b346c91c6982cfa3'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'source'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: 'e1e122b046f34407b0b372b647a3025d'
+                        key: {
+                            sys_security_acl: '04330d2be74b42e8b57d00095f46d5f4'
+                            sys_user_role: {
+                                id: 'f0cc966f036246d593acf246828b4955'
+                                key: {
+                                    name: 'x_2058901_fresher.agent'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_choice_set'
+                        id: 'e50964ddff224ea4b496fe6b6de02d68'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'source'
                         }
                     },
                     {
@@ -988,6 +1287,15 @@ declare global {
                         id: 'f0cc966f036246d593acf246828b4955'
                         key: {
                             name: 'x_2058901_fresher.agent'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'f49c17a73d8b445982fa38b18dd7b6ca'
+                        key: {
+                            name: 'x_2058901_fresher_ticket_attachment'
+                            element: 'ticket'
+                            language: 'en'
                         }
                     },
                     {
