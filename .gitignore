@@ -5,3 +5,8 @@ node_modules/
 target/
 *.tsbuildinfo
 .jest_cache
+.env
+.env.*
+.eslintcache
+coverage/
+*.log

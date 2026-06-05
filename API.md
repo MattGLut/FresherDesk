@@ -65,8 +65,8 @@ Returns a paginated list of ticket summaries. `comments` and `attachments` are a
 | `assignee` | string | — | Assignee user sys_id, or `unassigned` for tickets with no assignee |
 | `tag` | string | — | Filter tickets whose stored JSON tag field contains this substring (e.g. `tag=billing` matches `billing` in `["billing","urgent"]`). Use distinctive tag names; short values can match unintended substrings inside the JSON. |
 | `updated_since` | string | — | Glide/datetime string compared to `sys_updated_on` (e.g. `2026-06-01 00:00:00` in the instance timezone). Invalid values may yield empty results rather than an error. |
-| `limit` | integer | `50` | Page size (minimum 1, maximum 200) |
-| `offset` | integer | `0` | Number of records to skip |
+| `limit` | integer | `50` | Page size (minimum 1, maximum 200). Values below 1 or above 200 are clamped. |
+| `offset` | integer | `0` | Number of records to skip. Negative values are treated as `0`. |
 
 Invalid or unrecognized `status` / `priority` values are silently ignored (no filter applied for that parameter).
 
@@ -211,7 +211,7 @@ curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://
     ],
     "attachments": [
       {
-        "id": "a1b2c3d4e5f6789012345678901234ab",
+        "id": "c1d2e3f4a5b6789012345678901234aa",
         "file_name": "screenshot.png",
         "size_bytes": 204800,
         "content_type": "image/png",
@@ -261,7 +261,7 @@ Send a JSON object with `Content-Type: application/json`. Malformed JSON or an e
 | `subject` | string | Yes | Child ticket title (max 160 characters) |
 | `description` | string | No | Full ticket body |
 | `status` | string | No | `open`, `pending`, `resolved`, or `closed` (default: `open`) |
-| `priority` | string | No | `critical`, `high`, `medium`, `low`, or `planning` |
+| `priority` | string | No | `critical`, `high`, `medium`, `low`, or `planning` (default: `medium` when omitted) |
 | `category` | string | No | `general`, `billing`, `technical`, or `account` (default: `general`). Other values return **400**. |
 
 ### Example request
@@ -339,7 +339,7 @@ Malformed JSON or an empty body is treated as no fields and returns **400** with
 
 ### Side effects
 
-- Triggers the ticket delta audit business rule, which writes **audit_delta** comments for each changed field (hidden from the agent UI and REST `comments`; query `x_2058901_fresher_ticket_comment` for forensics).
+- Triggers the ticket delta audit business rule, which writes **audit_delta** comments for each changed field. These are excluded from REST `comments` and from the main Conversation tab in the agent workspace; users with the **admin** role can view them in the workspace **Audit Deltas** tab. Query `x_2058901_fresher_ticket_comment` with `comment_type=audit_delta` for forensics.
 - Setting `status` to `resolved` or `closed` may set `close_notes` to `Updated in FresherDesk` when that field was empty (platform task behavior).
 
 ### No-op updates
@@ -413,7 +413,7 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 | `opened_at` | string | Instance display datetime |
 | `updated_at` | string | Instance display datetime |
 | `parent_id` | string \| null | Parent ticket sys_id, or `null` for top-level tickets |
-| `children` | array | Direct child ticket summaries (populated on single-ticket GET and create_child; always `[]` in list responses) |
+| `children` | array | Direct child ticket summaries (populated on single-ticket GET and create_child; always `[]` in list responses). Ordered by most recently updated first. |
 | `comments` | array | Conversation thread (empty in list responses) |
 | `attachments` | array | File metadata (empty in list responses) |
 
@@ -445,18 +445,29 @@ Comments are ordered oldest-first.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | string | Azure metadata record sys_id (`x_2058901_fresher_ticket_attachment`) |
+| `id` | string | Attachment identifier — see [Attachment modes](#attachment-modes) below |
 | `file_name` | string | Original filename |
 | `size_bytes` | integer | File size in bytes |
 | `content_type` | string | MIME type |
 | `created_at` | string | Instance display datetime |
-| `sys_attachment_id` | string | Linked ServiceNow attachment sys_id (when synced) |
-| `download_url` | string | Time-limited Azure read SAS URL (when Azure is configured and sync succeeded) |
-| `download_url_expires_at` | string | When `download_url` expires |
+| `sys_attachment_id` | string | Linked ServiceNow `sys_attachment` sys_id |
+| `download_url` | string | Time-limited Azure read SAS URL (Azure-synced mode only) |
+| `download_url_expires_at` | string | When `download_url` expires (**UTC**, unlike other datetime fields) |
 
-Files are stored in **`sys_attachment`** for the agent UI. After insert, a business rule copies bytes to Azure Blob and creates a metadata row. **Each GET ticket** generates a fresh read SAS per attachment (`download_url`, `download_url_expires_at`). When a URL expires, call GET ticket again.
+Files are stored in **`sys_attachment`** for the agent UI. After insert, a business rule copies bytes to Azure Blob and creates a metadata row. **Any REST response that includes the full ticket object** (GET, PATCH, create_child) generates a fresh read SAS per synced attachment (`download_url`, `download_url_expires_at`). When a URL expires, call GET ticket again.
+
+The first GET (or PATCH/create_child that returns attachments) on a ticket with legacy `sys_attachment` rows may upload files that lack metadata — see [docs/AZURE.md](docs/AZURE.md) (GET backfill).
 
 Setup: [docs/AZURE.md](docs/AZURE.md).
+
+#### Attachment modes
+
+| Mode | When | `id` | `download_url` |
+|------|------|------|----------------|
+| **Azure-synced** | Azure configured and metadata row exists | Metadata table sys_id (`x_2058901_fresher_ticket_attachment`) | Present |
+| **Fallback** | Azure disabled, or no metadata rows yet for any file on the ticket | Same as `sys_attachment_id` | Omitted |
+
+When Azure is configured and **some** files on a ticket have synced but others failed, only successfully synced files appear in `attachments` (failed syncs are logged on the instance, not listed via fallback).
 
 ---
 
@@ -523,11 +534,11 @@ Use a real ticket number/sys_id from your instance after [deploy](README.md#loca
 
 - **No top-level ticket create** — only `POST …/create_child` under an existing parent
 - **Partial write support** — `PATCH` updates `status`, `subject`/`title`, `description`, and `tags` only (full tag list replacement). Ignored if sent: `priority`, `category`, `assignee`, `parent`, `requester`, etc.
-- **Child tickets** — list endpoint returns top-level tickets only; children via parent GET `children` or direct GET by child id
-- **Attachment API `id`** — metadata table sys_id; use `sys_attachment_id` to link to ServiceNow storage
+- **Child tickets** — list endpoint returns top-level tickets only; children via parent GET `children` (most recently updated first) or direct GET by child id
+- **Attachments** — Azure-synced responses use metadata table `id` plus `sys_attachment_id`; fallback mode uses `sys_attachment` sys_id for both. See [Attachment modes](#attachment-modes). Partial sync: only successfully synced files appear when Azure is on.
 - **No REST attachment upload** — files are uploaded via agent UI or email (`sys_attachment`); Azure sync is automatic
 - **No comment creation** via REST — conversation replies use the agent workspace
-- **Audit deltas** — `PATCH` changes emit `audit_delta` comments (not returned in `comments`); no separate public/internal API comment endpoint
+- **Audit deltas** — `PATCH` changes emit `audit_delta` comments (excluded from REST `comments`; admins see them in the workspace Audit Deltas tab)
 - ServiceNow platform authentication is disabled on these routes; access is controlled solely by API key validation
 
 Implementation source: [`src/fluent/rest/tickets-api.now.ts`](src/fluent/rest/tickets-api.now.ts), [`src/server/rest/`](src/server/rest/).

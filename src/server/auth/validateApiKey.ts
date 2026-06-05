@@ -30,28 +30,11 @@ export function validateApiKey(request: RESTAPIRequest): boolean {
     return true
 }
 
-export function hashKeyForStorage(apiKey: string): string {
-    return hashApiKey(apiKey)
-}
-
-export function getApiKeyFromRequest(request: RESTAPIRequest): string | null {
-    return request.getHeader(API_KEY_HEADER) || null
-}
-
 export function unauthorizedResponse(): { error: { code: string; message: string } } {
     return {
         error: {
             code: 'unauthorized',
             message: 'Valid X-API-Key header is required',
-        },
-    }
-}
-
-export function forbiddenResponse(): { error: { code: string; message: string } } {
-    return {
-        error: {
-            code: 'forbidden',
-            message: 'Agent role or valid API key is required',
         },
     }
 }
