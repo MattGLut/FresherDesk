@@ -9,6 +9,21 @@ function hashApiKey(apiKey: string): string {
     return digest.getSHA256Hex(apiKey)
 }
 
+export function isAgentUser(): boolean {
+    const userId = gs.getUserID()
+    if (!userId) {
+        return false
+    }
+    return gs.hasRole('x_2058901_fresher.agent')
+}
+
+export function validateApiKeyOrAgent(request: RESTAPIRequest): boolean {
+    if (validateApiKey(request)) {
+        return true
+    }
+    return isAgentUser()
+}
+
 export function validateApiKey(request: RESTAPIRequest): boolean {
     const apiKey = request.getHeader(API_KEY_HEADER)
     if (!apiKey) {
@@ -43,6 +58,24 @@ export function unauthorizedResponse(): { error: { code: string; message: string
         error: {
             code: 'unauthorized',
             message: 'Valid X-API-Key header is required',
+        },
+    }
+}
+
+export function forbiddenResponse(): { error: { code: string; message: string } } {
+    return {
+        error: {
+            code: 'forbidden',
+            message: 'Agent role or valid API key is required',
+        },
+    }
+}
+
+export function serviceUnavailableResponse(message: string): { error: { code: string; message: string } } {
+    return {
+        error: {
+            code: 'service_unavailable',
+            message,
         },
     }
 }

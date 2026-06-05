@@ -4,6 +4,8 @@ import { listTickets } from '../../server/rest/listTickets'
 import { getTicket } from '../../server/rest/getTicket'
 import { updateTicket } from '../../server/rest/updateTicket'
 import { createChildTicket } from '../../server/rest/createChildTicket'
+import { uploadTicketAttachmentHandler } from '../../server/rest/uploadTicketAttachment'
+import { getAttachmentDownloadUrlHandler } from '../../server/rest/getAttachmentDownloadUrl'
 
 RestApi({
     $id: Now.ID['tickets-rest-api'],
@@ -64,6 +66,28 @@ RestApi({
             internalRole: false,
             version: 1,
             shortDescription: 'Create a child ticket under a parent',
+        },
+        {
+            $id: Now.ID['tickets-upload-attachment-route'],
+            path: '/tickets/{id}/attachments',
+            method: 'POST',
+            script: uploadTicketAttachmentHandler,
+            authorization: false,
+            authentication: false,
+            internalRole: false,
+            version: 1,
+            shortDescription: 'Upload a ticket attachment to Azure Blob storage',
+        },
+        {
+            $id: Now.ID['tickets-attachment-download-route'],
+            path: '/tickets/{id}/attachments/{attachmentId}/download',
+            method: 'GET',
+            script: getAttachmentDownloadUrlHandler,
+            authorization: false,
+            authentication: false,
+            internalRole: false,
+            version: 1,
+            shortDescription: 'Refresh a time-limited Azure SAS download URL for an attachment',
         },
     ],
 })
