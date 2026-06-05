@@ -1,7 +1,6 @@
 import { gs, GlideRecord } from '@servicenow/glide'
 import {
     COMMENT_TYPE_AUDIT_DELTA,
-    COMMENT_TYPE_INTERNAL,
 } from './commentTypes.ts'
 
 const COMMENT_TABLE = 'x_2058901_fresher_ticket_comment'
@@ -28,28 +27,6 @@ export function insertTicketComment(input: TicketCommentInput): string | null {
     }
 
     return gr.insert() || null
-}
-
-export interface ApiFieldChange {
-    field: string
-    from: string
-    to: string
-}
-
-export function createApiUpdateInternalNote(ticketSysId: string, changes: ApiFieldChange[]): void {
-    if (changes.length === 0) {
-        return
-    }
-
-    const lines = changes.map((change) => `- ${change.field}: ${change.from || '(empty)'} → ${change.to || '(empty)'}`)
-    const body = ['Ticket updated via REST API.', ...lines].join('\n')
-
-    insertTicketComment({
-        ticketSysId,
-        body,
-        commentType: COMMENT_TYPE_INTERNAL,
-        source: 'api',
-    })
 }
 
 export function createAuditDeltaNote(

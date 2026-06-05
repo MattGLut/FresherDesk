@@ -6,7 +6,7 @@ A Freshdesk-style helpdesk built on ServiceNow using the [Now SDK](https://www.s
 
 - **Agent workspace** — three-pane UI (sidebar filters, ticket list, ticket detail with conversation thread)
 - **Ticket creation** — web form and inbound email ingestion
-- **Attachments** — `sys_attachment` in the UI; Azure Blob sync + SAS download URLs on REST GET ([docs/AZURE.md](docs/AZURE.md))
+- **Attachments** — `sys_attachment` in the UI; Azure Blob sync + SAS download URLs on REST responses that include attachments (GET, PATCH, create_child) ([docs/AZURE.md](docs/AZURE.md))
 - **REST API** — API-key-authenticated ticket API: list, get, PATCH update, child create ([API.md](API.md))
 
 ## Prerequisites

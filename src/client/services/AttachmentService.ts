@@ -61,8 +61,4 @@ export class AttachmentService {
 
         return response.json()
     }
-
-    getDownloadUrl(sysId: string): string {
-        return `/api/now/attachment/${sysId}/file`
-    }
 }

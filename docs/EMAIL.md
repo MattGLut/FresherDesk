@@ -26,8 +26,11 @@ sequenceDiagram
 | Inbound action | **FresherDesk Create Ticket from Email** (`sysevent_in_email_action`, scoped app) — [`create-ticket-from-email.now.ts`](../src/fluent/inbound-email/create-ticket-from-email.now.ts) |
 | Script | [`createTicketFromEmail.ts`](../src/server/email/createTicketFromEmail.ts) — subject, body, requester, attachments |
 | Business rule | **FresherDesk Email Comment on Insert** — [`ticket-email-comment.now.ts`](../src/fluent/business-rules/ticket-email-comment.now.ts) |
+| Attachment sync | **FresherDesk Sync Ticket Attachment to Azure** — same as agent UI; see [AZURE.md](AZURE.md) |
 
-After deploy, confirm both are **Active** in the **FresherDesk** application scope (`x_2058901_fresher`).
+New email tickets are created with **`source=email`**, **`state=open`**, **`priority=medium`**, and **`category=general`** (unless overridden later in the workspace or via REST).
+
+After deploy, confirm inbound action, email comment BR, and Azure sync BR are **Active** in the **FresherDesk** application scope (`x_2058901_fresher`).
 
 ---
 
@@ -85,7 +88,7 @@ As **admin** (global):
 | 1 | Send email with subject + body | New `TKT…`, `source=email`, subject/body on ticket |
 | 2 | Open ticket in workspace | **public_reply** comment matches email body |
 | 3 | Send from address **not** in `sys_user` | `requester_email` = sender; comment author empty (not Guest) |
-| 4 | Send email with PDF/image attached | Attachment on ticket (UI + REST GET `attachments[]`) |
+| 4 | Send email with PDF/image attached | Attachment on ticket; Azure sync when configured ([AZURE.md](AZURE.md)) |
 | 5 | REST GET ticket | `source: "email"`, tags/comments/attachments as documented in [API.md](API.md) |
 
 ### REST smoke test (after email creates a ticket)
