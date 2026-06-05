@@ -1,4 +1,4 @@
-import { gs, GlideRecord, GlideDigest, GlideDateTime, GlideSession } from '@servicenow/glide'
+import { gs, GlideRecord, GlideDigest, GlideDateTime } from '@servicenow/glide'
 import { RESTAPIRequest } from '@servicenow/glide/sn_ws_int'
 
 const API_KEY_TABLE = 'x_2058901_fresher_api_key'
@@ -17,29 +17,8 @@ export function isAgentUser(): boolean {
     return gs.hasRole('x_2058901_fresher.agent')
 }
 
-export function validateAgentSession(request: RESTAPIRequest): boolean {
-    const userToken = request.getHeader('X-UserToken') || request.getHeader('x-usertoken') || ''
-    if (!userToken) {
-        return false
-    }
-
-    const session = GlideSession.get()
-    if (!session.isLoggedIn()) {
-        return false
-    }
-
-    if (session.getSessionToken() !== userToken) {
-        return false
-    }
-
-    return session.hasRole('x_2058901_fresher.agent')
-}
-
 export function validateApiKeyOrAgent(request: RESTAPIRequest): boolean {
     if (validateApiKey(request)) {
-        return true
-    }
-    if (validateAgentSession(request)) {
         return true
     }
     return isAgentUser()

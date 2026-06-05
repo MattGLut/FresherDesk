@@ -19,27 +19,18 @@ interface UploadAttachmentBody {
 }
 
 function parseRequestBody(request: RESTAPIRequest): UploadAttachmentBody {
-    const envelope = request.body
-    if (!envelope) {
+    const body = request.body as { data?: unknown; dataString?: string } | undefined
+    if (!body) {
         return {}
     }
 
-    const data = envelope.data
-    if (data && typeof data === 'object') {
-        return data as UploadAttachmentBody
+    if (typeof body.data === 'object' && body.data !== null) {
+        return body.data as UploadAttachmentBody
     }
 
-    if (typeof data === 'string' && data) {
+    if (typeof body.dataString === 'string' && body.dataString) {
         try {
-            return JSON.parse(data) as UploadAttachmentBody
-        } catch {
-            return {}
-        }
-    }
-
-    if (typeof envelope.dataString === 'string' && envelope.dataString) {
-        try {
-            return JSON.parse(envelope.dataString) as UploadAttachmentBody
+            return JSON.parse(body.dataString) as UploadAttachmentBody
         } catch {
             return {}
         }
