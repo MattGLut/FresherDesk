@@ -17,7 +17,7 @@ export function loadAzureBlobConfig(): AzureBlobConfig {
         enabled: gs.getProperty(`${PROPERTY_PREFIX}enabled`, 'true') !== 'false',
         storageAccount: (gs.getProperty(`${PROPERTY_PREFIX}storage_account`, '') || '').trim(),
         container: (gs.getProperty(`${PROPERTY_PREFIX}container`, 'ticket-attachments') || 'ticket-attachments').trim(),
-        accountKey: gs.getProperty(`${PROPERTY_PREFIX}account_key`, '') || '',
+        accountKey: (gs.getProperty(`${PROPERTY_PREFIX}account_key`, '') || '').trim(),
         sasTtlMinutes: Number.isNaN(sasTtlRaw) || sasTtlRaw < 1 ? 15 : sasTtlRaw,
     }
 }

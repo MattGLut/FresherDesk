@@ -1,9 +1,5 @@
 import { GlideRecord, GlideSysAttachment, gs } from '@servicenow/glide'
-import {
-    assertAzureBlobConfigured,
-    isAzureBlobConfigured,
-    loadAzureBlobConfig,
-} from '../azure/azureBlobConfig.ts'
+import { assertAzureBlobConfigured, isAzureBlobConfigured, loadAzureBlobConfig } from '../azure/azureBlobConfig.ts'
 import { uploadBlob } from '../azure/azureBlobUpload.ts'
 import { generateReadSasUrl } from '../azure/azureBlobSas.ts'
 import { decodeBase64 } from '../azure/azureBlobCrypto.ts'
