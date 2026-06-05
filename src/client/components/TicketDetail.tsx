@@ -15,7 +15,6 @@ export default function TicketDetail({
     onUpdate,
     onReply,
     onUpload,
-    onDownloadAttachment,
     onRefresh,
     onDelete,
     onNavigateTicket,
@@ -113,19 +112,8 @@ export default function TicketDetail({
         const file = e.target.files?.[0]
         if (!file) return
         await onUpload(sysId, file)
+        await onRefresh(sysId)
         e.target.value = ''
-        await onRefresh(sysId, { showLoading: false })
-    }
-
-    const handleAttachmentClick = async (event, attachment) => {
-        event.preventDefault()
-        if (!onDownloadAttachment) return
-        try {
-            const url = await onDownloadAttachment(sysId, getSysId(attachment))
-            window.open(url, '_blank', 'noopener,noreferrer')
-        } catch (err) {
-            window.alert(`Failed to download attachment: ${err.message || 'Unknown error'}`)
-        }
     }
 
     return (
@@ -257,7 +245,7 @@ export default function TicketDetail({
                     <ul className="attachment-list">
                         {attachments.map((att) => (
                             <li key={getSysId(att)}>
-                                <a href="#" onClick={(event) => void handleAttachmentClick(event, att)}>
+                                <a href={`/api/now/attachment/${getSysId(att)}/file`} target="_blank" rel="noreferrer">
                                     {getDisplayValue(att.file_name)}
                                 </a>
                                 <span className="att-size">{getDisplayValue(att.size_bytes)} bytes</span>

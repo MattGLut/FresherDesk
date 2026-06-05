@@ -14,8 +14,6 @@ The API ID (`tickets`) is part of the path. Resource URLs:
 | `GET` | `/tickets/tickets/{id}` | Get a single ticket by number or sys_id |
 | `PATCH` | `/tickets/tickets/{id}` | Update ticket status, subject, description, or tags |
 | `POST` | `/tickets/tickets/{id}/create_child` | Create a child ticket under a parent |
-| `POST` | `/tickets/tickets/{id}/attachments` | Upload attachment (base64 JSON); API key or agent session |
-| `GET` | `/tickets/tickets/{id}/attachments/{attachmentId}/download` | Refresh time-limited Azure SAS download URL |
 
 **Content type:** `application/json`
 
@@ -217,9 +215,7 @@ curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://
         "file_name": "screenshot.png",
         "size_bytes": 204800,
         "content_type": "image/png",
-        "created_at": "2026-06-01 09:16:00",
-        "download_url": "https://{account}.blob.core.windows.net/ticket-attachments/{path}?sv=2020-12-06&st=...&se=...&sr=b&sp=r&sig=...",
-        "download_url_expires_at": "2026-06-01 09:31:00"
+        "created_at": "2026-06-01 09:16:00"
       }
     ]
   }
@@ -446,80 +442,13 @@ Comments are ordered oldest-first.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | string | Attachment metadata sys_id |
+| `id` | string | Attachment sys_id |
 | `file_name` | string | Original filename |
 | `size_bytes` | integer | File size in bytes |
 | `content_type` | string | MIME type |
 | `created_at` | string | Instance display datetime |
-| `download_url` | string | Time-limited Azure Blob read SAS URL (present when Azure is configured) |
-| `download_url_expires_at` | string | Instance display datetime when `download_url` expires |
 
-Attachments are stored in **Azure Blob Storage** with metadata in `x_2058901_fresher_ticket_attachment`. A fresh read SAS is generated on each GET ticket response. When a URL expires, call [Refresh attachment download URL](#refresh-attachment-download-url) or GET the ticket again.
-
-Setup: [docs/AZURE.md](docs/AZURE.md).
-
----
-
-## Upload attachment
-
-```http
-POST /api/x_2058901_fresher/v1/tickets/tickets/{id}/attachments
-```
-
-Uploads a file to Azure Blob and creates a metadata row linked to the ticket. Accepts **API key** (`X-API-Key`, sets `source=api`) or **agent session** (UI upload with `X-UserToken`, sets `source=agent`).
-
-### Request body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file_name` | string | yes | Original filename |
-| `content_base64` | string | yes | Base64-encoded file bytes (no data-URL prefix) |
-| `content_type` | string | no | MIME type (default `application/octet-stream`) |
-
-### Example
-
-```cmd
-curl.exe --ssl-no-revoke -s -X POST -H "X-API-Key: fd_live_dev_test_abc123xyz" -H "Content-Type: application/json" -d "{\"file_name\":\"note.txt\",\"content_type\":\"text/plain\",\"content_base64\":\"aGVsbG8=\"}" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets/TKT0001001/attachments"
-```
-
-### Success (201)
-
-```json
-{
-  "attachment": {
-    "id": "a1b2c3d4e5f6789012345678901234ab",
-    "file_name": "note.txt",
-    "size_bytes": 5,
-    "content_type": "text/plain",
-    "created_at": "2026-06-04 10:00:00",
-    "download_url": "https://{account}.blob.core.windows.net/...",
-    "download_url_expires_at": "2026-06-04 10:15:00"
-  }
-}
-```
-
-Returns **503** when Azure Blob is not configured. Returns **403** without API key or agent role.
-
----
-
-## Refresh attachment download URL
-
-```http
-GET /api/x_2058901_fresher/v1/tickets/tickets/{id}/attachments/{attachmentId}/download
-```
-
-Returns a fresh read SAS URL for one attachment. Use when `download_url` has expired but you still have ticket and attachment ids.
-
-### Success (200)
-
-```json
-{
-  "download_url": "https://{account}.blob.core.windows.net/ticket-attachments/{path}?sv=...",
-  "download_url_expires_at": "2026-06-04 10:15:00"
-}
-```
-
-Accepts API key or agent session. Returns **404** if the attachment does not belong to the ticket.
+Attachment download is not exposed via this API in v1. Attachments are stored in ServiceNow `sys_attachment` records linked to the ticket table.
 
 ---
 
@@ -530,10 +459,8 @@ All errors return JSON with an `error` object containing `code` and `message`.
 | HTTP status | Code | When |
 |-------------|------|------|
 | 401 | `unauthorized` | Missing, invalid, or inactive API key |
-| 403 | `forbidden` | Attachment routes without API key or agent role |
 | 400 | `bad_request` | Invalid payload, missing required fields, or invalid field values (see messages below) |
 | 404 | `not_found` | Ticket does not exist (`Ticket not found`) |
-| 503 | `service_unavailable` | Azure Blob not configured (upload / download refresh) |
 | 500 | `internal_error` | Unexpected server failure |
 
 ### Common `bad_request` messages
@@ -546,7 +473,6 @@ All errors return JSON with an `error` object containing `code` and `message`.
 | `priority must be one of: critical, high, medium, low, planning` | `POST …/create_child` | Invalid `priority` |
 | `category must be one of: general, billing, technical, account` | `POST …/create_child` | Invalid `category` |
 | `tags must be an array of strings` | `PATCH` | `tags` not a string array |
-| `file_name and content_base64 are required` | `POST …/attachments` | Missing upload fields |
 | `Provide at least one updatable field: status, subject, description, tags` | `PATCH` | Empty body, invalid JSON (parsed as empty), or no recognized keys |
 
 ### Internal error (500)
@@ -580,8 +506,6 @@ Use a real ticket number/sys_id from your instance after [deploy](README.md#loca
 | 8 | `PATCH` tags-only / `tags:[]` | **200**, tags replaced or cleared |
 | 9 | `PATCH` with no recognized fields | **400** |
 | 10 | `PATCH` with invalid `status` | **400** |
-| 11 | `POST …/attachments` with base64 body (Azure configured) | **201**, `attachment.download_url` present |
-| 12 | `GET …/attachments/{id}/download` | **200**, fresh SAS URL |
 
 **cmd.exe pitfalls:** Use `curl.exe --ssl-no-revoke` and escaped double quotes (`\"`) in `-d` JSON. Without `--ssl-no-revoke`, curl often exits **35** with no output. Bash-style `-d '{"…"}'` often sends an empty body and triggers **400**/**500**. Prefer a JSON file: `curl.exe --ssl-no-revoke … -d @payload.json` when bodies are large.
 
@@ -592,8 +516,7 @@ Use a real ticket number/sys_id from your instance after [deploy](README.md#loca
 - **No top-level ticket create** — only `POST …/create_child` under an existing parent
 - **Partial write support** — `PATCH` updates `status`, `subject`/`title`, `description`, and `tags` only (full tag list replacement). Ignored if sent: `priority`, `category`, `assignee`, `parent`, `requester`, etc.
 - **Child tickets** — list endpoint returns top-level tickets only; children via parent GET `children` or direct GET by child id
-- **Attachment upload for external integrators** — base64 JSON only (no multipart in v1); agent UI uses the same endpoint with session auth
-- **No attachment delete API**
+- **No attachment download** — metadata only
 - **No comment creation** via REST — conversation replies use the agent workspace
 - **Audit deltas** — `PATCH` changes emit `audit_delta` comments (not returned in `comments`); no separate public/internal API comment endpoint
 - ServiceNow platform authentication is disabled on these routes; access is controlled solely by API key validation

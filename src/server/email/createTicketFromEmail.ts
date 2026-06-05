@@ -70,7 +70,6 @@ export function createTicketFromEmail(...args: unknown[]): void {
     current.setValue('category', 'general')
 
     saveEmailAttachments(email, current, logger)
-    // Attachments land on sys_attachment at insert time; after-insert BR migrates them to Azure Blob.
 }
 
 export function createEmailCommentAfterInsert(
