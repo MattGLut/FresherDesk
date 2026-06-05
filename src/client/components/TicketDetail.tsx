@@ -19,6 +19,7 @@ export default function TicketDetail({
     onDelete,
     onNavigateTicket,
     onCreateChild,
+    onBack,
     childrenRefreshKey = 0,
 }) {
     const [replyBody, setReplyBody] = useState('')
@@ -61,7 +62,12 @@ export default function TicketDetail({
     if (!ticket) {
         return (
             <div className="ticket-detail-panel empty">
-                <p>Select a ticket to view details</p>
+                {loading ? <p>Loading ticket...</p> : <p>Ticket not found</p>}
+                {onBack && (
+                    <button type="button" className="back-btn" onClick={onBack}>
+                        Back to tickets
+                    </button>
+                )}
             </div>
         )
     }
@@ -118,6 +124,14 @@ export default function TicketDetail({
 
     return (
         <div className="ticket-detail-panel">
+            {onBack && (
+                <div className="detail-back-bar">
+                    <button type="button" className="back-btn" onClick={onBack}>
+                        ← Back to tickets
+                    </button>
+                </div>
+            )}
+
             <div className="detail-header">
                 <div>
                     <span className="detail-number">{getDisplayValue(ticket.number)}</span>

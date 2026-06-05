@@ -9,7 +9,8 @@ body {
 
 .workspace-app {
     display: flex;
-    height: 100vh;
+    min-height: 100dvh;
+    height: 100dvh;
     overflow: hidden;
     background: #f0f2f5;
 }
@@ -19,12 +20,64 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
 }
 
-.workspace-panels {
+.workspace-topbar {
     display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+    .workspace-topbar {
+        display: none;
+    }
+}
+
+.menu-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.topbar-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #264653;
+}
+
+.workspace-content {
     flex: 1;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    border: none;
+    background: rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+    .sidebar-overlay {
+        display: none;
+    }
 }
 
 .error-message {
@@ -36,6 +89,7 @@ body {
     justify-content: space-between;
     align-items: center;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 .error-message button {
@@ -45,4 +99,6 @@ body {
     cursor: pointer;
     font-weight: bold;
     text-decoration: underline;
+    min-height: 44px;
+    padding: 0 8px;
 }

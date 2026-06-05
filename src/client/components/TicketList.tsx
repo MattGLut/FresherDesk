@@ -33,7 +33,7 @@ function priorityClass(priorityValue: string): string {
     }
 }
 
-export default function TicketList({ tickets, selectedId, onSelect, loading, refreshing, tagFilter, onTagFilterChange }) {
+export default function TicketList({ tickets, onSelect, loading, refreshing, tagFilter, onTagFilterChange }) {
     if (loading && tickets.length === 0) {
         return <div className="ticket-list-panel"><div className="list-loading">Loading tickets...</div></div>
     }
@@ -72,7 +72,7 @@ export default function TicketList({ tickets, selectedId, onSelect, loading, ref
                         return (
                             <li
                                 key={sysId}
-                                className={`ticket-row ${selectedId === sysId ? 'selected' : ''}`}
+                                className="ticket-row"
                                 onClick={() => onSelect(ticket)}
                             >
                                 <div className="row-top">

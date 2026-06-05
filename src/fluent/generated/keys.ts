@@ -21,6 +21,10 @@ declare global {
                         table: 'sys_security_acl'
                         id: '12b5d6b9fb9042c1bfeaa4f53fb01b36'
                     }
+                    'app.tailwind.css': {
+                        table: 'sys_ux_theme_asset'
+                        id: 'e6029f22f0d6413087c0fbfb630ab73c'
+                    }
                     'attachment-acl-create': {
                         table: 'sys_security_acl'
                         id: '0f785b4ecb5b4562b272a1468488ec5c'
