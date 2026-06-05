@@ -53,7 +53,7 @@ Until configured, attachments work via `sys_attachment` only; the API returns at
 2. Disable anonymous public access; require HTTPS.
 3. Copy **Key1** or **Key2** into the script above.
 
-Blob path layout: `{ticketSysId}/{metadataSysId}/{safeFileName}`
+Blob path layout: `{ticketSysId}/{sysAttachmentSysId}/{safeFileName}`
 
 ## Test checklist
 
