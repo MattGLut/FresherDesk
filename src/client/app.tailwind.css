@@ -1345,15 +1345,18 @@
   }
 }
 
-/* ServiceNow UI frame underlines descendants on :hover — reset at end of bundle. */
+/* ServiceNow UI frame — reset at end of tailwind bundle (see frame-reset.css). */
 #root,
 #root *,
+#root *::before,
+#root *::after,
 #root *:hover,
 #root *:focus,
 #root *:focus-visible {
   text-decoration: none !important;
   text-decoration-line: none !important;
-  -webkit-text-decoration: none !important;
+  -webkit-text-decoration-line: none !important;
+  text-decoration-thickness: 0 !important;
 }
 
 #root a:hover,
@@ -1363,4 +1366,5 @@
 #root .attachment-list a:hover {
   text-decoration: underline !important;
   text-decoration-line: underline !important;
+  -webkit-text-decoration-line: underline !important;
 }
