@@ -3,7 +3,7 @@ import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries.ts'
 import { parseTags } from './ticketTags.ts'
 import { commentExclusionQuery, isVisibleCommentType } from './commentTypes.ts'
 import { isAzureBlobConfigured } from '../azure/azureBlobConfig.ts'
-import { loadAttachmentsForTicket } from './ticketAttachments.ts'
+import { loadAttachmentsForTicket, ensureAttachmentsSyncedForTicket } from './ticketAttachments.ts'
 
 const COMMENT_TABLE = 'x_2058901_fresher_ticket_comment'
 const TICKET_TABLE = 'x_2058901_fresher_ticket'
@@ -211,6 +211,7 @@ function loadAttachmentsFromSysAttachment(ticketSysId: string): AttachmentDto[] 
 
 function loadAttachments(ticketSysId: string): AttachmentDto[] {
     if (isAzureBlobConfigured()) {
+        ensureAttachmentsSyncedForTicket(ticketSysId)
         const azureAttachments = loadAttachmentsForTicket(ticketSysId, true)
         if (azureAttachments.length > 0) {
             return azureAttachments

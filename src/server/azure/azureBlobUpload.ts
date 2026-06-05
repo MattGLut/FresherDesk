@@ -1,6 +1,6 @@
 import { RESTMessageV2 } from '@servicenow/glide/sn_ws'
 import { AzureBlobConfig, getBlobEndpoint } from './azureBlobConfig.ts'
-import { bytesToIso8859String, decodeBase64, hmacSha256Base64 } from './azureBlobCrypto.ts'
+import { decodeBase64, hmacSha256Base64 } from './azureBlobCrypto.ts'
 
 const API_VERSION = '2020-12-06'
 
@@ -47,11 +47,12 @@ function buildSharedKeyAuthorization(
     return `SharedKey ${config.storageAccount}:${hmacSha256Base64(decodeBase64(config.accountKey), stringToSign)}`
 }
 
-export function uploadBlob(
+export function uploadBlobFromAttachment(
     config: AzureBlobConfig,
     blobPath: string,
     contentType: string,
-    bytes: number[]
+    sysAttachmentId: string,
+    contentLength: number
 ): void {
     const request = new RESTMessageV2()
     request.setHttpMethod('PUT')
@@ -61,15 +62,15 @@ export function uploadBlob(
     const resolvedContentType = contentType || 'application/octet-stream'
 
     request.setRequestHeader('Content-Type', resolvedContentType)
-    request.setRequestHeader('Content-Length', String(bytes.length))
+    request.setRequestHeader('Content-Length', String(contentLength))
     request.setRequestHeader('x-ms-date', rfcDate)
     request.setRequestHeader('x-ms-version', API_VERSION)
     request.setRequestHeader('x-ms-blob-type', 'BlockBlob')
     request.setRequestHeader(
         'Authorization',
-        buildSharedKeyAuthorization(config, blobPath, bytes.length, resolvedContentType, rfcDate)
+        buildSharedKeyAuthorization(config, blobPath, contentLength, resolvedContentType, rfcDate)
     )
-    request.setRequestBody(bytesToIso8859String(bytes))
+    request.setRequestBodyFromAttachment(sysAttachmentId)
 
     const response = request.execute()
     const status = response.getStatusCode()

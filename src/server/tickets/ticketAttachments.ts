@@ -1,6 +1,6 @@
 import { GlideRecord, GlideSysAttachment, gs } from '@servicenow/glide'
 import { isAzureBlobConfigured, loadAzureBlobConfig } from '../azure/azureBlobConfig.ts'
-import { uploadBlob } from '../azure/azureBlobUpload.ts'
+import { uploadBlobFromAttachment } from '../azure/azureBlobUpload.ts'
 import { generateReadSasUrl } from '../azure/azureBlobSas.ts'
 import { decodeBase64 } from '../azure/azureBlobCrypto.ts'
 
@@ -48,12 +48,12 @@ function resolveAttachmentSource(ticketSysId: string): AttachmentSource {
     return 'agent'
 }
 
-function metadataExistsForSysAttachment(sysAttachmentId: string): boolean {
+function getMetadataForSysAttachment(sysAttachmentId: string): GlideRecord<'x_2058901_fresher_ticket_attachment'> | null {
     const gr = new GlideRecord(ATTACHMENT_TABLE)
     gr.addQuery('sys_attachment', sysAttachmentId)
     gr.setLimit(1)
     gr.query()
-    return gr.hasNext()
+    return gr.next() ? gr : null
 }
 
 function serializeAttachmentRow(
@@ -99,6 +99,15 @@ export function loadAttachmentsForTicket(ticketSysId: string, includeDownloadUrl
     return attachments
 }
 
+function resolveContentLength(sysAttachment: GlideRecord<'sys_attachment'>, attachmentApi: GlideSysAttachment): number {
+    const sizeBytes = parseInt(sysAttachment.getValue('size_bytes') || '0', 10)
+    if (sizeBytes > 0) {
+        return sizeBytes
+    }
+
+    return decodeBase64(attachmentApi.getContentBase64(sysAttachment)).length
+}
+
 export function syncSysAttachmentToAzure(sysAttachment: GlideRecord<'sys_attachment'>): void {
     if (!isAzureBlobConfigured()) {
         return
@@ -110,7 +119,7 @@ export function syncSysAttachmentToAzure(sysAttachment: GlideRecord<'sys_attachm
 
     const ticketSysId = sysAttachment.getValue('table_sys_id') || ''
     const sysAttachmentId = sysAttachment.getUniqueValue()
-    if (!ticketSysId || !sysAttachmentId || metadataExistsForSysAttachment(sysAttachmentId)) {
+    if (!ticketSysId || !sysAttachmentId) {
         return
     }
 
@@ -118,9 +127,17 @@ export function syncSysAttachmentToAzure(sysAttachment: GlideRecord<'sys_attachm
     const attachmentApi = new GlideSysAttachment()
     const fileName = sysAttachment.getValue('file_name') || 'attachment'
     const contentType = sysAttachment.getValue('content_type') || 'application/octet-stream'
-    const contentBase64 = attachmentApi.getContentBase64(sysAttachment)
-    const bytes = decodeBase64(contentBase64)
+    const contentLength = resolveContentLength(sysAttachment, attachmentApi)
     const source = resolveAttachmentSource(ticketSysId)
+
+    const existingMetadata = getMetadataForSysAttachment(sysAttachmentId)
+    if (existingMetadata) {
+        return
+    }
+
+    const blobPath = buildBlobPath(ticketSysId, sysAttachmentId, fileName)
+
+    uploadBlobFromAttachment(config, blobPath, contentType, sysAttachmentId, contentLength)
 
     const gr = new GlideRecord(ATTACHMENT_TABLE)
     gr.initialize()
@@ -129,22 +146,29 @@ export function syncSysAttachmentToAzure(sysAttachment: GlideRecord<'sys_attachm
     gr.setValue('file_name', fileName)
     gr.setValue('content_type', contentType)
     gr.setValue('blob_container', config.container)
-    gr.setValue('source', source)
-    gr.setValue('size_bytes', bytes.length)
-
-    const blobPath = buildBlobPath(ticketSysId, sysAttachmentId, fileName)
     gr.setValue('blob_path', blobPath)
+    gr.setValue('source', source)
+    gr.setValue('size_bytes', contentLength)
 
-    const attachmentSysId = gr.insert()
-    if (!attachmentSysId) {
+    if (!gr.insert()) {
         throw new Error('Failed to create Azure attachment metadata record')
     }
+}
 
-    try {
-        uploadBlob(config, blobPath, contentType, bytes)
-    } catch (err) {
-        gr.deleteRecord()
-        throw err
+export function ensureAttachmentsSyncedForTicket(ticketSysId: string): void {
+    if (!isAzureBlobConfigured()) {
+        return
+    }
+
+    const gr = new GlideRecord('sys_attachment')
+    gr.addQuery('table_name', TICKET_TABLE)
+    gr.addQuery('table_sys_id', ticketSysId)
+    gr.query()
+
+    while (gr.next()) {
+        if (!getMetadataForSysAttachment(gr.getUniqueValue())) {
+            syncSysAttachmentToAzureSafe(gr)
+        }
     }
 }
 

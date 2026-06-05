@@ -1,12 +1,15 @@
-import { GlideDateTime } from '@servicenow/glide'
 import { AzureBlobConfig, getBlobEndpoint } from './azureBlobConfig.ts'
 import { decodeBase64, hmacSha256Base64 } from './azureBlobCrypto.ts'
 
 const SAS_VERSION = '2020-12-06'
 
-function formatUtcIso(date: GlideDateTime): string {
-    const value = date.getValue()
-    return value ? `${value.replace(' ', 'T')}Z` : ''
+function formatUtcIso(date: Date): string {
+    return date.toISOString().replace(/\.\d{3}Z$/, 'Z')
+}
+
+function formatDisplayExpiry(date: Date): string {
+    const pad = (value: number) => (value < 10 ? `0${value}` : String(value))
+    return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`
 }
 
 function encodeURIComponentRFC3986(value: string): string {
@@ -18,15 +21,9 @@ export interface ReadSasResult {
     expiresAt: string
 }
 
-export function generateReadSasUrl(
-    config: AzureBlobConfig,
-    blobPath: string,
-    referenceTime?: GlideDateTime
-): ReadSasResult {
-    const now = referenceTime || new GlideDateTime()
-    const expires = new GlideDateTime()
-    expires.setValue(now.getValue())
-    expires.addSeconds(config.sasTtlMinutes * 60)
+export function generateReadSasUrl(config: AzureBlobConfig, blobPath: string): ReadSasResult {
+    const now = new Date()
+    const expires = new Date(now.getTime() + config.sasTtlMinutes * 60 * 1000)
 
     const signedStart = formatUtcIso(now)
     const signedExpiry = formatUtcIso(expires)
@@ -48,6 +45,7 @@ export function generateReadSasUrl(
         '',
         '',
         '',
+        '',
     ].join('\n')
 
     const signature = encodeURIComponentRFC3986(hmacSha256Base64(decodeBase64(config.accountKey), stringToSign))
@@ -63,6 +61,6 @@ export function generateReadSasUrl(
 
     return {
         downloadUrl: `${getBlobEndpoint(config, blobPath)}?${query}`,
-        expiresAt: expires.getDisplayValue() || signedExpiry.replace('T', ' ').replace('Z', ''),
+        expiresAt: formatDisplayExpiry(expires),
     }
 }

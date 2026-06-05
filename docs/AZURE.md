@@ -21,6 +21,7 @@ Agent UI / email → sys_attachment (on ticket)
 
 - **`sys_attachment` is not deleted** — agents keep using native upload/download in the workspace.
 - **API consumers** use metadata record `id` and `download_url` on GET ticket (re-GET to refresh expired SAS).
+- **GET backfill** — the first GET ticket for a ticket with legacy `sys_attachment` rows (uploaded before Azure was enabled, or before the sync BR ran) uploads any files that lack a metadata row. Subsequent GETs only refresh SAS URLs.
 
 ## Configure Azure (Background Script)
 

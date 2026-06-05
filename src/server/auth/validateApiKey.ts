@@ -56,15 +56,6 @@ export function forbiddenResponse(): { error: { code: string; message: string } 
     }
 }
 
-export function serviceUnavailableResponse(message: string): { error: { code: string; message: string } } {
-    return {
-        error: {
-            code: 'service_unavailable',
-            message,
-        },
-    }
-}
-
 export function notFoundResponse(resource: string): { error: { code: string; message: string } } {
     return {
         error: {
