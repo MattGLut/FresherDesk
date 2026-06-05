@@ -47,6 +47,24 @@ export function unauthorizedResponse(): { error: { code: string; message: string
     }
 }
 
+export function forbiddenResponse(): { error: { code: string; message: string } } {
+    return {
+        error: {
+            code: 'forbidden',
+            message: 'Agent role or valid API key is required',
+        },
+    }
+}
+
+export function serviceUnavailableResponse(message: string): { error: { code: string; message: string } } {
+    return {
+        error: {
+            code: 'service_unavailable',
+            message,
+        },
+    }
+}
+
 export function notFoundResponse(resource: string): { error: { code: string; message: string } } {
     return {
         error: {

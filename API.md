@@ -211,11 +211,14 @@ curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://
     ],
     "attachments": [
       {
-        "id": "b1c2d3e4f5a6789012345678901234bc",
+        "id": "a1b2c3d4e5f6789012345678901234ab",
         "file_name": "screenshot.png",
         "size_bytes": 204800,
         "content_type": "image/png",
-        "created_at": "2026-06-01 09:16:00"
+        "created_at": "2026-06-01 09:16:00",
+        "sys_attachment_id": "b1c2d3e4f5a6789012345678901234bc",
+        "download_url": "https://{account}.blob.core.windows.net/ticket-attachments/{path}?sv=...",
+        "download_url_expires_at": "2026-06-01 09:31:00"
       }
     ]
   }
@@ -442,13 +445,18 @@ Comments are ordered oldest-first.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | string | Attachment sys_id |
+| `id` | string | Azure metadata record sys_id (`x_2058901_fresher_ticket_attachment`) |
 | `file_name` | string | Original filename |
 | `size_bytes` | integer | File size in bytes |
 | `content_type` | string | MIME type |
 | `created_at` | string | Instance display datetime |
+| `sys_attachment_id` | string | Linked ServiceNow attachment sys_id (when synced) |
+| `download_url` | string | Time-limited Azure read SAS URL (when Azure is configured and sync succeeded) |
+| `download_url_expires_at` | string | When `download_url` expires |
 
-Attachment download is not exposed via this API in v1. Attachments are stored in ServiceNow `sys_attachment` records linked to the ticket table.
+Files are stored in **`sys_attachment`** for the agent UI. After insert, a business rule copies bytes to Azure Blob and creates a metadata row. **Each GET ticket** generates a fresh read SAS per attachment (`download_url`, `download_url_expires_at`). When a URL expires, call GET ticket again.
+
+Setup: [docs/AZURE.md](docs/AZURE.md).
 
 ---
 
@@ -516,7 +524,8 @@ Use a real ticket number/sys_id from your instance after [deploy](README.md#loca
 - **No top-level ticket create** — only `POST …/create_child` under an existing parent
 - **Partial write support** — `PATCH` updates `status`, `subject`/`title`, `description`, and `tags` only (full tag list replacement). Ignored if sent: `priority`, `category`, `assignee`, `parent`, `requester`, etc.
 - **Child tickets** — list endpoint returns top-level tickets only; children via parent GET `children` or direct GET by child id
-- **No attachment download** — metadata only
+- **Attachment API `id`** — metadata table sys_id; use `sys_attachment_id` to link to ServiceNow storage
+- **No REST attachment upload** — files are uploaded via agent UI or email (`sys_attachment`); Azure sync is automatic
 - **No comment creation** via REST — conversation replies use the agent workspace
 - **Audit deltas** — `PATCH` changes emit `audit_delta` comments (not returned in `comments`); no separate public/internal API comment endpoint
 - ServiceNow platform authentication is disabled on these routes; access is controlled solely by API key validation
