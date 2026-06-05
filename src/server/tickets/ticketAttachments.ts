@@ -28,8 +28,8 @@ function sanitizeFileName(fileName: string): string {
     return sanitized || 'attachment'
 }
 
-function buildBlobPath(ticketSysId: string, attachmentSysId: string, fileName: string): string {
-    return `${ticketSysId}/${attachmentSysId}/${sanitizeFileName(fileName)}`
+function buildBlobPath(ticketSysId: string, sysAttachmentId: string, fileName: string): string {
+    return `${ticketSysId}/${sysAttachmentId}/${sanitizeFileName(fileName)}`
 }
 
 function resolveAttachmentSource(ticketSysId: string): AttachmentSource {
@@ -132,14 +132,13 @@ export function syncSysAttachmentToAzure(sysAttachment: GlideRecord<'sys_attachm
     gr.setValue('source', source)
     gr.setValue('size_bytes', bytes.length)
 
+    const blobPath = buildBlobPath(ticketSysId, sysAttachmentId, fileName)
+    gr.setValue('blob_path', blobPath)
+
     const attachmentSysId = gr.insert()
     if (!attachmentSysId) {
         throw new Error('Failed to create Azure attachment metadata record')
     }
-
-    const blobPath = buildBlobPath(ticketSysId, attachmentSysId, fileName)
-    gr.setValue('blob_path', blobPath)
-    gr.update()
 
     try {
         uploadBlob(config, blobPath, contentType, bytes)
