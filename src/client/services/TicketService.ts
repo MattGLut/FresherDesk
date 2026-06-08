@@ -31,6 +31,15 @@ export interface TicketFilter {
     tag?: string
 }
 
+export const TICKET_LIST_PAGE_SIZE = 2
+
+export interface TicketListResult {
+    tickets: TicketRecord[]
+    total: number
+    limit: number
+    offset: number
+}
+
 export class TicketService {
     private readonly tableName = 'x_2058901_fresher_ticket'
 
@@ -108,6 +117,43 @@ export class TicketService {
 
         const { result } = await response.json()
         return result || []
+    }
+
+    async listPage(
+        filter: TicketFilter = {},
+        limit: number = TICKET_LIST_PAGE_SIZE,
+        offset: number = 0
+    ): Promise<TicketListResult> {
+        const searchParams = new URLSearchParams()
+        searchParams.set('sysparm_display_value', 'all')
+        searchParams.set(
+            'sysparm_fields',
+            'sys_id,number,short_description,description,state,priority,assigned_to,opened_by,requester_email,source,category,tags,parent,sys_updated_on,opened_at'
+        )
+        searchParams.set('sysparm_query', this.buildQuery(filter))
+        searchParams.set('sysparm_limit', String(limit))
+        searchParams.set('sysparm_offset', String(offset))
+
+        const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
+            method: 'GET',
+            headers: this.headers(),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
+        }
+
+        const { result } = await response.json()
+        const totalHeader = response.headers.get('X-Total-Count')
+        const total = totalHeader != null ? parseInt(totalHeader, 10) || 0 : (result || []).length
+
+        return {
+            tickets: result || [],
+            total,
+            limit,
+            offset,
+        }
     }
 
     async listChildren(parentSysId: string): Promise<TicketRecord[]> {

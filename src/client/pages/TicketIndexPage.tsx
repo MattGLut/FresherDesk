@@ -3,7 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import TicketList from '../components/TicketList'
 import TicketForm from '../components/TicketForm'
 import { useWorkspace } from '../context/WorkspaceContext'
+import { TICKET_LIST_PAGE_SIZE } from '../services/TicketService'
 import { getSysId } from '../utils/snValue'
+
+function parsePage(value: string | null): number {
+    const parsed = parseInt(value || '1', 10)
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
+}
 
 export default function TicketIndexPage() {
     const { ticketService, reportError } = useWorkspace()
@@ -13,9 +19,11 @@ export default function TicketIndexPage() {
     const activeView = searchParams.get('view') || 'all'
     const tagFilter = searchParams.get('tag') || ''
     const shouldOpenCreate = searchParams.get('create') === '1'
+    const page = parsePage(searchParams.get('page'))
 
     const [debouncedTagFilter, setDebouncedTagFilter] = useState(tagFilter)
     const [tickets, setTickets] = useState([])
+    const [totalTickets, setTotalTickets] = useState(0)
     const [listLoading, setListLoading] = useState(true)
     const [listRefreshing, setListRefreshing] = useState(false)
     const [showForm, setShowForm] = useState(shouldOpenCreate)
@@ -44,8 +52,23 @@ export default function TicketIndexPage() {
                 ...(activeView === 'all' ? {} : { view: activeView }),
                 ...(debouncedTagFilter.trim() ? { tag: debouncedTagFilter.trim() } : {}),
             }
-            const data = await ticketService.list(filter)
+            const offset = (page - 1) * TICKET_LIST_PAGE_SIZE
+            const { tickets: data, total } = await ticketService.listPage(filter, TICKET_LIST_PAGE_SIZE, offset)
+
+            if (total > 0 && offset >= total && page > 1) {
+                const lastPage = Math.ceil(total / TICKET_LIST_PAGE_SIZE)
+                const next = new URLSearchParams(searchParams)
+                if (lastPage <= 1) {
+                    next.delete('page')
+                } else {
+                    next.set('page', String(lastPage))
+                }
+                setSearchParams(next, { replace: true })
+                return
+            }
+
             setTickets(data)
+            setTotalTickets(total)
             hasLoadedList.current = true
         } catch (err) {
             reportError('Failed to load tickets', err)
@@ -53,7 +76,7 @@ export default function TicketIndexPage() {
             setListLoading(false)
             setListRefreshing(false)
         }
-    }, [ticketService, activeView, debouncedTagFilter, reportError])
+    }, [ticketService, activeView, debouncedTagFilter, page, reportError, searchParams, setSearchParams])
 
     useEffect(() => {
         void refreshTickets()
@@ -66,8 +89,21 @@ export default function TicketIndexPage() {
         } else {
             next.delete('tag')
         }
+        next.delete('page')
         setSearchParams(next, { replace: true })
     }
+
+    const setPage = (nextPage: number) => {
+        const next = new URLSearchParams(searchParams)
+        if (nextPage <= 1) {
+            next.delete('page')
+        } else {
+            next.set('page', String(nextPage))
+        }
+        setSearchParams(next, { replace: true })
+    }
+
+    const totalPages = Math.max(1, Math.ceil(totalTickets / TICKET_LIST_PAGE_SIZE))
 
     const handleSelectTicket = (ticket: { sys_id: unknown }) => {
         navigate(`/tickets/${getSysId(ticket)}`)
@@ -103,6 +139,10 @@ export default function TicketIndexPage() {
                 refreshing={listRefreshing}
                 tagFilter={tagFilter}
                 onTagFilterChange={updateTagFilter}
+                page={page}
+                totalPages={totalPages}
+                totalTickets={totalTickets}
+                onPageChange={setPage}
             />
             {showForm && <TicketForm onSubmit={handleFormSubmit} onCancel={closeCreateForm} />}
         </>

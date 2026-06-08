@@ -33,7 +33,18 @@ function priorityClass(priorityValue: string): string {
     }
 }
 
-export default function TicketList({ tickets, onSelect, loading, refreshing, tagFilter, onTagFilterChange }) {
+export default function TicketList({
+    tickets,
+    onSelect,
+    loading,
+    refreshing,
+    tagFilter,
+    onTagFilterChange,
+    page = 1,
+    totalPages = 1,
+    totalTickets = 0,
+    onPageChange,
+}) {
     if (loading && tickets.length === 0) {
         return <div className="ticket-list-panel"><div className="list-loading">Loading tickets...</div></div>
     }
@@ -42,7 +53,7 @@ export default function TicketList({ tickets, onSelect, loading, refreshing, tag
         <div className={`ticket-list-panel${refreshing ? ' is-refreshing' : ''}`}>
             <div className="list-header">
                 <h2>Tickets</h2>
-                <span className="ticket-count">{tickets.length}</span>
+                <span className="ticket-count">{totalTickets}</span>
             </div>
 
             <div className="list-tag-filter">
@@ -123,6 +134,30 @@ export default function TicketList({ tickets, onSelect, loading, refreshing, tag
                         })}
                     </ul>
                 </>
+            )}
+
+            {totalTickets > 0 && onPageChange && (
+                <div className="list-pagination">
+                    <button
+                        type="button"
+                        className="pagination-btn"
+                        disabled={page <= 1 || refreshing}
+                        onClick={() => onPageChange(page - 1)}
+                    >
+                        Previous
+                    </button>
+                    <span className="pagination-info">
+                        Page {page} of {totalPages}
+                    </span>
+                    <button
+                        type="button"
+                        className="pagination-btn"
+                        disabled={page >= totalPages || refreshing}
+                        onClick={() => onPageChange(page + 1)}
+                    >
+                        Next
+                    </button>
+                </div>
             )}
         </div>
     )

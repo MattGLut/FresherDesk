@@ -203,6 +203,44 @@
     background: #c8e6c9;
 }
 
+.list-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-top: 1px solid #e0e0e0;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.pagination-btn {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    color: #264653;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #f0faf4;
+    border-color: #81c784;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: #666;
+    min-width: 7rem;
+    text-align: center;
+}
+
 @media (max-width: 1023px) {
     .ticket-row-header {
         display: none;

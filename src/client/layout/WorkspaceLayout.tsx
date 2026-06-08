@@ -26,6 +26,7 @@ export default function WorkspaceLayout() {
         } else {
             params.set('view', view)
         }
+        params.delete('page')
         const search = params.toString()
         navigate({ pathname: '/', search: search ? `?${search}` : '' })
         closeSidebar()
