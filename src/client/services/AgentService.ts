@@ -1,3 +1,5 @@
+import { AGENT_ROLE } from '../constants/roles'
+
 declare global {
     interface Window {
         g_ck: string
@@ -10,8 +12,6 @@ export interface AgentRecord {
     email: unknown
     user_name: unknown
 }
-
-const AGENT_ROLE = 'x_2058901_fresher.agent'
 
 export class AgentService {
     private headers(): Record<string, string> {

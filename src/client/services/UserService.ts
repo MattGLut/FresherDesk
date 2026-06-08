@@ -1,10 +1,10 @@
+import { ADMIN_ROLE } from '../constants/roles'
+
 declare global {
     interface Window {
         g_ck: string
     }
 }
-
-const ADMIN_ROLE = 'x_2058901_fresher.admin'
 
 export class UserService {
     private headers(): Record<string, string> {

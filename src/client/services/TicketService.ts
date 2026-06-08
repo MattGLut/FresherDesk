@@ -1,3 +1,5 @@
+import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
+import { TICKET_TABLE } from '../constants/tables'
 import { prepareTicketUpdate } from '../utils/ticketUpdate'
 
 declare global {
@@ -31,8 +33,6 @@ export interface TicketFilter {
     tag?: string
 }
 
-export const TICKET_LIST_PAGE_SIZE = 2
-
 export interface TicketListResult {
     tickets: TicketRecord[]
     total: number
@@ -41,7 +41,7 @@ export interface TicketListResult {
 }
 
 export class TicketService {
-    private readonly tableName = 'x_2058901_fresher_ticket'
+    private readonly tableName = TICKET_TABLE
 
     private headers(): Record<string, string> {
         return {

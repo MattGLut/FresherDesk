@@ -4,9 +4,8 @@ import TicketDetail from '../components/TicketDetail'
 import TicketForm from '../components/TicketForm'
 import { useWorkspace } from '../context/WorkspaceContext'
 import { getSysId, getValue, getDisplayValue } from '../utils/snValue'
+import { TICKET_TABLE } from '../constants/tables'
 import { mergeTicketUpdate } from '../utils/ticketPatch'
-
-const TICKET_TABLE = 'x_2058901_fresher_ticket'
 
 export default function TicketShowPage() {
     const { sysId } = useParams()
