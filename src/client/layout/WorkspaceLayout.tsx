@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import TicketSidebar from '../components/TicketSidebar'
 import ToastContainer from '../components/ToastContainer'
 import { useWorkspace } from '../context/WorkspaceContext'
+import { readSidebarCollapsed, writeSidebarCollapsed } from '../utils/sidebarStorage'
 
 function pageTitle(pathname: string): string {
     if (pathname.startsWith('/tickets/')) {
@@ -14,11 +15,20 @@ function pageTitle(pathname: string): string {
 export default function WorkspaceLayout() {
     const { error, setError, toasts, dismissToast } = useWorkspace()
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsed)
     const location = useLocation()
     const navigate = useNavigate()
     const title = pageTitle(location.pathname)
 
     const closeSidebar = () => setSidebarOpen(false)
+
+    const toggleSidebarCollapsed = () => {
+        setSidebarCollapsed((prev) => {
+            const next = !prev
+            writeSidebarCollapsed(next)
+            return next
+        })
+    }
 
     const handleViewChange = (view: string) => {
         const params = new URLSearchParams(location.search)
@@ -57,6 +67,8 @@ export default function WorkspaceLayout() {
                 onCreateClick={handleCreateClick}
                 open={sidebarOpen}
                 onClose={closeSidebar}
+                collapsed={sidebarCollapsed}
+                onToggleCollapse={toggleSidebarCollapsed}
             />
 
             <div className="workspace-main">
