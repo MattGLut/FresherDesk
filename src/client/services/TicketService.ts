@@ -1,5 +1,6 @@
 import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
 import { TICKET_TABLE } from '../constants/tables'
+import { buildSearchEncodedQuery } from '../utils/ticketSearch'
 import { prepareTicketUpdate } from '../utils/ticketUpdate'
 
 declare global {
@@ -31,6 +32,7 @@ export interface TicketFilter {
     status?: string
     assignee?: string
     tag?: string
+    search?: string
 }
 
 export interface TicketListResult {
@@ -98,8 +100,13 @@ export class TicketService {
         }
 
         parts.push('parentISEMPTY')
-        parts.push('ORDERBYDESCsys_updated_on')
-        return parts.join('^')
+
+        const baseQuery = parts.join('^')
+        const queryWithSearch = filter.search?.trim()
+            ? buildSearchEncodedQuery(baseQuery, filter.search)
+            : baseQuery
+
+        return `${queryWithSearch}^ORDERBYDESCsys_updated_on`
     }
 
     async list(filter: TicketFilter = {}): Promise<TicketRecord[]> {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import TicketSidebar from '../components/TicketSidebar'
+import GlobalSearchBar from '../components/GlobalSearchBar'
 import ToastContainer from '../components/ToastContainer'
 import { useWorkspace } from '../context/WorkspaceContext'
 
@@ -28,6 +29,7 @@ export default function WorkspaceLayout() {
             params.set('view', view)
         }
         params.delete('page')
+        params.delete('q')
         const search = params.toString()
         navigate({ pathname: '/', search: search ? `?${search}` : '' })
         closeSidebar()
@@ -70,6 +72,7 @@ export default function WorkspaceLayout() {
                         ☰
                     </button>
                     <h1 className="topbar-title">{title}</h1>
+                    <GlobalSearchBar />
                 </header>
 
                 {error && (

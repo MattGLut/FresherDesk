@@ -36,6 +36,7 @@ The UI is a single-page app with hash routes:
 | `...ticket_workspace.do#/` | Ticket index (list + filters) |
 | `...ticket_workspace.do#/?view=open&tag=billing` | Index with view/tag filters |
 | `...ticket_workspace.do#/?page=2` | Index page 2 (pagination) |
+| `...ticket_workspace.do#/?q=password` | Search by number, subject, or requester |
 | `...ticket_workspace.do#/tickets/{sys_id}` | Ticket detail |
 
 Use the ticket `sys_id` (not the display number) in show URLs.

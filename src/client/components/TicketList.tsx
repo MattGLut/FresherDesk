@@ -45,6 +45,7 @@ export default function TicketList({
     totalTickets = 0,
     onPageChange,
     onCreateClick,
+    searchQuery = '',
 }) {
     if (loading && tickets.length === 0) {
         return <div className="ticket-list-panel"><div className="list-loading">Loading tickets...</div></div>
@@ -74,8 +75,14 @@ export default function TicketList({
             {tickets.length === 0 ? (
                 <div className="list-empty">
                     <span className="empty-icon" aria-hidden="true">📭</span>
-                    <p className="empty-title">No tickets in this view</p>
-                    <p className="empty-hint">Try another sidebar view or clear your tag filter.</p>
+                    <p className="empty-title">
+                        {searchQuery.trim() ? 'No matching tickets' : 'No tickets in this view'}
+                    </p>
+                    <p className="empty-hint">
+                        {searchQuery.trim()
+                            ? 'Try a different search term or clear the search bar.'
+                            : 'Try another sidebar view or clear your tag filter.'}
+                    </p>
                     {onCreateClick && (
                         <button type="button" className="empty-cta" onClick={onCreateClick}>
                             + Create ticket
