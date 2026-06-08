@@ -18,10 +18,12 @@ export default function TicketIndexPage() {
 
     const activeView = searchParams.get('view') || 'all'
     const tagFilter = searchParams.get('tag') || ''
+    const searchQuery = searchParams.get('q') || ''
     const shouldOpenCreate = searchParams.get('create') === '1'
     const page = parsePage(searchParams.get('page'))
 
     const [debouncedTagFilter, setDebouncedTagFilter] = useState(tagFilter)
+    const [debouncedSearch, setDebouncedSearch] = useState(searchQuery)
     const [tickets, setTickets] = useState([])
     const [totalTickets, setTotalTickets] = useState(0)
     const [listLoading, setListLoading] = useState(true)
@@ -33,6 +35,11 @@ export default function TicketIndexPage() {
         const timer = window.setTimeout(() => setDebouncedTagFilter(tagFilter), 300)
         return () => window.clearTimeout(timer)
     }, [tagFilter])
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => setDebouncedSearch(searchQuery), 300)
+        return () => window.clearTimeout(timer)
+    }, [searchQuery])
 
     useEffect(() => {
         if (shouldOpenCreate) {
@@ -51,6 +58,7 @@ export default function TicketIndexPage() {
             const filter = {
                 ...(activeView === 'all' ? {} : { view: activeView }),
                 ...(debouncedTagFilter.trim() ? { tag: debouncedTagFilter.trim() } : {}),
+                ...(debouncedSearch.trim() ? { search: debouncedSearch.trim() } : {}),
             }
             const offset = (page - 1) * TICKET_LIST_PAGE_SIZE
             const { tickets: data, total } = await ticketService.listPage(filter, TICKET_LIST_PAGE_SIZE, offset)
@@ -76,7 +84,7 @@ export default function TicketIndexPage() {
             setListLoading(false)
             setListRefreshing(false)
         }
-    }, [ticketService, activeView, debouncedTagFilter, page, reportError, searchParams, setSearchParams])
+    }, [ticketService, activeView, debouncedTagFilter, debouncedSearch, page, reportError, searchParams, setSearchParams])
 
     useEffect(() => {
         void refreshTickets()
@@ -152,6 +160,7 @@ export default function TicketIndexPage() {
                 totalTickets={totalTickets}
                 onPageChange={setPage}
                 onCreateClick={openCreateForm}
+                searchQuery={searchQuery}
             />
             {showForm && <TicketForm onSubmit={handleFormSubmit} onCancel={closeCreateForm} />}
         </>
