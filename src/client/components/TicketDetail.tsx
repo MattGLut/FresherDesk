@@ -11,6 +11,10 @@ import './TicketDetail.css'
 export default function TicketDetail({
     ticket,
     comments,
+    commentPage,
+    commentTotal,
+    commentsLoading,
+    onCommentPageChange,
     attachments,
     loading,
     onUpdate,
@@ -294,6 +298,10 @@ export default function TicketDetail({
                 <ConversationPanel
                     ticketSysId={sysId}
                     comments={comments}
+                    commentsLoading={commentsLoading}
+                    commentPage={commentPage}
+                    commentTotal={commentTotal}
+                    onCommentPageChange={onCommentPageChange}
                     detailLoading={loading}
                     isAdmin={isAdmin}
                     replyBody={replyBody}

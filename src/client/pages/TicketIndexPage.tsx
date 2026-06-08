@@ -104,8 +104,6 @@ export default function TicketIndexPage() {
         setSearchParams(next, { replace: true })
     }
 
-    const totalPages = Math.max(1, Math.ceil(totalTickets / TICKET_LIST_PAGE_SIZE))
-
     const handleSelectTicket = (ticket: { sys_id: unknown }) => {
         navigate(`/tickets/${getSysId(ticket)}`)
     }
@@ -149,7 +147,6 @@ export default function TicketIndexPage() {
                 tagFilter={tagFilter}
                 onTagFilterChange={updateTagFilter}
                 page={page}
-                totalPages={totalPages}
                 totalTickets={totalTickets}
                 onPageChange={setPage}
                 onCreateClick={openCreateForm}

@@ -1,6 +1,8 @@
 import React from 'react'
 import { getDisplayValue, getSysId, getChoiceDisplay, getRequesterDisplay, STATE_DISPLAY_LABELS, PRIORITY_DISPLAY_LABELS } from '../utils/snValue'
 import { parseTags } from '../utils/ticketTags'
+import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
+import PanelPagination from './PanelPagination'
 import './TicketList.css'
 
 function statusClass(stateValue: string): string {
@@ -41,7 +43,6 @@ export default function TicketList({
     tagFilter,
     onTagFilterChange,
     page = 1,
-    totalPages = 1,
     totalTickets = 0,
     onPageChange,
     onCreateClick,
@@ -70,6 +71,14 @@ export default function TicketList({
                     </button>
                 )}
             </div>
+
+            <PanelPagination
+                page={page}
+                pageSize={TICKET_LIST_PAGE_SIZE}
+                totalItems={totalTickets}
+                onPageChange={onPageChange}
+                disabled={refreshing}
+            />
 
             {tickets.length === 0 ? (
                 <div className="list-empty">
@@ -144,30 +153,6 @@ export default function TicketList({
                         })}
                     </ul>
                 </>
-            )}
-
-            {totalTickets > 0 && onPageChange && (
-                <div className="list-pagination">
-                    <button
-                        type="button"
-                        className="pagination-btn"
-                        disabled={page <= 1 || refreshing}
-                        onClick={() => onPageChange(page - 1)}
-                    >
-                        Previous
-                    </button>
-                    <span className="pagination-info">
-                        Page {page} of {totalPages}
-                    </span>
-                    <button
-                        type="button"
-                        className="pagination-btn"
-                        disabled={page >= totalPages || refreshing}
-                        onClick={() => onPageChange(page + 1)}
-                    >
-                        Next
-                    </button>
-                </div>
             )}
         </div>
     )

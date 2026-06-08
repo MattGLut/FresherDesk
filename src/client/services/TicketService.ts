@@ -1,6 +1,7 @@
 import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
 import { TICKET_TABLE } from '../constants/tables'
 import { prepareTicketUpdate } from '../utils/ticketUpdate'
+import { fetchTablePage } from '../utils/tableApiPage'
 
 declare global {
     interface Window {
@@ -162,7 +163,7 @@ export class TicketService {
         }
     }
 
-    async listChildren(parentSysId: string): Promise<TicketRecord[]> {
+    async listChildrenPage(parentSysId: string, limit: number, offset: number) {
         const searchParams = new URLSearchParams()
         searchParams.set('sysparm_display_value', 'all')
         searchParams.set(
@@ -171,18 +172,7 @@ export class TicketService {
         )
         searchParams.set('sysparm_query', `parent=${parentSysId}^ORDERBYDESCsys_updated_on`)
 
-        const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
-            method: 'GET',
-            headers: this.headers(),
-        })
-
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
-        }
-
-        const { result } = await response.json()
-        return result || []
+        return fetchTablePage<TicketRecord>(this.tableName, searchParams, this.headers(), limit, offset)
     }
 
     async get(sysId: string): Promise<TicketRecord> {
