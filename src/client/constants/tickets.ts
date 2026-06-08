@@ -1,1 +1,1 @@
-export const TICKET_LIST_PAGE_SIZE = 2
+export const TICKET_LIST_PAGE_SIZE = 20
