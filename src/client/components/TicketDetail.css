@@ -65,15 +65,16 @@
 
 .detail-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
     gap: 16px;
+    width: 100%;
     margin-bottom: 12px;
     padding-bottom: 12px;
     border-bottom: 1px solid #eee;
 }
 
-.detail-header > div {
+.detail-header-title {
     display: flex;
     align-items: baseline;
     gap: 12px;
@@ -92,6 +93,8 @@
     margin: 0;
     font-size: 18px;
     color: #264653;
+    min-width: 0;
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -102,6 +105,7 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .edit-btn {
@@ -277,7 +281,7 @@
         grid-column: auto;
     }
 
-    .detail-header > div {
+    .detail-header-title {
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
@@ -285,6 +289,10 @@
 
     .detail-header h2 {
         white-space: normal;
+    }
+
+    .detail-header-actions {
+        align-self: flex-start;
     }
 }
 

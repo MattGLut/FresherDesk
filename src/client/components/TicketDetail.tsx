@@ -158,7 +158,7 @@ export default function TicketDetail({
             )}
 
             <div className="detail-header">
-                <div>
+                <div className="detail-header-title">
                     <span className="detail-number">{getDisplayValue(ticket.number)}</span>
                     <h2>{getDisplayValue(ticket.short_description)}</h2>
                 </div>
