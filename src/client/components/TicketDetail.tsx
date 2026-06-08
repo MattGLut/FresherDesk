@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { getDisplayValue, getValue, getSysId, getRequesterDisplay } from '../utils/snValue'
 import { parseTags, serializeTags } from '../utils/ticketTags'
+import { formatFileSize } from '../utils/formatFileSize'
 import { AgentService } from '../services/AgentService'
 import { UserService } from '../services/UserService'
 import ConversationPanel from './ConversationPanel'
@@ -20,6 +21,7 @@ export default function TicketDetail({
     onNavigateTicket,
     onCreateChild,
     onEdit,
+    onCopyLink,
     onBack,
     childrenRefreshKey = 0,
 }) {
@@ -165,6 +167,20 @@ export default function TicketDetail({
                     <h2>{getDisplayValue(ticket.short_description)}</h2>
                 </div>
                 <div className="detail-header-actions">
+                    {onCopyLink && (
+                        <button
+                            type="button"
+                            className="copy-link-btn"
+                            onClick={() => onCopyLink(ticket)}
+                            aria-label="Copy ticket link"
+                            title="Copy ticket link"
+                        >
+                            <svg className="copy-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                        </button>
+                    )}
                     {onEdit && (
                         <button type="button" className="edit-btn" onClick={() => onEdit(ticket)}>
                             Edit
@@ -306,7 +322,7 @@ export default function TicketDetail({
                                 <a href={`/api/now/attachment/${getSysId(att)}/file`} target="_blank" rel="noreferrer">
                                     {getDisplayValue(att.file_name)}
                                 </a>
-                                <span className="att-size">{getDisplayValue(att.size_bytes)} bytes</span>
+                                <span className="att-size">{formatFileSize(att.size_bytes)}</span>
                             </li>
                         ))}
                     </ul>
