@@ -12,7 +12,7 @@ function parsePage(value: string | null): number {
 }
 
 export default function TicketIndexPage() {
-    const { ticketService, reportError } = useWorkspace()
+    const { ticketService, reportError, showToast } = useWorkspace()
     const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams()
 
@@ -122,12 +122,20 @@ export default function TicketIndexPage() {
         try {
             const created = await ticketService.create(formData)
             closeCreateForm()
+            showToast('Ticket created')
             if (created) {
                 navigate(`/tickets/${getSysId(created)}`)
             }
         } catch (err) {
             reportError('Failed to create ticket', err)
         }
+    }
+
+    const openCreateForm = () => {
+        setShowForm(true)
+        const next = new URLSearchParams(searchParams)
+        next.set('create', '1')
+        setSearchParams(next, { replace: true })
     }
 
     return (
@@ -143,6 +151,7 @@ export default function TicketIndexPage() {
                 totalPages={totalPages}
                 totalTickets={totalTickets}
                 onPageChange={setPage}
+                onCreateClick={openCreateForm}
             />
             {showForm && <TicketForm onSubmit={handleFormSubmit} onCancel={closeCreateForm} />}
         </>

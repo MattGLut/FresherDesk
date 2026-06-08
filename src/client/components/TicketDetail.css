@@ -12,9 +12,30 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 8px;
     color: #aaa;
     font-size: 16px;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.ticket-detail-panel.empty .empty-icon {
+    font-size: 36px;
+    line-height: 1;
+}
+
+.ticket-detail-panel.empty .empty-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #666;
+}
+
+.ticket-detail-panel.empty .empty-hint {
+    margin: 0;
+    font-size: 14px;
+    color: #999;
+    max-width: 320px;
 }
 
 .detail-back-bar {
@@ -76,6 +97,29 @@
     text-overflow: ellipsis;
 }
 
+.detail-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.edit-btn {
+    padding: 6px 14px;
+    background: #fff;
+    color: #264653;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background: #f0faf4;
+    border-color: #81c784;
+}
+
 .delete-btn {
     padding: 6px 14px;
     background: #fff;
@@ -115,6 +159,39 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+}
+
+.assignee-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.assignee-controls select {
+    flex: 1;
+    min-width: 0;
+}
+
+.assign-me-btn {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border: 1px solid #81c784;
+    border-radius: 4px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.assign-me-btn:hover:not(:disabled) {
+    background: #c8e6c9;
+}
+
+.assign-me-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .field-readonly {

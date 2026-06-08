@@ -10,13 +10,14 @@ import { mergeTicketUpdate } from '../utils/ticketPatch'
 export default function TicketShowPage() {
     const { sysId } = useParams()
     const navigate = useNavigate()
-    const { ticketService, commentService, attachmentService, reportError } = useWorkspace()
+    const { ticketService, commentService, attachmentService, reportError, showToast } = useWorkspace()
 
     const [ticket, setTicket] = useState(null)
     const [comments, setComments] = useState([])
     const [attachments, setAttachments] = useState([])
     const [detailLoading, setDetailLoading] = useState(true)
     const [childParentTicket, setChildParentTicket] = useState(null)
+    const [editingTicket, setEditingTicket] = useState(null)
     const [childrenRefreshKey, setChildrenRefreshKey] = useState(0)
 
     const loadTicketDetail = useCallback(
@@ -55,12 +56,15 @@ export default function TicketShowPage() {
         navigate('/')
     }
 
-    const handleUpdate = async (ticketSysId: string, data: Record<string, string>) => {
+    const handleUpdate = async (ticketSysId: string, data: Record<string, string>, successMessage?: string) => {
         setTicket((prev) => (prev ? mergeTicketUpdate(prev, data) : prev))
         try {
             await ticketService.update(ticketSysId, data)
             const updated = await ticketService.get(ticketSysId)
             setTicket(updated)
+            if (successMessage) {
+                showToast(successMessage)
+            }
         } catch (err) {
             reportError('Failed to update ticket', err)
             if (sysId) {
@@ -71,10 +75,12 @@ export default function TicketShowPage() {
 
     const handleReply = async (ticketSysId: string, body: string, commentType: string) => {
         await commentService.create(ticketSysId, body, commentType)
+        showToast(commentType === 'internal_note' ? 'Internal note added' : 'Reply sent')
     }
 
     const handleUpload = async (ticketSysId: string, file: File) => {
         await attachmentService.upload(TICKET_TABLE, ticketSysId, file)
+        showToast('Attachment uploaded')
     }
 
     const handleDelete = async (ticketRecord: { number: unknown; sys_id: unknown }) => {
@@ -82,8 +88,26 @@ export default function TicketShowPage() {
         if (!confirm(`Delete ticket ${number}?`)) return
 
         const ticketSysId = getSysId(ticketRecord)
-        await ticketService.delete(ticketSysId)
-        navigate('/')
+        try {
+            await ticketService.delete(ticketSysId)
+            showToast(`Ticket ${number} deleted`)
+            navigate('/')
+        } catch (err) {
+            reportError('Failed to delete ticket', err)
+        }
+    }
+
+    const handleEditSubmit = async (formData: Record<string, string>) => {
+        if (!editingTicket) return
+        const ticketSysId = getSysId(editingTicket)
+        try {
+            await ticketService.update(ticketSysId, formData)
+            setEditingTicket(null)
+            showToast('Ticket updated')
+            await loadTicketDetail(ticketSysId, { showLoading: false })
+        } catch (err) {
+            reportError('Failed to update ticket', err)
+        }
     }
 
     const handleChildFormSubmit = async (formData: Record<string, string>) => {
@@ -98,6 +122,7 @@ export default function TicketShowPage() {
             })
             setChildParentTicket(null)
             setChildrenRefreshKey((k) => k + 1)
+            showToast('Child ticket created')
             if (created) {
                 navigate(`/tickets/${getSysId(created)}`)
             }
@@ -131,9 +156,17 @@ export default function TicketShowPage() {
                 onDelete={handleDelete}
                 onNavigateTicket={handleNavigateTicket}
                 onCreateChild={() => ticket && setChildParentTicket(ticket)}
+                onEdit={(ticketRecord) => setEditingTicket(ticketRecord)}
                 onBack={handleBack}
                 childrenRefreshKey={childrenRefreshKey}
             />
+            {editingTicket && (
+                <TicketForm
+                    ticket={editingTicket}
+                    onSubmit={handleEditSubmit}
+                    onCancel={() => setEditingTicket(null)}
+                />
+            )}
             {childParentTicket && (
                 <TicketForm
                     parentTicket={childParentTicket}

@@ -1,13 +1,6 @@
 import React from 'react'
+import { TICKET_SIDEBAR_VIEWS } from '../constants/ticketViews'
 import './TicketSidebar.css'
-
-const VIEWS = [
-    { id: 'all', label: 'All Tickets' },
-    { id: 'open', label: 'Open' },
-    { id: 'pending', label: 'Pending' },
-    { id: 'resolved', label: 'Resolved' },
-    { id: 'unassigned', label: 'Unassigned' },
-]
 
 export default function TicketSidebar({ activeView, onViewChange, onCreateClick, open = false, onClose }) {
     return (
@@ -24,7 +17,7 @@ export default function TicketSidebar({ activeView, onViewChange, onCreateClick,
             <nav className="sidebar-nav">
                 <p className="nav-section-label">Views</p>
                 <ul>
-                    {VIEWS.map((view) => (
+                    {TICKET_SIDEBAR_VIEWS.map((view) => (
                         <li key={view.id}>
                             <button
                                 type="button"

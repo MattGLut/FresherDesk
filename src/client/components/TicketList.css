@@ -43,6 +43,47 @@
     text-align: center;
     color: #888;
     font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+}
+
+.list-empty .empty-icon {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.list-empty .empty-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+}
+
+.list-empty .empty-hint {
+    margin: 0;
+    font-size: 13px;
+    color: #999;
+    max-width: 280px;
+}
+
+.list-empty .empty-cta {
+    margin-top: 8px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #2ecc71;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.list-empty .empty-cta:hover {
+    background: #27ae60;
 }
 
 .ticket-row-header,

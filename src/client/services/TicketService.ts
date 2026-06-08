@@ -70,6 +70,12 @@ export class TicketService {
             case 'resolved':
                 parts.push('state=6')
                 break
+            case 'closed':
+                parts.push('state=7')
+                break
+            case 'mine':
+                parts.push('assigned_to=javascript:gs.getUserID()')
+                break
             case 'unassigned':
                 parts.push('assigned_toISEMPTY')
                 break

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import TicketSidebar from '../components/TicketSidebar'
+import ToastContainer from '../components/ToastContainer'
 import { useWorkspace } from '../context/WorkspaceContext'
 
 function pageTitle(pathname: string): string {
@@ -11,7 +12,7 @@ function pageTitle(pathname: string): string {
 }
 
 export default function WorkspaceLayout() {
-    const { error, setError } = useWorkspace()
+    const { error, setError, toasts, dismissToast } = useWorkspace()
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const location = useLocation()
     const navigate = useNavigate()
@@ -84,6 +85,8 @@ export default function WorkspaceLayout() {
                     <Outlet />
                 </main>
             </div>
+
+            <ToastContainer toasts={toasts} onDismiss={dismissToast} />
         </div>
     )
 }
