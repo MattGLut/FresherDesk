@@ -8,6 +8,7 @@ import { getSysId, getValue, getDisplayValue } from '../utils/snValue'
 import { TICKET_TABLE } from '../constants/tables'
 import { mergeTicketUpdate } from '../utils/ticketPatch'
 import { createOptimisticComment, getOptimisticCommentId } from '../utils/optimisticComment'
+import { copyTicketLink } from '../utils/copyTicketLink'
 
 export default function TicketShowPage() {
     const { sysId } = useParams()
@@ -118,6 +119,15 @@ export default function TicketShowPage() {
         showToast('Attachment uploaded')
     }
 
+    const handleCopyLink = async (ticketRecord: { sys_id: unknown }) => {
+        const copied = await copyTicketLink(getSysId(ticketRecord))
+        if (copied) {
+            showToast('Link copied')
+        } else {
+            showToast('Could not copy link', 'error')
+        }
+    }
+
     const handleDelete = async (ticketRecord: { number: unknown; sys_id: unknown }) => {
         const number = getDisplayValue(ticketRecord.number) || getValue(ticketRecord.number)
         if (!confirm(`Delete ticket ${number}?`)) return
@@ -192,6 +202,7 @@ export default function TicketShowPage() {
                 onNavigateTicket={handleNavigateTicket}
                 onCreateChild={() => ticket && setChildParentTicket(ticket)}
                 onEdit={(ticketRecord) => setEditingTicket(ticketRecord)}
+                onCopyLink={handleCopyLink}
                 onBack={handleBack}
                 childrenRefreshKey={childrenRefreshKey}
             />

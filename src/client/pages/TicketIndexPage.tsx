@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import TicketList from '../components/TicketList'
 import TicketForm from '../components/TicketForm'
 import { useWorkspace } from '../context/WorkspaceContext'
@@ -14,6 +14,7 @@ function parsePage(value: string | null): number {
 export default function TicketIndexPage() {
     const { ticketService, reportError, showToast } = useWorkspace()
     const navigate = useNavigate()
+    const location = useLocation()
     const [searchParams, setSearchParams] = useSearchParams()
 
     const activeView = searchParams.get('view') || 'all'
@@ -80,7 +81,7 @@ export default function TicketIndexPage() {
 
     useEffect(() => {
         void refreshTickets()
-    }, [refreshTickets])
+    }, [location.key, refreshTickets])
 
     const updateTagFilter = (value: string) => {
         const next = new URLSearchParams(searchParams)
