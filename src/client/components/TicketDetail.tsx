@@ -19,6 +19,7 @@ export default function TicketDetail({
     onDelete,
     onNavigateTicket,
     onCreateChild,
+    onEdit,
     onBack,
     childrenRefreshKey = 0,
 }) {
@@ -30,6 +31,7 @@ export default function TicketDetail({
     const [localTags, setLocalTags] = useState<string[]>([])
     const [newTag, setNewTag] = useState('')
     const [isAdmin, setIsAdmin] = useState(false)
+    const [currentUserSysId, setCurrentUserSysId] = useState<string | null>(null)
 
     useEffect(() => {
         const agentService = new AgentService()
@@ -41,10 +43,15 @@ export default function TicketDetail({
 
     useEffect(() => {
         const userService = new UserService()
-        userService
-            .isAdmin()
-            .then(setIsAdmin)
-            .catch(() => setIsAdmin(false))
+        Promise.all([userService.isAdmin(), userService.getCurrentUserSysId()])
+            .then(([admin, userSysId]) => {
+                setIsAdmin(admin)
+                setCurrentUserSysId(userSysId)
+            })
+            .catch(() => {
+                setIsAdmin(false)
+                setCurrentUserSysId(null)
+            })
     }, [])
 
     useEffect(() => {
@@ -62,7 +69,18 @@ export default function TicketDetail({
     if (!ticket) {
         return (
             <div className="ticket-detail-panel empty">
-                {loading ? <p>Loading ticket...</p> : <p>Ticket not found</p>}
+                {loading ? (
+                    <>
+                        <span className="empty-icon" aria-hidden="true">⏳</span>
+                        <p className="empty-title">Loading ticket...</p>
+                    </>
+                ) : (
+                    <>
+                        <span className="empty-icon" aria-hidden="true">🔍</span>
+                        <p className="empty-title">Ticket not found</p>
+                        <p className="empty-hint">It may have been deleted or the link is invalid.</p>
+                    </>
+                )}
                 {onBack && (
                     <button type="button" className="back-btn" onClick={onBack}>
                         Back to tickets
@@ -74,10 +92,10 @@ export default function TicketDetail({
 
     const sysId = getSysId(ticket)
 
-    const handleFieldUpdate = async (field, value) => {
+    const handleFieldUpdate = async (field, value, successMessage?: string) => {
         const updated = { ...localState, [field]: value }
         setLocalState(updated)
-        await onUpdate(sysId, { [field]: value })
+        await onUpdate(sysId, { [field]: value }, successMessage)
     }
 
     const handleTagsUpdate = async (nextTags: string[]) => {
@@ -122,6 +140,13 @@ export default function TicketDetail({
         e.target.value = ''
     }
 
+    const handleAssignToMe = async () => {
+        if (!currentUserSysId || localState.assigned_to === currentUserSysId) return
+        await handleFieldUpdate('assigned_to', currentUserSysId, 'Assigned to you')
+    }
+
+    const isAssignedToMe = !!currentUserSysId && localState.assigned_to === currentUserSysId
+
     return (
         <div className="ticket-detail-panel">
             {onBack && (
@@ -133,13 +158,20 @@ export default function TicketDetail({
             )}
 
             <div className="detail-header">
-                <div>
+                <div className="detail-header-title">
                     <span className="detail-number">{getDisplayValue(ticket.number)}</span>
                     <h2>{getDisplayValue(ticket.short_description)}</h2>
                 </div>
-                <button type="button" className="delete-btn" onClick={() => onDelete(ticket)}>
-                    Delete
-                </button>
+                <div className="detail-header-actions">
+                    {onEdit && (
+                        <button type="button" className="edit-btn" onClick={() => onEdit(ticket)}>
+                            Edit
+                        </button>
+                    )}
+                    <button type="button" className="delete-btn" onClick={() => onDelete(ticket)}>
+                        Delete
+                    </button>
+                </div>
             </div>
 
             <div className="detail-fields">
@@ -161,19 +193,29 @@ export default function TicketDetail({
                         <option value="4">Low</option>
                     </select>
                 </div>
-                <div className="field-group">
+                <div className="field-group field-group-assignee">
                     <span className="field-label">Assignee</span>
-                    <select
-                        value={localState.assigned_to}
-                        onChange={(e) => handleFieldUpdate('assigned_to', e.target.value)}
-                    >
-                        <option value="">Unassigned</option>
-                        {agents.map((agent) => (
-                            <option key={getSysId(agent)} value={getValue(agent.sys_id)}>
-                                {getDisplayValue(agent.name)}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="assignee-controls">
+                        <select
+                            value={localState.assigned_to}
+                            onChange={(e) => handleFieldUpdate('assigned_to', e.target.value)}
+                        >
+                            <option value="">Unassigned</option>
+                            {agents.map((agent) => (
+                                <option key={getSysId(agent)} value={getValue(agent.sys_id)}>
+                                    {getDisplayValue(agent.name)}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            className="assign-me-btn"
+                            onClick={handleAssignToMe}
+                            disabled={!currentUserSysId || isAssignedToMe}
+                        >
+                            Assign to me
+                        </button>
+                    </div>
                 </div>
                 <div className="field-group">
                     <span className="field-label">Requester</span>
