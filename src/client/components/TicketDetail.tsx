@@ -19,6 +19,7 @@ export default function TicketDetail({
     onDelete,
     onNavigateTicket,
     onCreateChild,
+    onBack,
     childrenRefreshKey = 0,
 }) {
     const [replyBody, setReplyBody] = useState('')
@@ -61,7 +62,12 @@ export default function TicketDetail({
     if (!ticket) {
         return (
             <div className="ticket-detail-panel empty">
-                <p>Select a ticket to view details</p>
+                {loading ? <p>Loading ticket...</p> : <p>Ticket not found</p>}
+                {onBack && (
+                    <button type="button" className="back-btn" onClick={onBack}>
+                        Back to tickets
+                    </button>
+                )}
             </div>
         )
     }
@@ -118,19 +124,27 @@ export default function TicketDetail({
 
     return (
         <div className="ticket-detail-panel">
+            {onBack && (
+                <div className="detail-back-bar">
+                    <button type="button" className="back-btn" onClick={onBack}>
+                        ← Back to tickets
+                    </button>
+                </div>
+            )}
+
             <div className="detail-header">
                 <div>
                     <span className="detail-number">{getDisplayValue(ticket.number)}</span>
                     <h2>{getDisplayValue(ticket.short_description)}</h2>
                 </div>
-                <button className="delete-btn" onClick={() => onDelete(ticket)}>
+                <button type="button" className="delete-btn" onClick={() => onDelete(ticket)}>
                     Delete
                 </button>
             </div>
 
             <div className="detail-fields">
                 <div className="field-group">
-                    <label>Status</label>
+                    <span className="field-label">Status</span>
                     <select value={localState.state} onChange={(e) => handleFieldUpdate('state', e.target.value)}>
                         <option value="1">Open</option>
                         <option value="2">Pending</option>
@@ -139,7 +153,7 @@ export default function TicketDetail({
                     </select>
                 </div>
                 <div className="field-group">
-                    <label>Priority</label>
+                    <span className="field-label">Priority</span>
                     <select value={localState.priority} onChange={(e) => handleFieldUpdate('priority', e.target.value)}>
                         <option value="1">Critical</option>
                         <option value="2">High</option>
@@ -148,7 +162,7 @@ export default function TicketDetail({
                     </select>
                 </div>
                 <div className="field-group">
-                    <label>Assignee</label>
+                    <span className="field-label">Assignee</span>
                     <select
                         value={localState.assigned_to}
                         onChange={(e) => handleFieldUpdate('assigned_to', e.target.value)}
@@ -162,15 +176,15 @@ export default function TicketDetail({
                     </select>
                 </div>
                 <div className="field-group">
-                    <label>Requester</label>
+                    <span className="field-label">Requester</span>
                     <span className="field-readonly">{getRequesterDisplay(ticket)}</span>
                 </div>
                 <div className="field-group">
-                    <label>Category</label>
+                    <span className="field-label">Category</span>
                     <span className="field-readonly">{getDisplayValue(ticket.category)}</span>
                 </div>
-                <div className="field-group field-group-full">
-                    <label>Tags</label>
+                <div className="field-group field-group-tags">
+                    <span className="field-label">Tags</span>
                     <div className="tag-editor">
                         <div className="tag-list">
                             {localTags.length === 0 ? (

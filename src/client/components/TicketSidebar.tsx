@@ -9,15 +9,15 @@ const VIEWS = [
     { id: 'unassigned', label: 'Unassigned' },
 ]
 
-export default function TicketSidebar({ activeView, onViewChange, onCreateClick }) {
+export default function TicketSidebar({ activeView, onViewChange, onCreateClick, open = false, onClose }) {
     return (
-        <aside className="ticket-sidebar">
+        <aside className={`ticket-sidebar${open ? ' is-open' : ''}`}>
             <div className="sidebar-brand">
                 <h1>FresherDesk</h1>
                 <p className="sidebar-subtitle">Agent Workspace</p>
             </div>
 
-            <button className="sidebar-create-btn" onClick={onCreateClick}>
+            <button type="button" className="sidebar-create-btn" onClick={onCreateClick}>
                 + New Ticket
             </button>
 
@@ -27,6 +27,7 @@ export default function TicketSidebar({ activeView, onViewChange, onCreateClick 
                     {VIEWS.map((view) => (
                         <li key={view.id}>
                             <button
+                                type="button"
                                 className={`nav-item ${activeView === view.id ? 'active' : ''}`}
                                 onClick={() => onViewChange(view.id)}
                             >
@@ -36,6 +37,10 @@ export default function TicketSidebar({ activeView, onViewChange, onCreateClick 
                     ))}
                 </ul>
             </nav>
+
+            <button type="button" className="sidebar-close-btn" onClick={onClose}>
+                Close menu
+            </button>
         </aside>
     )
 }

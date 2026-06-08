@@ -4,7 +4,7 @@ A Freshdesk-style helpdesk built on ServiceNow using the [Now SDK](https://www.s
 
 ## Features
 
-- **Agent workspace** — three-pane UI (sidebar filters, ticket list, ticket detail with conversation thread)
+- **Agent workspace** — hash-routed SPA: ticket index (`#/`) and ticket show (`#/tickets/{sys_id}`)
 - **Ticket creation** — web form and inbound email ingestion
 - **Attachments** — `sys_attachment` in the UI; Azure Blob sync + SAS download URLs on REST responses that include attachments (GET, PATCH, create_child) ([docs/AZURE.md](docs/AZURE.md))
 - **REST API** — API-key-authenticated ticket API: list, get, PATCH update, child create ([API.md](API.md))
@@ -28,6 +28,16 @@ Open the agent workspace:
 ```
 https://dev385836.service-now.com/x_2058901_fresher_ticket_workspace.do
 ```
+
+The UI is a single-page app with hash routes:
+
+| URL | Page |
+|-----|------|
+| `...ticket_workspace.do#/` | Ticket index (list + filters) |
+| `...ticket_workspace.do#/?view=open&tag=billing` | Index with view/tag filters |
+| `...ticket_workspace.do#/tickets/{sys_id}` | Ticket detail |
+
+Use the ticket `sys_id` (not the display number) in show URLs.
 
 ## GitHub Actions deployment
 
