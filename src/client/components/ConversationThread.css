@@ -29,6 +29,15 @@
     border-left: 3px solid #f9a825;
 }
 
+.comment-bubble.is-pending {
+    opacity: 0.82;
+}
+
+.comment-bubble.is-pending .comment-time {
+    color: #999;
+    font-style: italic;
+}
+
 .comment-header {
     display: flex;
     align-items: center;

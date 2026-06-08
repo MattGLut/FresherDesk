@@ -6,6 +6,11 @@ declare global {
     }
 }
 
+export interface CurrentUser {
+    sysId: string
+    name: string
+}
+
 export class UserService {
     private headers(): Record<string, string> {
         return {
@@ -36,9 +41,10 @@ export class UserService {
         return this.hasRole(ADMIN_ROLE)
     }
 
-    async getCurrentUserSysId(): Promise<string | null> {
+    async getCurrentUser(): Promise<CurrentUser | null> {
         const searchParams = new URLSearchParams()
-        searchParams.set('sysparm_fields', 'sys_id')
+        searchParams.set('sysparm_display_value', 'all')
+        searchParams.set('sysparm_fields', 'sys_id,name')
         searchParams.set('sysparm_limit', '1')
         searchParams.set('sysparm_query', 'sys_id=javascript:gs.getUserID()')
 
@@ -56,11 +62,26 @@ export class UserService {
             return null
         }
 
-        const sysId = result[0]?.sys_id
+        const record = result[0]
+        const sysId = record?.sys_id
         if (sysId == null || sysId === '') {
             return null
         }
 
-        return String(sysId)
+        const nameField = record?.name
+        const name =
+            typeof nameField === 'object' && nameField !== null && 'display_value' in nameField
+                ? String(nameField.display_value || nameField.value || 'You')
+                : String(nameField || 'You')
+
+        return {
+            sysId: typeof sysId === 'object' && sysId !== null && 'value' in sysId ? String(sysId.value) : String(sysId),
+            name: name || 'You',
+        }
+    }
+
+    async getCurrentUserSysId(): Promise<string | null> {
+        const user = await this.getCurrentUser()
+        return user?.sysId ?? null
     }
 }

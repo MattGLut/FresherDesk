@@ -120,13 +120,15 @@ export default function TicketDetail({
 
     const handleReplySubmit = async (e) => {
         e.preventDefault()
-        if (!replyBody.trim()) return
+        const bodyToSend = replyBody.trim()
+        if (!bodyToSend) return
 
         setSubmitting(true)
+        setReplyBody('')
         try {
-            await onReply(sysId, replyBody, replyType)
-            setReplyBody('')
-            await onRefresh(sysId)
+            await onReply(sysId, bodyToSend, replyType)
+        } catch {
+            setReplyBody(bodyToSend)
         } finally {
             setSubmitting(false)
         }

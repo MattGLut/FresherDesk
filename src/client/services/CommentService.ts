@@ -76,7 +76,7 @@ export class CommentService {
         return result || []
     }
 
-    async create(ticketSysId: string, body: string, commentType: string): Promise<unknown> {
+    async create(ticketSysId: string, body: string, commentType: string): Promise<CommentRecord> {
         const response = await fetch(`/api/now/table/${this.tableName}`, {
             method: 'POST',
             headers: this.jsonHeaders(),
@@ -93,6 +93,7 @@ export class CommentService {
             throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
         }
 
-        return response.json()
+        const { result } = await response.json()
+        return result
     }
 }
