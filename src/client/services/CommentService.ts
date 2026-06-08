@@ -1,3 +1,4 @@
+import { TICKET_COMMENT_TABLE } from '../constants/tables'
 import { commentExclusionQuery, COMMENT_TYPE_AUDIT_DELTA } from '../utils/commentTypes'
 
 declare global {
@@ -16,7 +17,7 @@ export interface CommentRecord {
 }
 
 export class CommentService {
-    private readonly tableName = 'x_2058901_fresher_ticket_comment'
+    private readonly tableName = TICKET_COMMENT_TABLE
 
     private headers(): Record<string, string> {
         return {

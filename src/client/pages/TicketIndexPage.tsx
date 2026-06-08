@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import TicketList from '../components/TicketList'
 import TicketForm from '../components/TicketForm'
 import { useWorkspace } from '../context/WorkspaceContext'
-import { TICKET_LIST_PAGE_SIZE } from '../services/TicketService'
+import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
 import { getSysId } from '../utils/snValue'
 
 function parsePage(value: string | null): number {
