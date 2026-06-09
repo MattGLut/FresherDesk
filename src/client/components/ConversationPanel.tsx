@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import ConversationThread from './ConversationThread'
 import AuditDeltaThread from './AuditDeltaThread'
+import PanelPagination from './PanelPagination'
 import { CommentService } from '../services/CommentService'
+import { AUDIT_DELTA_PAGE_SIZE, pageOffset } from '../constants/pagination'
 import './ConversationPanel.css'
 
 export default function ConversationPanel({
     ticketSysId,
     comments,
+    commentsLoading,
+    commentPage,
+    commentTotal,
+    onCommentPageChange,
     detailLoading,
     isAdmin,
     replyBody,
@@ -18,18 +24,27 @@ export default function ConversationPanel({
 }) {
     const [activeTab, setActiveTab] = useState('conversation')
     const [auditDeltas, setAuditDeltas] = useState([])
+    const [auditTotal, setAuditTotal] = useState(0)
+    const [auditPage, setAuditPage] = useState(1)
     const [auditLoading, setAuditLoading] = useState(false)
     const [auditLoadedFor, setAuditLoadedFor] = useState(null)
 
     useEffect(() => {
         setActiveTab('conversation')
         setAuditDeltas([])
+        setAuditTotal(0)
+        setAuditPage(1)
         setAuditLoadedFor(null)
     }, [ticketSysId])
 
-    useEffect(() => {
-        setAuditLoadedFor(null)
-    }, [comments])
+    const fetchAuditPage = useCallback(async (targetPage: number) => {
+        const commentService = new CommentService()
+        return commentService.listAuditDeltasPageForTicket(
+            ticketSysId,
+            AUDIT_DELTA_PAGE_SIZE,
+            pageOffset(targetPage, AUDIT_DELTA_PAGE_SIZE)
+        )
+    }, [ticketSysId])
 
     const loadAuditDeltas = useCallback(async () => {
         if (!ticketSysId || auditLoadedFor === ticketSysId) {
@@ -38,16 +53,33 @@ export default function ConversationPanel({
 
         setAuditLoading(true)
         try {
-            const commentService = new CommentService()
-            const deltas = await commentService.listAuditDeltasForTicket(ticketSysId)
-            setAuditDeltas(deltas)
+            const result = await fetchAuditPage(1)
+            setAuditDeltas(result.items)
+            setAuditTotal(result.total)
+            setAuditPage(1)
             setAuditLoadedFor(ticketSysId)
+        } catch {
+            setAuditDeltas([])
+            setAuditTotal(0)
+            setAuditPage(1)
+        } finally {
+            setAuditLoading(false)
+        }
+    }, [ticketSysId, auditLoadedFor, fetchAuditPage])
+
+    const handleAuditPageChange = useCallback(async (nextPage: number) => {
+        setAuditLoading(true)
+        try {
+            const result = await fetchAuditPage(nextPage)
+            setAuditDeltas(result.items)
+            setAuditTotal(result.total)
+            setAuditPage(nextPage)
         } catch {
             setAuditDeltas([])
         } finally {
             setAuditLoading(false)
         }
-    }, [ticketSysId, auditLoadedFor])
+    }, [fetchAuditPage])
 
     const handleAuditTab = () => {
         setActiveTab('audit')
@@ -86,7 +118,13 @@ export default function ConversationPanel({
 
             {activeTab === 'conversation' ? (
                 <>
-                    <ConversationThread comments={comments} loading={detailLoading} />
+                    <ConversationThread
+                        comments={comments}
+                        loading={detailLoading || commentsLoading}
+                        commentPage={commentPage}
+                        commentTotal={commentTotal}
+                        onCommentPageChange={onCommentPageChange}
+                    />
                     <form className="reply-composer" onSubmit={handleReplySubmit}>
                         <div className="reply-type-toggle">
                             <button
@@ -118,7 +156,16 @@ export default function ConversationPanel({
                     </form>
                 </>
             ) : (
-                <AuditDeltaThread comments={auditDeltas} loading={auditLoading} />
+                <>
+                    <PanelPagination
+                        page={auditPage}
+                        pageSize={AUDIT_DELTA_PAGE_SIZE}
+                        totalItems={auditTotal}
+                        onPageChange={handleAuditPageChange}
+                        disabled={auditLoading}
+                    />
+                    <AuditDeltaThread comments={auditDeltas} loading={auditLoading} />
+                </>
             )}
         </div>
     )
