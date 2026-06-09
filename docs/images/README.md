@@ -8,8 +8,7 @@ PNG screenshots for [README.md](../../README.md). Paths are relative from the re
 
 | File | Capture |
 |------|---------|
-| `workspace-overview.png` | Full desktop view: sidebar + ticket index |
-| `ticket-list-filters.png` | Sidebar view selected, tag filter, pagination under list header |
+| `workspace-overview.png` | Ticket index: sidebar view, tag filter, pagination, list rows |
 | `ticket-detail-header.png` | Ticket detail: header, status/priority/assignee/tags, attachments section |
 | `ticket-detail-children.png` | Child tickets panel with pagination |
 | `ticket-detail-conversation.png` | Conversation tab, thread, reply composer |

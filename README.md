@@ -54,9 +54,7 @@ Requires role `x_2058901_fresher.agent`. The **Audit Deltas** tab requires `x_20
 
 ### Ticket index
 
-Sidebar views, tag filter, and paginated list (20 tickets per page).
-
-![Ticket list with filters and pagination](./docs/images/ticket-list-filters.png)
+Sidebar views, tag filter, and paginated list (20 tickets per page). See the overview screenshot above.
 
 ### Ticket detail
 
