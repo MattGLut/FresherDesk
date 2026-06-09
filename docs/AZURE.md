@@ -1,6 +1,8 @@
 # Azure Blob attachments
 
-FresherDesk keeps **ServiceNow `sys_attachment`** as the primary store for the agent UI and inbound email. A business rule copies each new ticket attachment to **Azure Blob** and writes metadata to `x_2058901_fresher_ticket_attachment`. The REST API returns time-limited **read SAS URLs** from that metadata table.
+FresherDesk keeps **ServiceNow `sys_attachment`** as the primary store for the agent UI and inbound email. Agents upload and download files from the **Attachments** section on the ticket detail page in the [agent workspace](README.md#agent-workspace) — those files are never removed when Azure sync runs.
+
+A business rule copies each new attachment to **Azure Blob** and writes metadata to `x_2058901_fresher_ticket_attachment`. The REST API returns time-limited **read SAS URLs** from that metadata table.
 
 ## Flow
 
@@ -76,5 +78,6 @@ Blob path layout: `{ticketSysId}/{sysAttachmentSysId}/{safeFileName}`
 
 ## Related
 
+- [README.md — Agent workspace](../README.md#agent-workspace) — where agents upload attachments in the UI
 - [API.md](../API.md) — attachment object on GET ticket
 - [EMAIL.md](EMAIL.md) — inbound email setup

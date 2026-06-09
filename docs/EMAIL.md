@@ -91,6 +91,8 @@ As **admin** (global):
 | 4 | Send email with PDF/image attached | Attachment on ticket; Azure sync when configured ([AZURE.md](AZURE.md)) |
 | 5 | REST GET ticket | `source: "email"`, tags/comments/attachments as documented in [API.md](API.md) |
 
+After a successful ingest, open the ticket in the [agent workspace](README.md#agent-workspace) to confirm the conversation comment and attachments match the email.
+
 ### REST smoke test (after email creates a ticket)
 
 Replace `TKT0001234` with the ticket number from the email:
@@ -123,3 +125,9 @@ Check `result.ticket.source`, `result.ticket.requester.email`, `result.ticket.co
 - REST endpoint to create tickets (use email or agent UI)
 
 Implementation: [`src/server/email/`](../src/server/email/), [`src/fluent/inbound-email/`](../src/fluent/inbound-email/).
+
+## Related
+
+- [README.md — Agent workspace](../README.md#agent-workspace) — UI screenshots and routes
+- [API.md](../API.md) — REST shape for email-created tickets
+- [AZURE.md](AZURE.md) — attachment sync from inbound email
