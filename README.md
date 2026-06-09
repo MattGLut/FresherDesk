@@ -86,12 +86,6 @@ Edit from detail header:
 
 ![Edit ticket modal](./docs/images/ticket-edit-modal.png)
 
-### Mobile layout
-
-Collapsible sidebar via hamburger menu; full-width list and detail.
-
-![Mobile workspace layout](./docs/images/workspace-mobile.png)
-
 Screenshot capture guide: [docs/images/README.md](docs/images/README.md).
 
 ## Architecture

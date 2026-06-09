@@ -16,14 +16,13 @@ PNG screenshots for [README.md](../../README.md). Paths are relative from the re
 | `ticket-detail-audit.png` | Audit Deltas tab (admin user) |
 | `ticket-create-modal.png` | Create ticket modal from sidebar |
 | `ticket-edit-modal.png` | Edit modal from detail header |
-| `workspace-mobile.png` | Narrow viewport (~390px): menu + list or detail |
 
 ## How to capture
 
 1. Deploy latest: `npm run build && npm run deploy`
 2. Open `https://<instance>/x_2058901_fresher_ticket_workspace.do` as a user with `x_2058901_fresher.agent` (admin for audit tab).
 3. Use sample data that exercises pagination: 20+ index tickets, 6+ child tickets, 11+ comments, 11+ audit deltas on one ticket.
-4. Browser zoom **100%**, width **~1280px** (desktop) or **~390px** (mobile).
+4. Browser zoom **100%**, width **~1280px**.
 5. Save PNGs into this folder (overwrite existing files).
 6. Crop sensitive data (emails, internal names) if sharing publicly.
 
