@@ -2,6 +2,10 @@
 
 JSON API for listing, retrieving, updating, and creating child helpdesk tickets. All endpoints require a valid API key.
 
+**Agents** use the [agent workspace UI](README.md#agent-workspace) for day-to-day ticket handling. This API is for **integrations** (scripts, external apps, automation). Changes made via PATCH or child create appear in the workspace the same as UI edits.
+
+![Ticket detail — fields agents see in the workspace](./docs/images/ticket-detail-header.png)
+
 **Base URL:** `https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets`
 
 Examples use the dev instance `dev385836.service-now.com` (no trailing slash on URLs) and the dev API key `fd_live_dev_test_abc123xyz` (hash must exist in **FresherDesk API Key** on that instance — see [README.md — API key provisioning](README.md#api-key-provisioning)).
@@ -542,3 +546,9 @@ Use a real ticket number/sys_id from your instance after [deploy](README.md#loca
 - ServiceNow platform authentication is disabled on these routes; access is controlled solely by API key validation
 
 Implementation source: [`src/fluent/rest/tickets-api.now.ts`](src/fluent/rest/tickets-api.now.ts), [`src/server/rest/`](src/server/rest/).
+
+## Related
+
+- [README.md — Agent workspace](README.md#agent-workspace) — UI tour and screenshots
+- [docs/EMAIL.md](docs/EMAIL.md) — inbound email ticket creation
+- [docs/AZURE.md](docs/AZURE.md) — attachment sync and SAS URLs

@@ -1,115 +1,275 @@
 # FresherDesk
 
-A Freshdesk-style helpdesk built on ServiceNow using the [Now SDK](https://www.servicenow.com/docs/bundle/zurich-application-development/page/build/applications/now-sdk/concept/now-sdk-landing.html) Fluent framework.
+A Freshdesk-style helpdesk on ServiceNow, built with the [Now SDK](https://www.servicenow.com/docs/bundle/zurich-application-development/page/build/applications/now-sdk/concept/now-sdk-landing.html) Fluent framework. Agents work tickets in a React workspace; integrations use a REST API, inbound email, and optional Azure Blob attachment URLs.
 
-## Features
+## Contents
 
-- **Agent workspace** — hash-routed SPA: ticket index (`#/`) and ticket show (`#/tickets/{sys_id}`)
-- **Ticket creation** — web form and inbound email ingestion
-- **Attachments** — `sys_attachment` in the UI; Azure Blob sync + SAS download URLs on REST responses that include attachments (GET, PATCH, create_child) ([docs/AZURE.md](docs/AZURE.md))
-- **REST API** — API-key-authenticated ticket API: list, get, PATCH update, child create ([API.md](API.md))
+- [Overview](#overview)
+- [Agent workspace](#agent-workspace)
+- [Architecture](#architecture)
+- [Data model](#data-model)
+- [Prerequisites](#prerequisites)
+- [Local development](#local-development)
+- [Client conventions](#client-conventions)
+- [Integrations](#integrations)
+- [CI/CD](#cicd)
+- [Roles](#roles)
+- [Out of scope (v1)](#out-of-scope-v1)
+
+## Overview
+
+FresherDesk provides:
+
+- **Agent workspace** — hash-routed SPA: ticket index (`#/`) and ticket detail (`#/tickets/{sys_id}`)
+- **Ticket creation** — sidebar form in the UI and inbound email ingestion
+- **Conversation** — public replies and internal notes; field-change audit deltas (admin tab)
+- **Child tickets** — nested tickets under a parent with paginated panel
+- **Attachments** — `sys_attachment` in the UI; optional Azure Blob sync + SAS URLs on REST ([docs/AZURE.md](docs/AZURE.md))
+- **REST API** — API-key list, get, PATCH, child create ([API.md](API.md))
+
+![Ticket index with sidebar views](./docs/images/workspace-overview.png)
+
+> **Dev instance example:** Screenshots and curl samples below use `dev385836.service-now.com`. Replace `<instance>` with your ServiceNow host when deploying elsewhere.
+
+## Agent workspace
+
+Open the workspace after deploy:
+
+```
+https://<instance>/x_2058901_fresher_ticket_workspace.do
+```
+
+Requires role `x_2058901_fresher.agent`. The **Audit Deltas** tab requires `x_2058901_fresher.admin`.
+
+### Routes
+
+| Hash route | Page |
+|------------|------|
+| `#/` | Ticket index (sidebar views, tag filter, pagination) |
+| `#/?view=open` | Filtered index (`open`, `pending`, `resolved`, `closed`, `mine`, `unassigned`) |
+| `#/?tag=billing` | Tag filter (debounced) |
+| `#/?page=2` | Index page 2 |
+| `#/?create=1` | Open create-ticket modal |
+| `#/tickets/{sys_id}` | Ticket detail (use `sys_id`, not display number) |
+
+### Ticket index
+
+Sidebar views, tag filter, and paginated list (20 tickets per page). See the overview screenshot above.
+
+### Ticket detail
+
+Inline edits for status, priority, assignee, and tags. Header actions: copy link, edit, delete.
+
+![Ticket detail header and fields](./docs/images/ticket-detail-header.png)
+
+**Child tickets** — paginated panel (5 per page); create child from header button.
+
+![Child tickets panel](./docs/images/ticket-detail-children.png)
+
+**Conversation** — paginated thread (10 per page, opens on newest page); public reply / internal note composer with optimistic send.
+
+![Conversation thread and reply composer](./docs/images/ticket-detail-conversation.png)
+
+**Audit deltas** (admin) — paginated field-change log (10 per page, newest first).
+
+![Audit deltas tab](./docs/images/ticket-detail-audit.png)
+
+### Modals
+
+Create from sidebar **New Ticket**:
+
+![Create ticket modal](./docs/images/ticket-create-modal.png)
+
+Edit from detail header:
+
+![Edit ticket modal](./docs/images/ticket-edit-modal.png)
+
+Screenshot capture guide: [docs/images/README.md](docs/images/README.md).
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph fluent [src/fluent]
+    Tables[Tables and ACLs]
+    REST[REST API binding]
+    BR[Business rules]
+    Email[Inbound email action]
+    UI[UI page metadata]
+  end
+  subgraph server [src/server]
+    Handlers[REST handlers]
+    Serial[ticketSerializer]
+    EmailScript[createTicketFromEmail]
+    Azure[Azure sync]
+  end
+  subgraph client [src/client]
+    SPA[React HashRouter SPA]
+    Services[Table API services]
+  end
+  fluent --> server
+  SPA --> Services
+  Services -->|g_ck Table API| Tables
+  Handlers --> Tables
+  BR --> Tables
+  Email --> EmailScript
+```
+
+| Layer | Path | Responsibility |
+|-------|------|----------------|
+| Fluent metadata | [`src/fluent/`](src/fluent/) | Tables, roles, ACLs, REST script includes, business rules, inbound email, UI page |
+| Server modules | [`src/server/`](src/server/) | REST handlers (`rest/`), serializers, email ingestion, Azure upload/SAS, delta audit |
+| Client SPA | [`src/client/`](src/client/) | React workspace: pages, components, Table API services |
+
+Key server entry points:
+
+| Concern | File |
+|---------|------|
+| List tickets (REST) | [`src/server/rest/listTickets.ts`](src/server/rest/listTickets.ts) |
+| Get ticket | [`src/server/rest/getTicket.ts`](src/server/rest/getTicket.ts) |
+| PATCH ticket | [`src/server/rest/updateTicket.ts`](src/server/rest/updateTicket.ts) |
+| Create child | [`src/server/rest/createChildTicket.ts`](src/server/rest/createChildTicket.ts) |
+| Email → ticket | [`src/server/email/createTicketFromEmail.ts`](src/server/email/createTicketFromEmail.ts) |
+| Attachment → Azure | [`src/server/attachments/syncTicketAttachmentToAzure.ts`](src/server/attachments/syncTicketAttachmentToAzure.ts) |
+| Field delta audit | [`src/fluent/business-rules/ticket-delta-audit.now.ts`](src/fluent/business-rules/ticket-delta-audit.now.ts) |
+
+## Data model
+
+| Table | Purpose |
+|-------|---------|
+| `x_2058901_fresher_ticket` | Tickets (parent/child via `parent`, tags JSON, `source`) |
+| `x_2058901_fresher_ticket_comment` | Conversation + audit rows |
+| `x_2058901_fresher_ticket_attachment` | Azure blob metadata (REST SAS URLs) |
+| `x_2058901_fresher_api_key` | Hashed API keys for REST auth |
+
+**Comment types** (`comment_type` on ticket comment):
+
+| Value | UI / API |
+|-------|----------|
+| `public_reply` | Shown in conversation thread |
+| `internal_note` | Shown in thread with internal styling |
+| `audit_delta` | JSON field change; **Audit Deltas** tab only (hidden from conversation and public API) |
+
+Fluent table definitions: [`src/fluent/tables/`](src/fluent/tables/).
 
 ## Prerequisites
 
 - Node.js 20+
-- ServiceNow developer instance with scoped app `x_2058901_fresher` installed
-- Users assigned role `x_2058901_fresher.agent` (admins: `x_2058901_fresher.admin`)
+- ServiceNow instance with scoped app `x_2058901_fresher` installed
+- User with `x_2058901_fresher.agent` (admins: `x_2058901_fresher.admin`)
 
 ## Local development
 
 ```bash
 npm ci
+npm run lint      # optional before commit
 npm run build
-npm run deploy   # deploys to instance configured in now.config.json / env vars
+npm run deploy    # now-sdk install — uses SN_SDK_* env or interactive auth
 ```
 
-Open the agent workspace:
+Open the workspace:
+
+```
+https://<instance>/x_2058901_fresher_ticket_workspace.do
+```
+
+**Example (dev):**
 
 ```
 https://dev385836.service-now.com/x_2058901_fresher_ticket_workspace.do
 ```
 
-The UI is a single-page app with hash routes:
+| Script | Purpose |
+|--------|---------|
+| `npm run build` | Typecheck + bundle client + Fluent artifacts |
+| `npm run deploy` | Install/update app on configured instance |
+| `npm run lint` | ESLint on `src/` |
+| `npm run dev` | Now SDK dev runner |
 
-| URL | Page |
-|-----|------|
-| `...ticket_workspace.do#/` | Ticket index (list + filters) |
-| `...ticket_workspace.do#/?view=open&tag=billing` | Index with view/tag filters |
-| `...ticket_workspace.do#/?page=2` | Index page 2 (pagination) |
-| `...ticket_workspace.do#/tickets/{sys_id}` | Ticket detail |
+Scope and app name: [`now.config.json`](now.config.json) (`x_2058901_fresher`).
 
-Use the ticket `sys_id` (not the display number) in show URLs.
+## Client conventions
 
-## GitHub Actions deployment
+Routing lives in [`src/client/app.tsx`](src/client/app.tsx):
 
-Configure repository **Settings → Secrets and variables → Actions**:
+- [`TicketIndexPage`](src/client/pages/TicketIndexPage.tsx) — list, URL query params (`view`, `tag`, `page`)
+- [`TicketShowPage`](src/client/pages/TicketShowPage.tsx) — detail, paginated comments, optimistic replies
 
-| Type | Name | Purpose |
-|------|------|---------|
-| Variable | `SN_SDK_INSTANCE_URL` | e.g. `https://yourinstance.service-now.com` |
-| Variable | `SN_SDK_USER` | Deploy username |
-| Secret | `SN_SDK_USER_PWD` | Deploy password |
+**Table API services** (use `window.g_ck`):
 
-Pushes to `master` run [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) (build + `now-sdk install`).
+- [`TicketService`](src/client/services/TicketService.ts) — tickets, children, index pagination
+- [`CommentService`](src/client/services/CommentService.ts) — comments and audit deltas
+- [`AttachmentService`](src/client/services/AttachmentService.ts) — `sys_attachment` upload/list
 
-## Email ingestion setup
+**Pagination** — shared sizes in [`src/client/constants/pagination.ts`](src/client/constants/pagination.ts); UI in [`PanelPagination`](src/client/components/PanelPagination.tsx). Index page size: [`src/client/constants/tickets.ts`](src/client/constants/tickets.ts).
 
-Full guide: **[docs/EMAIL.md](docs/EMAIL.md)** (mailbox on `dev385836`, inbound action binding, test checklist, troubleshooting).
+**Layout** — [`WorkspaceLayout`](src/client/layout/WorkspaceLayout.tsx), collapsible sidebar ([`TicketSidebar`](src/client/components/TicketSidebar.tsx)), toasts via [`WorkspaceContext`](src/client/context/WorkspaceContext.tsx).
 
-Summary:
+To change list filters, edit [`TicketService.buildQuery`](src/client/services/TicketService.ts) and sidebar views in [`src/client/constants/ticketViews.ts`](src/client/constants/ticketViews.ts).
 
-1. Deploy the app so **FresherDesk Create Ticket from Email** and **FresherDesk Email Comment on Insert** are active in scope `x_2058901_fresher`.
-2. Create an **IMAP/POP inbound email account** in ServiceNow and bind it on the inbound action **Mailbox** field.
-3. Send a test email — ticket with `source=email`, initial **public_reply** comment, and attachments on the ticket (Azure sync when configured — [docs/AZURE.md](docs/AZURE.md)).
+## Integrations
 
-## Azure Blob attachments
+### REST API
 
-See **[docs/AZURE.md](docs/AZURE.md)** for storage setup and the background script for instance properties.
+Machine-to-machine access for external systems. Agents use the workspace UI above; the API does not replace the SPA for day-to-day ticket handling.
 
-## API key provisioning
+Full reference: **[API.md](API.md)** — endpoints, schemas, errors, Windows `curl` examples.
 
-API keys are stored as SHA-256 hashes in `x_2058901_fresher_api_key`. Create keys as a user with `x_2058901_fresher.admin`:
+**API key provisioning** (role `x_2058901_fresher.admin`):
 
-1. Generate a random secret (e.g. `fd_live_abc123...`).
-2. In **Scripts - Background**, compute the hash:
+1. Generate a secret (e.g. `fd_live_abc123...`).
+2. Hash in **Scripts - Background**:
 
 ```javascript
 var digest = new GlideDigest();
 gs.info(digest.getSHA256Hex('YOUR_SECRET_HERE'));
 ```
 
-3. Create a record in **FresherDesk API Key** with `name`, `key_hash` (output from step 2), and `active=true`.
-4. Store the plaintext secret securely — it cannot be recovered from the hash.
+3. Create **FresherDesk API Key** record: `name`, `key_hash`, `active=true`.
+4. Store plaintext secret securely — it cannot be recovered from the hash.
 
-## REST API
-
-See **[API.md](API.md)** for full endpoint documentation, request/response schemas, and error codes.
-
-Quick start (Windows cmd — see [API.md](API.md) for full examples):
+Quick start (see [API.md](API.md) for full examples):
 
 ```cmd
-curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://dev385836.service-now.com/api/x_2058901_fresher/v1/tickets/tickets?status=open&limit=50"
+curl.exe --ssl-no-revoke -s -H "X-API-Key: YOUR_KEY" "https://<instance>/api/x_2058901_fresher/v1/tickets/tickets?status=open&limit=50"
 ```
 
-## Project structure
+### Email ingestion
 
-```
-src/
-  fluent/          # Tables, ACLs, REST API, inbound email, UI page metadata
-  server/          # Server modules (API handlers, serializers, email logic)
-  client/          # React agent workspace
-```
+Inbound email creates top-level tickets with `source=email` and an initial public reply comment.
+
+Guide: **[docs/EMAIL.md](docs/EMAIL.md)** — mailbox binding, test checklist, troubleshooting.
+
+### Azure Blob attachments
+
+Agent UI and email write to `sys_attachment` first; a business rule syncs to Azure for REST `download_url` (SAS).
+
+Guide: **[docs/AZURE.md](docs/AZURE.md)** — instance properties, test checklist.
+
+## CI/CD
+
+Pull requests to `master` run [`.github/workflows/pr-checks.yml`](.github/workflows/pr-checks.yml) (lint, build, dependency audit, CodeQL).
+
+Pushes to `master` deploy via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+
+Configure **Settings → Secrets and variables → Actions**:
+
+| Type | Name | Purpose |
+|------|------|---------|
+| Variable | `SN_SDK_INSTANCE_URL` | `https://<instance>` |
+| Variable | `SN_SDK_USER` | Deploy username |
+| Secret | `SN_SDK_USER_PWD` | Deploy password |
 
 ## Roles
 
 | Role | Access |
 |------|--------|
-| `x_2058901_fresher.agent` | CRUD tickets, comments; use agent UI |
-| `x_2058901_fresher.admin` | Manage API keys (includes agent role) |
+| `x_2058901_fresher.agent` | CRUD tickets and comments; agent workspace |
+| `x_2058901_fresher.admin` | API key management, Audit Deltas tab (includes agent) |
 
 ## Out of scope (v1)
 
 - Customer portal
-- REST attachment upload (use agent UI / email; files land on `sys_attachment` first)
-- REST top-level ticket create, comment create
-- Email reply threading
+- REST attachment upload (use agent UI or email; files land on `sys_attachment` first)
+- REST top-level ticket create or comment create
+- Email reply threading (inbound reply creates a new ticket)
