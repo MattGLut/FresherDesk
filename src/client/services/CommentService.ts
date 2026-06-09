@@ -1,5 +1,6 @@
 import { TICKET_COMMENT_TABLE } from '../constants/tables'
 import { commentExclusionQuery, COMMENT_TYPE_AUDIT_DELTA } from '../utils/commentTypes'
+import { fetchTablePage } from '../utils/tableApiPage'
 
 declare global {
     interface Window {
@@ -33,47 +34,25 @@ export class CommentService {
         }
     }
 
-    async listForTicket(ticketSysId: string): Promise<CommentRecord[]> {
+    async listPageForTicket(ticketSysId: string, limit: number, offset: number) {
         const searchParams = new URLSearchParams()
         searchParams.set('sysparm_display_value', 'all')
         searchParams.set('sysparm_fields', 'sys_id,ticket,body,author,comment_type,source,sys_created_on')
         searchParams.set('sysparm_query', `ticket=${ticketSysId}^${commentExclusionQuery()}^ORDERBYsys_created_on`)
 
-        const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
-            method: 'GET',
-            headers: this.headers(),
-        })
-
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
-        }
-
-        const { result } = await response.json()
-        return result || []
+        return fetchTablePage<CommentRecord>(this.tableName, searchParams, this.headers(), limit, offset)
     }
 
-    async listAuditDeltasForTicket(ticketSysId: string): Promise<CommentRecord[]> {
+    async listAuditDeltasPageForTicket(ticketSysId: string, limit: number, offset: number) {
         const searchParams = new URLSearchParams()
         searchParams.set('sysparm_display_value', 'all')
         searchParams.set('sysparm_fields', 'sys_id,ticket,body,author,comment_type,source,sys_created_on')
         searchParams.set(
             'sysparm_query',
-            `ticket=${ticketSysId}^comment_type=${COMMENT_TYPE_AUDIT_DELTA}^ORDERBYsys_created_on`
+            `ticket=${ticketSysId}^comment_type=${COMMENT_TYPE_AUDIT_DELTA}^ORDERBYDESCsys_created_on`
         )
 
-        const response = await fetch(`/api/now/table/${this.tableName}?${searchParams.toString()}`, {
-            method: 'GET',
-            headers: this.headers(),
-        })
-
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
-        }
-
-        const { result } = await response.json()
-        return result || []
+        return fetchTablePage<CommentRecord>(this.tableName, searchParams, this.headers(), limit, offset)
     }
 
     async create(ticketSysId: string, body: string, commentType: string): Promise<CommentRecord> {

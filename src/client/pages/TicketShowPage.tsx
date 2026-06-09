@@ -6,6 +6,7 @@ import { useWorkspace } from '../context/WorkspaceContext'
 import { UserService } from '../services/UserService'
 import { getSysId, getValue, getDisplayValue } from '../utils/snValue'
 import { TICKET_TABLE } from '../constants/tables'
+import { COMMENT_PAGE_SIZE, pageOffset, totalPages } from '../constants/pagination'
 import { mergeTicketUpdate } from '../utils/ticketPatch'
 import { createOptimisticComment, getOptimisticCommentId } from '../utils/optimisticComment'
 import { copyTicketLink } from '../utils/copyTicketLink'
@@ -17,12 +18,25 @@ export default function TicketShowPage() {
 
     const [ticket, setTicket] = useState(null)
     const [comments, setComments] = useState([])
+    const [commentPage, setCommentPage] = useState(1)
+    const [commentTotal, setCommentTotal] = useState(0)
+    const [commentsLoading, setCommentsLoading] = useState(false)
     const [attachments, setAttachments] = useState([])
     const [detailLoading, setDetailLoading] = useState(true)
     const [childParentTicket, setChildParentTicket] = useState(null)
     const [editingTicket, setEditingTicket] = useState(null)
     const [childrenRefreshKey, setChildrenRefreshKey] = useState(0)
     const currentUserNameRef = useRef('You')
+    const commentTotalRef = useRef(0)
+    const commentPageRef = useRef(1)
+
+    useEffect(() => {
+        commentTotalRef.current = commentTotal
+    }, [commentTotal])
+
+    useEffect(() => {
+        commentPageRef.current = commentPage
+    }, [commentPage])
 
     useEffect(() => {
         const userService = new UserService()
@@ -38,18 +52,74 @@ export default function TicketShowPage() {
             })
     }, [])
 
+    const loadComments = useCallback(
+        async (ticketSysId: string, page: number, { showLoading = true } = {}) => {
+            if (!ticketSysId) return
+            try {
+                if (showLoading) setCommentsLoading(true)
+                const result = await commentService.listPageForTicket(
+                    ticketSysId,
+                    COMMENT_PAGE_SIZE,
+                    pageOffset(page, COMMENT_PAGE_SIZE)
+                )
+                setComments(result.items)
+                setCommentTotal(result.total)
+                setCommentPage(page)
+            } catch (err) {
+                reportError('Failed to load comments', err)
+                setComments([])
+                setCommentTotal(0)
+            } finally {
+                if (showLoading) setCommentsLoading(false)
+            }
+        },
+        [commentService, reportError]
+    )
+
+    const loadCommentsOnLastPage = useCallback(
+        async (ticketSysId: string) => {
+            if (!ticketSysId) return
+            setCommentsLoading(true)
+            try {
+                const first = await commentService.listPageForTicket(ticketSysId, COMMENT_PAGE_SIZE, 0)
+                const lastPageNum = totalPages(first.total, COMMENT_PAGE_SIZE)
+
+                if (lastPageNum === 1) {
+                    setComments(first.items)
+                    setCommentTotal(first.total)
+                    setCommentPage(1)
+                } else {
+                    const last = await commentService.listPageForTicket(
+                        ticketSysId,
+                        COMMENT_PAGE_SIZE,
+                        pageOffset(lastPageNum, COMMENT_PAGE_SIZE)
+                    )
+                    setComments(last.items)
+                    setCommentTotal(last.total)
+                    setCommentPage(lastPageNum)
+                }
+            } catch (err) {
+                reportError('Failed to load comments', err)
+                setComments([])
+                setCommentTotal(0)
+                setCommentPage(1)
+            } finally {
+                setCommentsLoading(false)
+            }
+        },
+        [commentService, reportError]
+    )
+
     const loadTicketDetail = useCallback(
         async (ticketSysId: string, { showLoading = true } = {}) => {
             if (!ticketSysId) return
             try {
                 if (showLoading) setDetailLoading(true)
-                const [ticketData, commentData, attachmentData] = await Promise.all([
+                const [ticketData, attachmentData] = await Promise.all([
                     ticketService.get(ticketSysId),
-                    commentService.listForTicket(ticketSysId),
                     attachmentService.list(TICKET_TABLE, ticketSysId),
                 ])
                 setTicket(ticketData)
-                setComments(commentData)
                 setAttachments(attachmentData)
             } catch (err) {
                 reportError('Failed to load ticket', err)
@@ -57,14 +127,24 @@ export default function TicketShowPage() {
                 if (showLoading) setDetailLoading(false)
             }
         },
-        [ticketService, commentService, attachmentService, reportError]
+        [ticketService, attachmentService, reportError]
     )
 
     useEffect(() => {
         if (sysId) {
+            setCommentPage(1)
+            setCommentTotal(0)
+            setComments([])
             void loadTicketDetail(sysId)
+            void loadCommentsOnLastPage(sysId)
         }
-    }, [sysId, loadTicketDetail])
+    }, [sysId, loadTicketDetail, loadCommentsOnLastPage])
+
+    const handleCommentPageChange = (page: number) => {
+        if (sysId) {
+            void loadComments(sysId, page)
+        }
+    }
 
     const handleNavigateTicket = (targetSysId: string) => {
         navigate(`/tickets/${targetSysId}`)
@@ -92,6 +172,13 @@ export default function TicketShowPage() {
     }
 
     const handleReply = async (ticketSysId: string, body: string, commentType: string) => {
+        const currentTotal = commentTotalRef.current
+        const lastPageNum = totalPages(currentTotal, COMMENT_PAGE_SIZE)
+
+        if (commentPageRef.current !== lastPageNum) {
+            await loadComments(ticketSysId, lastPageNum, { showLoading: false })
+        }
+
         const optimistic = createOptimisticComment(
             ticketSysId,
             body,
@@ -103,8 +190,17 @@ export default function TicketShowPage() {
         setComments((prev) => [...prev, optimistic])
 
         try {
-            const created = await commentService.create(ticketSysId, body, commentType)
-            setComments((prev) => prev.map((comment) => (getOptimisticCommentId(comment) === optimisticId ? created : comment)))
+            await commentService.create(ticketSysId, body, commentType)
+            const newTotal = currentTotal + 1
+            const newLastPage = totalPages(newTotal, COMMENT_PAGE_SIZE)
+            const result = await commentService.listPageForTicket(
+                ticketSysId,
+                COMMENT_PAGE_SIZE,
+                pageOffset(newLastPage, COMMENT_PAGE_SIZE)
+            )
+            setComments(result.items)
+            setCommentTotal(result.total)
+            setCommentPage(newLastPage)
             showToast(commentType === 'internal_note' ? 'Internal note added' : 'Reply sent')
         } catch (err) {
             setComments((prev) => prev.filter((comment) => getOptimisticCommentId(comment) !== optimisticId))
@@ -192,6 +288,10 @@ export default function TicketShowPage() {
             <TicketDetail
                 ticket={ticket}
                 comments={comments}
+                commentPage={commentPage}
+                commentTotal={commentTotal}
+                commentsLoading={commentsLoading}
+                onCommentPageChange={handleCommentPageChange}
                 attachments={attachments}
                 loading={detailLoading}
                 onUpdate={handleUpdate}
