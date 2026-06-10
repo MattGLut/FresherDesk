@@ -10,6 +10,7 @@ A Freshdesk-style helpdesk on ServiceNow, built with the [Now SDK](https://www.s
 - [Data model](#data-model)
 - [Prerequisites](#prerequisites)
 - [Local development](#local-development)
+- [Development process (Now SDK)](#development-process-now-sdk)
 - [Client conventions](#client-conventions)
 - [Integrations](#integrations)
 - [CI/CD](#cicd)
@@ -188,6 +189,12 @@ https://dev385836.service-now.com/x_2058901_fresher_ticket_workspace.do
 
 Scope and app name: [`now.config.json`](now.config.json) (`x_2058901_fresher`).
 
+## Development process (Now SDK)
+
+Full walkthrough for this repo — developer instance, clone/setup, build/deploy loop, and GitHub Actions for teams:
+
+**[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)**
+
 ## Client conventions
 
 Routing lives in [`src/client/app.tsx`](src/client/app.tsx):
@@ -248,17 +255,7 @@ Guide: **[docs/AZURE.md](docs/AZURE.md)** — instance properties, test checklis
 
 ## CI/CD
 
-Pull requests to `master` run [`.github/workflows/pr-checks.yml`](.github/workflows/pr-checks.yml) (lint, build, dependency audit, CodeQL).
-
-Pushes to `master` deploy via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
-
-Configure **Settings → Secrets and variables → Actions**:
-
-| Type | Name | Purpose |
-|------|------|---------|
-| Variable | `SN_SDK_INSTANCE_URL` | `https://<instance>` |
-| Variable | `SN_SDK_USER` | Deploy username |
-| Secret | `SN_SDK_USER_PWD` | Deploy password |
+Pull requests to `master` run lint, build, audit, and CodeQL; merges to `master` deploy to the configured instance. See **[docs/DEVELOPMENT.md — GitHub Actions and team workflow](docs/DEVELOPMENT.md#10-github-actions-and-team-workflow)** for setup, branch flow, and team practices.
 
 ## Roles
 
