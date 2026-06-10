@@ -10,3 +10,4 @@ target/
 .eslintcache
 coverage/
 *.log
+docs/presentations/
