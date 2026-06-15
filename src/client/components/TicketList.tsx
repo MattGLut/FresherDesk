@@ -1,5 +1,13 @@
 import React from 'react'
-import { getDisplayValue, getSysId, getChoiceDisplay, getRequesterDisplay, STATE_DISPLAY_LABELS, PRIORITY_DISPLAY_LABELS } from '../utils/snValue'
+import {
+    getDisplayValue,
+    getSysId,
+    getChoiceDisplay,
+    getRequesterDisplay,
+    STATE_DISPLAY_LABELS,
+    PRIORITY_DISPLAY_LABELS,
+    priorityCssClass,
+} from '../utils/snValue'
 import { parseTags } from '../utils/ticketTags'
 import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
 import PanelPagination from './PanelPagination'
@@ -15,21 +23,6 @@ function statusClass(stateValue: string): string {
             return 'status-resolved'
         case '7':
             return 'status-closed'
-        default:
-            return ''
-    }
-}
-
-function priorityClass(priorityValue: string): string {
-    switch (priorityValue) {
-        case '1':
-            return 'priority-critical'
-        case '2':
-            return 'priority-high'
-        case '3':
-            return 'priority-medium'
-        case '4':
-            return 'priority-low'
         default:
             return ''
     }
@@ -139,7 +132,7 @@ export default function TicketList({
 
                                     <span className="row-requester">{getRequesterDisplay(ticket)}</span>
 
-                                    <span className={`priority-chip ${priorityClass(String(priorityValue))}`}>
+                                    <span className={`priority-chip ${priorityCssClass(String(priorityValue))}`}>
                                         {getChoiceDisplay(ticket.priority, PRIORITY_DISPLAY_LABELS)}
                                     </span>
 

@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { getDisplayValue, getValue, getSysId, getChoiceDisplay, STATE_DISPLAY_LABELS, PRIORITY_DISPLAY_LABELS } from '../utils/snValue'
+import {
+    getDisplayValue,
+    getValue,
+    getSysId,
+    getChoiceDisplay,
+    STATE_DISPLAY_LABELS,
+    PRIORITY_DISPLAY_LABELS,
+    priorityCssClass,
+} from '../utils/snValue'
 import { TicketService } from '../services/TicketService'
 import { CHILD_TICKET_PAGE_SIZE, pageOffset } from '../constants/pagination'
 import PanelPagination from './PanelPagination'
@@ -15,21 +23,6 @@ function statusClass(stateValue: string): string {
             return 'status-resolved'
         case '7':
             return 'status-closed'
-        default:
-            return ''
-    }
-}
-
-function priorityClass(priorityValue: string): string {
-    switch (priorityValue) {
-        case '1':
-            return 'priority-critical'
-        case '2':
-            return 'priority-high'
-        case '3':
-            return 'priority-medium'
-        case '4':
-            return 'priority-low'
         default:
             return ''
     }
@@ -121,7 +114,7 @@ export default function ChildTicketsPanel({ parentTicket, onNavigateTicket, onCr
                                         </div>
                                         <p className="child-subject">{getDisplayValue(child.short_description)}</p>
                                         <div className="child-row-meta">
-                                            <span className={`priority-chip ${priorityClass(priorityValue)}`}>
+                                            <span className={`priority-chip ${priorityCssClass(priorityValue)}`}>
                                                 {getChoiceDisplay(child.priority, PRIORITY_DISPLAY_LABELS)}
                                             </span>
                                             <span className="child-updated">{getDisplayValue(child.sys_updated_on)}</span>

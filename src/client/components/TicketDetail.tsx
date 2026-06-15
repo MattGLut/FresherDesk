@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { getDisplayValue, getValue, getSysId, getRequesterDisplay } from '../utils/snValue'
+import {
+    getDisplayValue,
+    getValue,
+    getSysId,
+    getRequesterDisplay,
+    PRIORITY_DISPLAY_LABELS,
+    PRIORITY_VALUES,
+} from '../utils/snValue'
 import { parseTags, serializeTags } from '../utils/ticketTags'
 import { formatFileSize } from '../utils/formatFileSize'
 import { AgentService } from '../services/AgentService'
@@ -209,10 +216,11 @@ export default function TicketDetail({
                 <div className="field-group">
                     <span className="field-label">Priority</span>
                     <select value={localState.priority} onChange={(e) => handleFieldUpdate('priority', e.target.value)}>
-                        <option value="1">Critical</option>
-                        <option value="2">High</option>
-                        <option value="3">Medium</option>
-                        <option value="4">Low</option>
+                        {PRIORITY_VALUES.map((value) => (
+                            <option key={value} value={value}>
+                                {PRIORITY_DISPLAY_LABELS[value]}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="field-group field-group-assignee">
