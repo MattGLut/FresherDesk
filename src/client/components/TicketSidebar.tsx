@@ -21,7 +21,7 @@ export default function TicketSidebar({
                 ) : (
                     <>
                         <h1>FresherDesk</h1>
-                        <p className="sidebar-subtitle">Agent Workspace</p>
+                        <p className="sidebar-subtitle">RMS Agent Workspace</p>
                     </>
                 )}
                 {onToggleCollapse && (
