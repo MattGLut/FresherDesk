@@ -210,10 +210,25 @@ declare global {
                 }
                 composite: [
                     {
+                        table: 'sys_ux_lib_asset'
+                        id: '01c2b592a067446281f8ed65fc53507a'
+                        key: {
+                            name: 'x_2058901_fresher/vendor-react-router--c6b1dbc3.js.map'
+                        }
+                    },
+                    {
                         table: 'sn_glider_source_artifact'
                         id: '041d0a512c4e424ebd8a7f2335bd2c43'
                         key: {
                             name: 'x_2058901_fresher_ticket_workspace.do - BYOUI Files'
+                        }
+                    },
+                    {
+                        table: 'sn_glider_source_artifact_m2m'
+                        id: '04e5572ecde44da3aaf6279c82e5ea6a'
+                        key: {
+                            application_file: 'bfd130cf2c8b49fd8f4262d0a1d4462c'
+                            source_artifact: '041d0a512c4e424ebd8a7f2335bd2c43'
                         }
                     },
                     {
@@ -482,6 +497,14 @@ declare global {
                         key: {
                             application_file: '5604814769e949fba410da4900a0bb00'
                             source_artifact: '7fd8d55779344f8d9a58e4e5683ff96b'
+                        }
+                    },
+                    {
+                        table: 'sn_glider_source_artifact_m2m'
+                        id: '36b1ca60e0234d778ade33c3bb2b425f'
+                        key: {
+                            application_file: '01c2b592a067446281f8ed65fc53507a'
+                            source_artifact: '041d0a512c4e424ebd8a7f2335bd2c43'
                         }
                     },
                     {
@@ -815,6 +838,13 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ux_lib_asset'
+                        id: '8e17814fbd8642c1a8c9432b7910727e'
+                        key: {
+                            name: 'x_2058901_fresher/vendor-react-dom--e1b6b6d2'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: '90a5ef96469d4766807a319e9609c944'
                         key: {
@@ -902,6 +932,13 @@ declare global {
                             name: 'x_2058901_fresher_ticket_attachment'
                             element: 'blob_container'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_ux_lib_asset'
+                        id: 'a0526f427dd54cc096b5b9d3ae0ec5ec'
+                        key: {
+                            name: 'x_2058901_fresher/vendor-react-router--c6b1dbc3'
                         }
                     },
                     {
@@ -1082,6 +1119,13 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ux_lib_asset'
+                        id: 'bfd130cf2c8b49fd8f4262d0a1d4462c'
+                        key: {
+                            name: 'x_2058901_fresher/vendor-react-dom--e1b6b6d2.js.map'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'bfd49d68dc8e488c80250044cf0eea23'
                         key: {
@@ -1164,6 +1208,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sn_glider_source_artifact_m2m'
+                        id: 'd010c7942b0f4ee3af2a8f0ab6b5a12c'
+                        key: {
+                            application_file: '8e17814fbd8642c1a8c9432b7910727e'
+                            source_artifact: '041d0a512c4e424ebd8a7f2335bd2c43'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'd0bd1973d8ab47b4b5f2ebaeca3beb9c'
                         key: {
@@ -1177,6 +1229,14 @@ declare global {
                         id: 'd1efc529c53e41d08fd2fbe5399a7b81'
                         key: {
                             name: 'x_2058901_fresher.admin'
+                        }
+                    },
+                    {
+                        table: 'sn_glider_source_artifact_m2m'
+                        id: 'd30d01fce03b4ef2bd154135dbbfc4f0'
+                        key: {
+                            application_file: 'a0526f427dd54cc096b5b9d3ae0ec5ec'
+                            source_artifact: '041d0a512c4e424ebd8a7f2335bd2c43'
                         }
                     },
                     {
