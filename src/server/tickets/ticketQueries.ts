@@ -15,7 +15,6 @@ const PRIORITY_MAP: Record<string, string> = {
     '2': 'high',
     '3': 'medium',
     '4': 'low',
-    '5': 'planning',
 }
 
 export interface TicketFilters {
@@ -125,8 +124,6 @@ export function mapPriorityToValue(priority: unknown): string | null {
             return '3'
         case 'low':
             return '4'
-        case 'planning':
-            return '5'
         default:
             return null
     }

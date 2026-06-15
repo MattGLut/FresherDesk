@@ -23,7 +23,7 @@ FresherDesk provides:
 
 - **Agent workspace** — hash-routed SPA: ticket index (`#/`) and ticket detail (`#/tickets/{sys_id}`)
 - **Ticket creation** — sidebar form in the UI and inbound email ingestion
-- **Conversation** — public replies and internal notes; field-change audit deltas (admin tab)
+- **Conversation** — public replies and internal notes; **Audit Deltas** tab in the Conversation panel (admin) for field-change log
 - **Child tickets** — nested tickets under a parent with paginated panel
 - **Attachments** — `sys_attachment` in the UI; optional Azure Blob sync + SAS URLs on REST ([docs/AZURE.md](docs/AZURE.md))
 - **REST API** — API-key list, get, PATCH, child create ([API.md](API.md))
@@ -46,32 +46,30 @@ Requires role `x_2058901_fresher.agent`. The **Audit Deltas** tab requires `x_20
 
 | Hash route | Page |
 |------------|------|
-| `#/` | Ticket index (sidebar views, tag filter, pagination) |
-| `#/?view=open` | Filtered index (`open`, `pending`, `resolved`, `closed`, `mine`, `unassigned`) |
-| `#/?tag=billing` | Tag filter (debounced) |
+| `#/` | Ticket index (default view: **All Tickets**; sidebar views, tag filter, pagination) |
+| `#/?view={view}` | Filtered index — `all`, `mine`, `open`, `pending`, `resolved`, `closed`, or `unassigned` (`all` is the default when `view` is omitted) |
+| `#/?tag=billing` | Tag filter (debounced; click a tag chip on a row to apply the same filter) |
 | `#/?page=2` | Index page 2 |
 | `#/?create=1` | Open create-ticket modal |
 | `#/tickets/{sys_id}` | Ticket detail (use `sys_id`, not display number) |
 
 ### Ticket index
 
-Sidebar views, tag filter, and paginated list (20 tickets per page). See the overview screenshot above.
+Sidebar views (**All Tickets**, **My Tickets**, **Open**, **Pending**, **Resolved**, **Closed**, **Unassigned**), tag filter, and paginated list (20 top-level tickets per page; child tickets appear only on the parent detail page). See the overview screenshot above.
 
 ### Ticket detail
 
-Inline edits for status, priority, assignee, and tags. Header actions: copy link, edit, delete.
+Inline edits for status, priority, assignee (including **Assign to me**), and tags. Header actions: copy link, edit, delete. Category and requester are read-only on the detail page (editable via the edit modal).
 
 ![Ticket detail header and fields](./docs/images/ticket-detail-header.png)
 
-**Child tickets** — paginated panel (5 per page); create child from header button.
+**Child tickets** — paginated panel (5 per page); **Create Child** in the panel header. Child ticket detail shows a link back to the parent when applicable.
 
 ![Child tickets panel](./docs/images/ticket-detail-children.png)
 
-**Conversation** — paginated thread (10 per page, opens on newest page); public reply / internal note composer with optimistic send.
+**Conversation** — tabbed panel: **Conversation** (default) and **Audit Deltas** (admin only). Thread is paginated (10 per page, opens on newest page) with public reply / internal note composer and optimistic send. Audit tab: paginated field-change log (10 per page, newest first).
 
 ![Conversation thread and reply composer](./docs/images/ticket-detail-conversation.png)
-
-**Audit deltas** (admin) — paginated field-change log (10 per page, newest first).
 
 ![Audit deltas tab](./docs/images/ticket-detail-audit.png)
 
@@ -222,7 +220,9 @@ Machine-to-machine access for external systems. Agents use the workspace UI abov
 
 Full reference: **[API.md](API.md)** — endpoints, schemas, errors, Windows `curl` examples.
 
-**API key provisioning** (role `x_2058901_fresher.admin`):
+#### API key provisioning
+
+Requires role `x_2058901_fresher.admin`:
 
 1. Generate a secret (e.g. `fd_live_abc123...`).
 2. Hash in **Scripts - Background**:

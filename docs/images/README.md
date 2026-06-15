@@ -11,8 +11,8 @@ PNG screenshots for [README.md](../../README.md). Paths are relative from the re
 | `workspace-overview.png` | Ticket index: sidebar view, tag filter, pagination, list rows |
 | `ticket-detail-header.png` | Ticket detail: header, status/priority/assignee/tags, attachments section |
 | `ticket-detail-children.png` | Child tickets panel with pagination |
-| `ticket-detail-conversation.png` | Conversation tab, thread, reply composer |
-| `ticket-detail-audit.png` | Audit Deltas tab (admin user) |
+| `ticket-detail-conversation.png` | Conversation panel — Conversation tab, thread, reply composer |
+| `ticket-detail-audit.png` | Conversation panel — Audit Deltas tab (admin user) |
 | `ticket-create-modal.png` | Create ticket modal from sidebar |
 | `ticket-edit-modal.png` | Edit modal from detail header |
 

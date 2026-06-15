@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getDisplayValue, getValue } from '../utils/snValue'
+import { getDisplayValue, getValue, PRIORITY_DISPLAY_LABELS, PRIORITY_VALUES } from '../utils/snValue'
 import { parseTags, serializeTags, formatTagsInput, parseTagsInput } from '../utils/ticketTags'
 import './TicketForm.css'
 
@@ -115,10 +115,11 @@ export default function TicketForm({ ticket = null, parentTicket = null, onSubmi
                         <div className="form-group">
                             <label htmlFor="priority">Priority</label>
                             <select id="priority" name="priority" value={formData.priority} onChange={handleChange}>
-                                <option value="1">Critical</option>
-                                <option value="2">High</option>
-                                <option value="3">Medium</option>
-                                <option value="4">Low</option>
+                                {PRIORITY_VALUES.map((value) => (
+                                    <option key={value} value={value}>
+                                        {PRIORITY_DISPLAY_LABELS[value]}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>

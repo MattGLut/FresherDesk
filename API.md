@@ -65,7 +65,7 @@ Returns a paginated list of ticket summaries. `comments` and `attachments` are a
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `status` | string | — | Filter by status: `open`, `pending`, `resolved`, `closed` |
-| `priority` | string | — | Filter by priority: `critical`, `high`, `medium`, `low`, `planning` |
+| `priority` | string | — | Filter by priority: `critical`, `high`, `medium`, `low` |
 | `assignee` | string | — | Assignee user sys_id, or `unassigned` for tickets with no assignee |
 | `tag` | string | — | Filter tickets whose stored JSON tag field contains this substring (e.g. `tag=billing` matches `billing` in `["billing","urgent"]`). Use distinctive tag names; short values can match unintended substrings inside the JSON. |
 | `updated_since` | string | — | Glide/datetime string compared to `sys_updated_on` (e.g. `2026-06-01 00:00:00` in the instance timezone). Invalid values may yield empty results rather than an error. |
@@ -265,7 +265,7 @@ Send a JSON object with `Content-Type: application/json`. Malformed JSON or an e
 | `subject` | string | Yes | Child ticket title (max 160 characters) |
 | `description` | string | No | Full ticket body |
 | `status` | string | No | `open`, `pending`, `resolved`, or `closed` (default: `open`) |
-| `priority` | string | No | `critical`, `high`, `medium`, `low`, or `planning` (default: `medium` when omitted) |
+| `priority` | string | No | `critical`, `high`, `medium`, or `low` (default: `medium` when omitted) |
 | `category` | string | No | `general`, `billing`, `technical`, or `account` (default: `general`). Other values return **400**. |
 
 ### Example request
@@ -408,7 +408,7 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 | `subject` | string | Short description (max 160 characters) |
 | `description` | string | Full ticket body |
 | `status` | string | `open`, `pending`, `resolved`, or `closed` |
-| `priority` | string | `critical`, `high`, `medium`, `low`, or `planning` |
+| `priority` | string | `critical`, `high`, `medium`, or `low` |
 | `category` | string | `general`, `billing`, `technical`, or `account` |
 | `source` | string | How the ticket was created: `email`, `form`, or `api` (email tickets: see [docs/EMAIL.md](docs/EMAIL.md)) |
 | `tags` | string[] | Labels applied to the ticket (e.g. `["billing", "urgent"]`) |
@@ -429,7 +429,7 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 | `number` | string | Child ticket number |
 | `subject` | string | Short description |
 | `status` | string | `open`, `pending`, `resolved`, or `closed` |
-| `priority` | string | `critical`, `high`, `medium`, `low`, or `planning` |
+| `priority` | string | `critical`, `high`, `medium`, or `low` |
 | `updated_at` | string | Instance display datetime |
 
 ### Comment object
@@ -493,7 +493,7 @@ All errors return JSON with an `error` object containing `code` and `message`.
 | `subject is required` | `POST …/create_child` | Missing/empty `subject` or unreadable JSON body |
 | `subject must be 160 characters or fewer` | `POST …/create_child`, `PATCH` | Subject too long |
 | `status must be one of: open, pending, resolved, closed` | `POST …/create_child`, `PATCH` | Invalid or empty `status` |
-| `priority must be one of: critical, high, medium, low, planning` | `POST …/create_child` | Invalid `priority` |
+| `priority must be one of: critical, high, medium, low` | `POST …/create_child` | Invalid `priority` |
 | `category must be one of: general, billing, technical, account` | `POST …/create_child` | Invalid `category` |
 | `tags must be an array of strings` | `PATCH` | `tags` not a string array |
 | `Provide at least one updatable field: status, subject, description, tags` | `PATCH` | Empty body, invalid JSON (parsed as empty), or no recognized keys |

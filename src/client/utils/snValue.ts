@@ -29,6 +29,23 @@ export const PRIORITY_DISPLAY_LABELS: Record<string, string> = {
     '4': 'Low',
 }
 
+export const PRIORITY_VALUES = ['1', '2', '3', '4'] as const
+
+export function priorityCssClass(priorityValue: string): string {
+    switch (priorityValue) {
+        case '1':
+            return 'priority-critical'
+        case '2':
+            return 'priority-high'
+        case '3':
+            return 'priority-medium'
+        case '4':
+            return 'priority-low'
+        default:
+            return ''
+    }
+}
+
 export function getChoiceDisplay(field: unknown, labelMap: Record<string, string>): string {
     const value = getValue(field)
     const display = getDisplayValue(field)

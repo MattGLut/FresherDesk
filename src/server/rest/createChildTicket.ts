@@ -134,7 +134,7 @@ export function createChildTicket(request: RESTAPIRequest, response: RESTAPIResp
                 setJsonResponse(
                     response,
                     400,
-                    badRequestResponse('priority must be one of: critical, high, medium, low, planning')
+                    badRequestResponse('priority must be one of: critical, high, medium, low')
                 )
                 return
             }
