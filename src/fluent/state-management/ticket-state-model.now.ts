@@ -1,12 +1,12 @@
 import '@servicenow/sdk/global'
 import { Record } from '@servicenow/sdk/core'
+import { TICKET_STATE_MODEL_NAME } from '../../shared/ticketStateTransitions'
 import {
-    TICKET_STATE_MODEL_NAME,
     TICKET_STATE_TRANSITION_OPEN,
     TICKET_STATE_TRANSITION_PENDING,
     TICKET_STATE_TRANSITION_RESOLVED,
     TICKET_STATE_TRANSITION_CLOSED,
-} from '../../shared/ticketStateTransitions'
+} from '../../shared/ticketStateTransitionDefs'
 
 export const fresherDeskTicketStateModel = Record({
     $id: Now.ID['ticket-state-model'],

@@ -8,7 +8,7 @@ import {
     PRIORITY_VALUES,
     STATE_DISPLAY_LABELS,
 } from '../utils/snValue'
-import { getAllowedStatusOptions } from '../../shared/ticketStateTransitions'
+import { getAllowedStatusOptions, normalizeTicketStateValue } from '../../shared/ticketStateTransitions'
 import { parseTags, serializeTags } from '../utils/ticketTags'
 import { formatFileSize } from '../utils/formatFileSize'
 import { AgentService } from '../services/AgentService'
@@ -72,7 +72,7 @@ export default function TicketDetail({
     useEffect(() => {
         if (ticket) {
             setLocalState({
-                state: getValue(ticket.state) || '1',
+                state: normalizeTicketStateValue(getValue(ticket.state)),
                 priority: getValue(ticket.priority) || '3',
                 assigned_to: getValue(ticket.assigned_to) || '',
             })
