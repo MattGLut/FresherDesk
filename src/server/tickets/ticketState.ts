@@ -1,8 +1,9 @@
 import { GlideRecord } from '@servicenow/glide'
-import { isResolvedOrClosedState } from '../../shared/ticketStateTransitions.ts'
+
+const RESOLVED_STATES = new Set(['6', '7'])
 
 export function applyResolvedStateFields(gr: GlideRecord<'x_2058901_fresher_ticket'>, state?: string): void {
-    if (!state || !isResolvedOrClosedState(state)) {
+    if (!state || !RESOLVED_STATES.has(state)) {
         return
     }
 
