@@ -114,6 +114,15 @@ declare global {
                         table: 'sys_module'
                         id: '988d3531662546caafc6fdf75f840dae'
                     }
+                    'src_server_state-management_ensureTicketStateModel_ts': {
+                        table: 'sys_module'
+                        id: '627cb272920e45cf89eb5e7cf4407e28'
+                    }
+                    'src_server_state-management_ticketStateTransitions_ts': {
+                        table: 'sys_module'
+                        id: '43658cb17e024f5e99b3c56c9714674c'
+                        deleted: true
+                    }
                     src_server_tickets_commentTypes_ts: {
                         table: 'sys_module'
                         id: 'fc13814ac71a48a780de04b27082eca0'
@@ -177,6 +186,26 @@ declare global {
                     'ticket-email-comment-br': {
                         table: 'sys_script'
                         id: '9ce096be130b40ec9d8f6511c7ef5a57'
+                    }
+                    'ticket-state-model': {
+                        table: 'sys_state_model'
+                        id: '7b692d8ab6684cc1a6c53e09dc231f39'
+                    }
+                    'ticket-state-transition-closed': {
+                        table: 'sys_state_transition'
+                        id: '0572a155926f43298101c7b0b3afdd83'
+                    }
+                    'ticket-state-transition-open': {
+                        table: 'sys_state_transition'
+                        id: '796eead5977f4fa6842bcd9460c39da7'
+                    }
+                    'ticket-state-transition-pending': {
+                        table: 'sys_state_transition'
+                        id: '1a73bf04bf3b4cdeacac4370dc37173a'
+                    }
+                    'ticket-state-transition-resolved': {
+                        table: 'sys_state_transition'
+                        id: 'ae8b5249c2c84be19a8f8626c3582d58'
                     }
                     'tickets-api-v1': {
                         table: 'sys_ws_version'
