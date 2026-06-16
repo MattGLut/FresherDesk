@@ -1,7 +1,6 @@
 import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
 import { TICKET_TABLE } from '../constants/tables'
 import { prepareTicketUpdate } from '../utils/ticketUpdate'
-import { extractApiErrorMessage } from '../utils/apiErrors'
 import { fetchTablePage } from '../utils/tableApiPage'
 
 declare global {
@@ -206,7 +205,7 @@ export class TicketService {
 
         if (!response.ok) {
             const errorData = await response.json()
-            throw new Error(extractApiErrorMessage(errorData, `HTTP error ${response.status}`))
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
         }
 
         const { result } = await response.json()
@@ -223,7 +222,7 @@ export class TicketService {
 
         if (!response.ok) {
             const errorData = await response.json()
-            throw new Error(extractApiErrorMessage(errorData, `HTTP error ${response.status}`))
+            throw new Error(errorData.error?.message || `HTTP error ${response.status}`)
         }
 
         const { result } = await response.json()
