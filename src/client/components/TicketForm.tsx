@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { getDisplayValue, getValue, PRIORITY_DISPLAY_LABELS, PRIORITY_VALUES } from '../utils/snValue'
+import { getDisplayValue, getValue, PRIORITY_DISPLAY_LABELS, PRIORITY_VALUES, STATE_DISPLAY_LABELS } from '../utils/snValue'
+import { getAllowedStatusOptions, normalizeTicketStateValue } from '../../shared/ticketStateTransitions'
 import { parseTags, serializeTags, formatTagsInput, parseTagsInput } from '../utils/ticketTags'
 import './TicketForm.css'
 
@@ -22,7 +23,7 @@ export default function TicketForm({ ticket = null, parentTicket = null, onSubmi
             setFormData({
                 short_description: getValue(ticket.short_description),
                 description: getValue(ticket.description),
-                state: getValue(ticket.state) || '1',
+                state: normalizeTicketStateValue(getValue(ticket.state)),
                 priority: getValue(ticket.priority) || '3',
                 requester_email: getValue(ticket.requester_email),
                 category: getValue(ticket.category) || 'general',
@@ -49,6 +50,8 @@ export default function TicketForm({ ticket = null, parentTicket = null, onSubmi
             tags: serializeTags(parseTagsInput(tagsInput)),
         })
     }
+
+    const statusOptions = getAllowedStatusOptions(formData.state)
 
     return (
         <div className="form-overlay">
@@ -105,10 +108,11 @@ export default function TicketForm({ ticket = null, parentTicket = null, onSubmi
                         <div className="form-group">
                             <label htmlFor="state">Status</label>
                             <select id="state" name="state" value={formData.state} onChange={handleChange}>
-                                <option value="1">Open</option>
-                                <option value="2">Pending</option>
-                                <option value="6">Resolved</option>
-                                <option value="7">Closed</option>
+                                {statusOptions.map((value) => (
+                                    <option key={value} value={value}>
+                                        {STATE_DISPLAY_LABELS[value] ?? value}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

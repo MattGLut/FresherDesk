@@ -9,24 +9,10 @@ import {
     priorityCssClass,
 } from '../utils/snValue'
 import { TicketService } from '../services/TicketService'
+import { ticketStatusClass } from '../utils/ticketStatus'
 import { CHILD_TICKET_PAGE_SIZE, pageOffset } from '../constants/pagination'
 import PanelPagination from './PanelPagination'
 import './ChildTicketsPanel.css'
-
-function statusClass(stateValue: string): string {
-    switch (stateValue) {
-        case '1':
-            return 'status-open'
-        case '2':
-            return 'status-pending'
-        case '6':
-            return 'status-resolved'
-        case '7':
-            return 'status-closed'
-        default:
-            return ''
-    }
-}
 
 export default function ChildTicketsPanel({ parentTicket, onNavigateTicket, onCreateChild }) {
     const [children, setChildren] = useState([])
@@ -108,7 +94,7 @@ export default function ChildTicketsPanel({ parentTicket, onNavigateTicket, onCr
                                     <button type="button" className="child-ticket-btn" onClick={() => onNavigateTicket(getSysId(child))}>
                                         <div className="child-row-top">
                                             <span className="child-number">{getDisplayValue(child.number)}</span>
-                                            <span className={`status-chip ${statusClass(stateValue)}`}>
+                                            <span className={`status-chip ${ticketStatusClass(stateValue)}`}>
                                                 {getChoiceDisplay(child.state, STATE_DISPLAY_LABELS)}
                                             </span>
                                         </div>

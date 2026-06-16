@@ -1,3 +1,4 @@
+import { gs } from '@servicenow/glide'
 import { RESTAPIRequest, RESTAPIResponse } from '@servicenow/glide/sn_ws_int'
 import {
     validateApiKey,
@@ -8,7 +9,8 @@ import {
     logApiError,
 } from '../auth/validateApiKey.ts'
 import { serializeTicket } from '../tickets/ticketSerializer.ts'
-import { mapStatusToState } from '../tickets/ticketQueries.ts'
+import { mapStatusToState, mapStateToStatus } from '../tickets/ticketQueries.ts'
+import { isAllowedStateTransition } from '../../shared/ticketStateTransitions.ts'
 import { findTicketByIdOrNumber } from '../tickets/ticketLookup.ts'
 import {
     setUpdateSource,
@@ -126,6 +128,16 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
 
             const current = gr.getValue('state') || ''
             if (stateValue !== current) {
+                if (!isAllowedStateTransition(current, stateValue)) {
+                    setJsonResponse(
+                        response,
+                        400,
+                        badRequestResponse(
+                            `Invalid state transition from ${mapStateToStatus(current)} to ${mapStateToStatus(stateValue)}`
+                        )
+                    )
+                    return
+                }
                 updates.state = stateValue
             }
         }
@@ -173,8 +185,19 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
         }
 
         applyResolvedStateFields(gr, updates.state)
-        gr.update()
+
+        const updatedSysId = gr.update()
         clearUpdateSource()
+
+        if (!updatedSysId) {
+            const message = gs.getMessage() || 'Failed to update ticket'
+            if (/state transition|invalid state/i.test(message)) {
+                setJsonResponse(response, 400, badRequestResponse(message))
+                return
+            }
+            setJsonResponse(response, 500, { error: { code: 'internal_error', message } })
+            return
+        }
 
         const refreshed = findTicketByIdOrNumber(ticketSysId)
         if (!refreshed) {
