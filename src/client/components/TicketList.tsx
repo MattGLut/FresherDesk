@@ -9,10 +9,24 @@ import {
     priorityCssClass,
 } from '../utils/snValue'
 import { parseTags } from '../utils/ticketTags'
-import { ticketStatusClass } from '../utils/ticketStatus'
 import { TICKET_LIST_PAGE_SIZE } from '../constants/tickets'
 import PanelPagination from './PanelPagination'
 import './TicketList.css'
+
+function statusClass(stateValue: string): string {
+    switch (stateValue) {
+        case '1':
+            return 'status-open'
+        case '2':
+            return 'status-pending'
+        case '6':
+            return 'status-resolved'
+        case '7':
+            return 'status-closed'
+        default:
+            return ''
+    }
+}
 
 export default function TicketList({
     tickets,
@@ -122,7 +136,7 @@ export default function TicketList({
                                         {getChoiceDisplay(ticket.priority, PRIORITY_DISPLAY_LABELS)}
                                     </span>
 
-                                    <span className={`status-chip ${ticketStatusClass(String(stateValue))}`}>
+                                    <span className={`status-chip ${statusClass(String(stateValue))}`}>
                                         {getChoiceDisplay(ticket.state, STATE_DISPLAY_LABELS)}
                                     </span>
 
