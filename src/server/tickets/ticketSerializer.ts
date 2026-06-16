@@ -1,5 +1,6 @@
 import { GlideRecord } from '@servicenow/glide'
 import { mapStateToStatus, mapPriorityToLabel } from './ticketQueries.ts'
+import { getAllowedNextStates } from '../../shared/ticketStateTransitions.ts'
 import { parseTags } from './ticketTags.ts'
 import { commentExclusionQuery, isVisibleCommentType } from './commentTypes.ts'
 import { isAzureBlobConfigured } from '../azure/azureBlobConfig.ts'
@@ -61,6 +62,7 @@ export interface TicketDto {
     subject: string
     description: string
     status: string
+    allowed_statuses: string[]
     priority: string
     category: string
     source: string
@@ -249,12 +251,20 @@ export function serializeTicket(gr: GlideRecord<'x_2058901_fresher_ticket'>, inc
     const requesterEmail = gr.getValue('requester_email') || ''
     const parentId = gr.getValue('parent') || ''
 
+    const currentState = gr.getValue('state') || '1'
+    const currentStatus = mapStateToStatus(currentState)
+    const allowedStatuses = [
+        currentStatus,
+        ...getAllowedNextStates(currentState).map((state) => mapStateToStatus(state)),
+    ].filter((status, index, values) => values.indexOf(status) === index)
+
     const ticket: TicketDto = {
         id: ticketId,
         number: gr.getValue('number') || '',
         subject: gr.getValue('short_description') || '',
         description: gr.getValue('description') || '',
-        status: mapStateToStatus(gr.getValue('state') || '1'),
+        status: currentStatus,
+        allowed_statuses: allowedStatuses,
         priority: mapPriorityToLabel(gr.getValue('priority') || '3'),
         category: gr.getValue('category') || 'general',
         source: gr.getValue('source') || 'form',

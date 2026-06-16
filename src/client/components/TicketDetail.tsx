@@ -6,7 +6,9 @@ import {
     getRequesterDisplay,
     PRIORITY_DISPLAY_LABELS,
     PRIORITY_VALUES,
+    STATE_DISPLAY_LABELS,
 } from '../utils/snValue'
+import { getAllowedStatusOptions, normalizeTicketStateValue } from '../../shared/ticketStateTransitions'
 import { parseTags, serializeTags } from '../utils/ticketTags'
 import { formatFileSize } from '../utils/formatFileSize'
 import { AgentService } from '../services/AgentService'
@@ -70,7 +72,7 @@ export default function TicketDetail({
     useEffect(() => {
         if (ticket) {
             setLocalState({
-                state: getValue(ticket.state) || '1',
+                state: normalizeTicketStateValue(getValue(ticket.state)),
                 priority: getValue(ticket.priority) || '3',
                 assigned_to: getValue(ticket.assigned_to) || '',
             })
@@ -161,6 +163,7 @@ export default function TicketDetail({
     }
 
     const isAssignedToMe = !!currentUserSysId && localState.assigned_to === currentUserSysId
+    const statusOptions = getAllowedStatusOptions(localState.state)
 
     return (
         <div className="ticket-detail-panel">
@@ -207,10 +210,11 @@ export default function TicketDetail({
                 <div className="field-group">
                     <span className="field-label">Status</span>
                     <select value={localState.state} onChange={(e) => handleFieldUpdate('state', e.target.value)}>
-                        <option value="1">Open</option>
-                        <option value="2">Pending</option>
-                        <option value="6">Resolved</option>
-                        <option value="7">Closed</option>
+                        {statusOptions.map((value) => (
+                            <option key={value} value={value}>
+                                {STATE_DISPLAY_LABELS[value] ?? value}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="field-group">

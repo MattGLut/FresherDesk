@@ -114,6 +114,10 @@ declare global {
                         table: 'sys_module'
                         id: '988d3531662546caafc6fdf75f840dae'
                     }
+                    'src_server_state-management_ensureTicketStateModel_ts': {
+                        table: 'sys_module'
+                        id: 'fae1954c52544398a77146d69790bb6d'
+                    }
                     src_server_tickets_commentTypes_ts: {
                         table: 'sys_module'
                         id: 'fc13814ac71a48a780de04b27082eca0'
@@ -177,6 +181,26 @@ declare global {
                     'ticket-email-comment-br': {
                         table: 'sys_script'
                         id: '9ce096be130b40ec9d8f6511c7ef5a57'
+                    }
+                    'ticket-state-model': {
+                        table: 'sys_state_model'
+                        id: '294c8cec5e26497091b9d603e34e150a'
+                    }
+                    'ticket-state-transition-closed': {
+                        table: 'sys_state_transition'
+                        id: '5e202b6b65b2490ca9ffc1b2abb3a97f'
+                    }
+                    'ticket-state-transition-open': {
+                        table: 'sys_state_transition'
+                        id: '841a6473b6ca47f4915e4c6c504590df'
+                    }
+                    'ticket-state-transition-pending': {
+                        table: 'sys_state_transition'
+                        id: '936e2a9f399b4bcda1d702ad59fa038b'
+                    }
+                    'ticket-state-transition-resolved': {
+                        table: 'sys_state_transition'
+                        id: 'dbf64a4d758c4835b5ca176d221292f3'
                     }
                     'tickets-api-v1': {
                         table: 'sys_ws_version'

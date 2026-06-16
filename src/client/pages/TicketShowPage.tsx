@@ -8,6 +8,7 @@ import { getSysId, getValue, getDisplayValue } from '../utils/snValue'
 import { TICKET_TABLE } from '../constants/tables'
 import { COMMENT_PAGE_SIZE, pageOffset, totalPages } from '../constants/pagination'
 import { mergeTicketUpdate } from '../utils/ticketPatch'
+import { isStateTransitionError } from '../utils/apiErrors'
 import { createOptimisticComment, getOptimisticCommentId } from '../utils/optimisticComment'
 import { copyTicketLink } from '../utils/copyTicketLink'
 
@@ -164,7 +165,8 @@ export default function TicketShowPage() {
                 showToast(successMessage)
             }
         } catch (err) {
-            reportError('Failed to update ticket', err)
+            const message = err instanceof Error ? err.message : 'Failed to update ticket'
+            reportError(isStateTransitionError(message) ? message : 'Failed to update ticket', err)
             if (sysId) {
                 await loadTicketDetail(sysId, { showLoading: false })
             }
