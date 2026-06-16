@@ -168,6 +168,7 @@ curl.exe --ssl-no-revoke -s -H "X-API-Key: fd_live_dev_test_abc123xyz" "https://
     "subject": "Cannot reset password",
     "description": "User reports login issues after password reset.",
     "status": "open",
+    "allowed_statuses": ["open", "pending", "resolved"],
     "priority": "high",
     "category": "technical",
     "source": "email",
@@ -345,6 +346,7 @@ Malformed JSON or an empty body is treated as no fields and returns **400** with
 
 - Triggers the ticket delta audit business rule, which writes **audit_delta** comments for each changed field. These are excluded from REST `comments` and from the main Conversation tab in the agent workspace; users with the **admin** role can view them in the workspace **Audit Deltas** tab. Query `x_2058901_fresher_ticket_comment` with `comment_type=audit_delta` for forensics.
 - Setting `status` to `resolved` or `closed` may set `close_notes` to `Updated in FresherDesk` when that field was empty (platform task behavior).
+- Invalid status transitions enforced by the FresherDesk ticket state model return **400** with the platform validation message (e.g. invalid transition from `open` to `closed`).
 
 ### No-op updates
 
@@ -408,6 +410,7 @@ Same structure as the [Get ticket](#get-ticket) response, including the updated 
 | `subject` | string | Short description (max 160 characters) |
 | `description` | string | Full ticket body |
 | `status` | string | `open`, `pending`, `resolved`, or `closed` |
+| `allowed_statuses` | string[] | Valid next statuses from the current state (includes current `status`) |
 | `priority` | string | `critical`, `high`, `medium`, or `low` |
 | `category` | string | `general`, `billing`, `technical`, or `account` |
 | `source` | string | How the ticket was created: `email`, `form`, or `api` (email tickets: see [docs/EMAIL.md](docs/EMAIL.md)) |

@@ -1,3 +1,4 @@
+import { gs } from '@servicenow/glide'
 import { RESTAPIRequest, RESTAPIResponse } from '@servicenow/glide/sn_ws_int'
 import {
     validateApiKey,
@@ -173,8 +174,19 @@ export function updateTicket(request: RESTAPIRequest, response: RESTAPIResponse)
         }
 
         applyResolvedStateFields(gr, updates.state)
-        gr.update()
+
+        const updatedSysId = gr.update()
         clearUpdateSource()
+
+        if (!updatedSysId) {
+            const message = gs.getMessage() || 'Failed to update ticket'
+            if (/state transition|invalid state/i.test(message)) {
+                setJsonResponse(response, 400, badRequestResponse(message))
+                return
+            }
+            setJsonResponse(response, 500, { error: { code: 'internal_error', message } })
+            return
+        }
 
         const refreshed = findTicketByIdOrNumber(ticketSysId)
         if (!refreshed) {
